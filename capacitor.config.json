@@ -1,0 +1,15 @@
+{
+  "appId": "ng.pronexa.app",
+  "appName": "Pronexa",
+  "webDir": "dist",
+  "backgroundColor": "#07101c",
+  "android": {
+    "backgroundColor": "#07101c",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

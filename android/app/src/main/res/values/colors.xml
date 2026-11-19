@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#07101C</color>
+    <color name="colorPrimaryDark">#07101C</color>
+    <color name="colorAccent">#50A2FF</color>
+    <color name="pronexaNight">#07101C</color>
+</resources>
