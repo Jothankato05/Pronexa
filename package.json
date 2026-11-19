@@ -1,0 +1,34 @@
+{
+  "name": "pronexa",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pronexa: making every meal count. An offline-first protein-gap PWA for Nigerian university students.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "eval": "vitest run tests/parser.eval.test.ts --reporter=verbose",
+    "typecheck": "tsc --noEmit",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "android:release": "npm run android:sync && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@preact/signals": "2.11.4",
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@capacitor/cli": "^8.6.2",
+    "@preact/preset-vite": "2.10.6",
+    "@types/node": "^22.20.5",
+    "fake-indexeddb": "^6.0.0",
+    "typescript": "~5.8.3",
+    "vite": "6.4.6",
+    "vitest": "^5.1.1"
+  }
+}
