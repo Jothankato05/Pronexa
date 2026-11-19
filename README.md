@@ -8,6 +8,9 @@ It ships as an **Android APK** (Capacitor) and as an installable **PWA** from th
 
 ## Get the app
 
+![Pronexa screens](release/screens.png)
+
+
 - **Android:** [`release/Pronexa-0.1.0-debug.apk`](release/Pronexa-0.1.0-debug.apk) (4.9 MB, Android 7.0+, debug-signed). On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
 - **Web / PWA:** `npm install && npm run build && npm run preview`, then open it on a phone and use "Add to home screen".
 
