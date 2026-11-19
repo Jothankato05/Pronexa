@@ -171,8 +171,8 @@ export function ProgressRing({ value, max, children }: { value: number; max: num
       <svg viewBox="0 0 104 104">
         <defs>
           <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#92dcff" />
-            <stop offset="1" stop-color="#5fd38a" />
+            <stop offset="0" stop-color="#f6ebcf" />
+            <stop offset="1" stop-color="#c9dfc3" />
           </linearGradient>
         </defs>
         <circle class="ring-track" cx="52" cy="52" r={r} fill="none" stroke-width="8" />
@@ -194,7 +194,7 @@ export function Celebration({ onDone }: { onDone: () => void }) {
     const t = setTimeout(onDone, 3600);
     return () => clearTimeout(t);
   }, []);
-  const colors = ['#92dcff', '#50a2ff', '#5fd38a', '#ffffff', '#f5b971'];
+  const colors = ['#5a9a68', '#d9a441', '#c8743f', '#97c487', '#efc86f'];
   const sparks = Array.from({ length: 22 }, (_, i) => {
     const a = (i / 22) * Math.PI * 2;
     const d = 90 + (i % 3) * 40;
@@ -212,7 +212,7 @@ export function Celebration({ onDone }: { onDone: () => void }) {
       <div class="celebrate-card" role="status" onClick={onDone}>
         <svg viewBox="0 0 72 72" aria-hidden="true">
           <circle cx="36" cy="36" r="32" fill="rgb(255 255 255 / 0.12)" />
-          <path d="M22 37l9 9 19-20" fill="none" stroke="#5fd38a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M22 37l9 9 19-20" fill="none" stroke="#dcefd5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <h2>Gap closed. Nice one!</h2>
         <p class="small" style={{ marginTop: '6px' }}>You've reached today's estimated protein target. Keep it easy and keep it going.</p>

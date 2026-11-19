@@ -20,9 +20,10 @@ const LOOK: Record<PillState, { energy: number; warm: number; swirl: number }> =
 };
 
 const hexToRgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+// Pronexa plasma: forest core, leaf glass, pale-sage rim, fresh-leaf plasma and an ochre spark.
 const COLORS = {
-  Deep: hexToRgb('#1a4fe6'), Body: hexToRgb('#4fa8ff'), Glow: hexToRgb('#92dcff'),
-  Plasma: hexToRgb('#6fd0ff'), Accent: hexToRgb('#ff8fc8'), Bg: hexToRgb('#18181a'),
+  Deep: hexToRgb('#1f5a37'), Body: hexToRgb('#5a9a68'), Glow: hexToRgb('#c9dfc3'),
+  Plasma: hexToRgb('#a8d89a'), Accent: hexToRgb('#e2b04a'), Bg: hexToRgb('#1f4a33'),
 };
 // Small-orb tuning from the original (orb under ~58 px): thicker, faster strands and gentle surges.
 const SMALL = { webScale: 0.5, strand: 1.5, core: 0.32, pace: 2.4, surge: 0.4 };

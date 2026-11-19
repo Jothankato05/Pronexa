@@ -1,4 +1,5 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
+import { setBarTone } from '../lib/systemBars';
 import { ICheck, IChevronLeft, ICloudOff, IInfo, ILeaf, PronexaMark } from '../components/icons';
 import type { Activity, Allergen, Diet } from '../data/types';
 import { ACTIVITY, DEFAULT_WEIGHT_KG, fmtRange, proteinTarget } from '../lib/calc';
@@ -17,6 +18,7 @@ export function Onboarding() {
   const [weightKnown, setWeightKnown] = useState(true);
   const [activity, setActivity] = useState<Activity | null>(null);
 
+  useEffect(() => setBarTone(step === 0 ? 'on-green' : 'on-light'), [step]);
   const next = () => setStep((s) => Math.min(STEPS - 1, s + 1));
   const prev = () => setStep((s) => Math.max(0, s - 1));
   const target = proteinTarget({ weightKg: weightKnown ? weight : null, activity: activity ?? 'moderate' });
@@ -41,13 +43,13 @@ export function Onboarding() {
         <h1>Making every<br />meal count</h1>
         <p class="lead">See if the food you already eat gives you enough protein, and find cheap ways to close the gap.</p>
         <div class="stack" style={{ marginTop: '28px', gap: '14px' }}>
-          <div class="promise"><span class="p-ico"><ILeaf /></span><p class="small" style={{ color: 'rgb(255 255 255 / .74)' }}>No scale, no grams. Naira, packs, wraps and spoons.</p></div>
-          <div class="promise"><span class="p-ico"><ICloudOff /></span><p class="small" style={{ color: 'rgb(255 255 255 / .74)' }}>Works offline. Your log lives on this phone.</p></div>
-          <div class="promise"><span class="p-ico"><IInfo /></span><p class="small" style={{ color: 'rgb(255 255 255 / .74)' }}>Honest estimates. Not medical advice.</p></div>
+          <div class="promise"><span class="p-ico"><ILeaf /></span><p class="small muted">No scale, no grams. Naira, packs, wraps and spoons.</p></div>
+          <div class="promise"><span class="p-ico"><ICloudOff /></span><p class="small muted">Works offline. Your log lives on this phone.</p></div>
+          <div class="promise"><span class="p-ico"><IInfo /></span><p class="small muted">Honest estimates. Not medical advice.</p></div>
         </div>
         <div class="stack" style={{ marginTop: '32px', gap: '8px' }}>
           <button class="btn btn-primary btn-block" onClick={next}>Get started</button>
-          <p class="caption" style={{ textAlign: 'center', color: 'rgb(255 255 255 / .66)', padding: '12px 0' }}>No name, email or phone number needed.</p>
+          <p class="caption muted" style={{ textAlign: 'center', padding: '12px 0' }}>No name, email or phone number needed.</p>
         </div>
       </div>
     );
@@ -143,9 +145,9 @@ export function Onboarding() {
           {step === 5 && (
             <>
               <div class="card hero target-reveal">
-                <p class="eyebrow" style={{ color: 'rgb(255 255 255 / .74)' }}>Your daily protein estimate</p>
+                <p class="eyebrow">Your daily protein estimate</p>
                 <p class="big num">{Math.round(target.mid)}<small> g</small></p>
-                <p style={{ color: 'rgb(255 255 255 / .74)' }}>a day, roughly {fmtRange(target)}</p>
+                <p class="muted">a day, roughly {fmtRange(target)}</p>
               </div>
               <div class="stack" style={{ marginTop: '24px' }}>
                 <p class="small muted">

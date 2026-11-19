@@ -6,8 +6,8 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 
 const RES = new URL('../android/app/src/main/res/', import.meta.url).pathname;
 const icon = readFileSync(new URL('../public/icons/icon.svg', import.meta.url), 'utf8');
-const MARK = `<svg viewBox="0 0 170 124" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d9e4f5"/></linearGradient></defs><path d="M2 122C2 60 40 12 118 2c4 62-34 112-116 120Z" fill="url(#g)"/><rect x="122" y="74" width="47" height="49" rx="4" fill="url(#g)"/></svg>`;
-const BG = 'linear-gradient(180deg,#7f9cc0 -20%,#3b4c7b 25%,#141d43 60%,#07101c 100%)';
+const MARK = `<svg viewBox="0 0 170 124" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e4efe0"/></linearGradient></defs><path d="M2 122C2 60 40 12 118 2c4 62-34 112-116 120Z" fill="url(#g)"/><rect x="122" y="74" width="47" height="49" rx="4" fill="#d9a441"/></svg>`;
+const BG = 'linear-gradient(180deg,#5a9a68 -10%,#2e6340 45%,#1f4a33 100%)';
 
 const browser = await chromium.launch();
 const page = await browser.newPage();

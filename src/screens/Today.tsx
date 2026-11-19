@@ -45,14 +45,14 @@ export function Today() {
       <header class="dash-head">
         <div class="dash-top">
           <button class="icon-btn plain" onClick={() => go('settings')} aria-label="Profile and settings"><IMenu /></button>
-          <span class="caption" style={{ color: 'rgb(255 255 255 / .74)' }}>{date}</span>
+          <span class="caption muted">{date}</span>
           <StatusPill />
         </div>
 
         <div class="pill-row" aria-label="Today at a glance">
-          <span class="mini-pill"><i style={{ background: '#50a2ff' }} />TARGET <span class="v num">~{Math.round(t.mid)} g</span></span>
-          <span class="mini-pill"><i style={{ background: closed ? '#5fd38a' : '#f5b971' }} />{closed ? 'GAP CLOSED' : <>GAP <span class="v num">{fmtRange(list.length ? g : t)}</span></>}</span>
-          <span class="mini-pill"><i style={{ background: '#ffffff' }} />{dietLabel(profile.value!.diet).toUpperCase()}</span>
+          <span class="mini-pill"><i style={{ background: 'var(--ochre-400)' }} />TARGET <span class="v num">~{Math.round(t.mid)} g</span></span>
+          <span class="mini-pill"><i style={{ background: closed ? 'var(--leaf-300)' : 'var(--clay-200)' }} />{closed ? 'GAP CLOSED' : <>GAP <span class="v num">{fmtRange(list.length ? g : t)}</span></>}</span>
+          <span class="mini-pill"><i style={{ background: 'var(--leaf-200)' }} />{dietLabel(profile.value!.diet).toUpperCase()}</span>
         </div>
 
         <div class="balance">

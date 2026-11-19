@@ -17,9 +17,9 @@ export function Learn() {
       <TopBar title="Learn" subtitle="Small lessons, big difference" />
 
       <article class="card hero">
-        <p class="eyebrow" style={{ color: 'rgb(255 255 255 / .74)' }}>Did you know?</p>
+        <p class="eyebrow">Did you know?</p>
         <h3 style={{ margin: '4px 0 6px' }}>Beans + rice is a team</h3>
-        <p class="small" style={{ color: 'rgb(255 255 255 / .8)' }}>Beans and grains carry different protein building blocks. Eaten in the same day, they work together. That's why rice and beans, or bread and akara, are such good combos.</p>
+        <p class="small muted">Beans and grains carry different protein building blocks. Eaten in the same day, they work together. That's why rice and beans, or bread and akara, are such good combos.</p>
       </article>
 
       <section class="section">
@@ -67,8 +67,8 @@ export function ComingSoon() {
     <div class="screen">
       <TopBar title={item.title} subtitle="Coming soon" backTo={() => back(key === 'photo' ? 'log' : 'learn')} />
       <div class="card hero empty" style={{ padding: '40px 24px' }}>
-        <div style={{ width: '96px', height: '96px', borderRadius: '22px', background: 'rgb(255 255 255 / 0.11)', display: 'grid', placeItems: 'center', margin: '0 auto 20px', boxShadow: 'var(--shadow-2)' }}>
-          <Icon width={44} height={44} style={{ color: '#fff' }} />
+        <div style={{ width: '96px', height: '96px', borderRadius: '22px', background: 'var(--surface-2)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
+          <Icon width={44} height={44} style={{ color: 'var(--ink)' }} />
         </div>
         <h2 style={{ marginBottom: '8px' }}>We're cooking this one</h2>
         <p style={{ maxWidth: '34ch' }}>{item.sub}</p>

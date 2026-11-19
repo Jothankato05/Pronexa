@@ -158,7 +158,7 @@ export function Settings() {
       <Sheet open={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete everything?">
         <p class="muted" style={{ marginBottom: '20px' }}>This removes your profile, meals and settings from this phone. It can't be undone.</p>
         <div class="stack">
-          <button class="btn btn-primary btn-block" style={{ background: '#c9343a' }} onClick={async () => { await resetAll(); setConfirmDelete(false); location.hash = ''; }}>Yes, delete my data</button>
+          <button class="btn btn-primary btn-block" style={{ background: 'var(--clay-700)', boxShadow: 'none' }} onClick={async () => { await resetAll(); setConfirmDelete(false); location.hash = ''; }}>Yes, delete my data</button>
           <button class="btn btn-secondary btn-block" onClick={() => setConfirmDelete(false)}>Keep my data</button>
         </div>
       </Sheet>
