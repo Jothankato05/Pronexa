@@ -11,7 +11,7 @@ It ships as an **Android APK** (Capacitor) and as an installable **PWA** from th
 ![Pronexa screens](release/screens.png)
 
 
-- **Android:** [`release/Pronexa-0.1.0-debug.apk`](release/Pronexa-0.1.0-debug.apk) (4.9 MB, Android 7.0+, debug-signed). On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
+- **Android:** [`release/Pronexa-0.1.0-debug.apk`](release/Pronexa-0.1.0-debug.apk) (5.2 MB, Android 7.0+, debug-signed). On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
 - **Web / PWA:** `npm install && npm run build && npm run preview`, then open it on a phone and use "Add to home screen".
 
 ## The five-step flow
@@ -33,7 +33,7 @@ Later features (Photo mode, ₦500 Protein Challenge, Plant-based Meal Planner, 
 | AI interpreter | `src/ai/` | Any interpreter only *picks* food ids from the database. `validate.ts` drops unknown foods, fixes portions, uses price only as a clue, and decides confidence and the one question |
 | Gap Solver | `src/lib/solver.ts` | Deterministic ranking (value per ₦, gap fit, plant bonus) with strict diet and allergen filtering. Works offline |
 | Offline storage | `src/lib/db.ts`, `src/lib/store.ts` | IndexedDB (localStorage fallback). An opt-in sync queue with a stub adapter |
-| UI | `src/screens/`, `src/styles/app.css` | Preact + signals, Asteria design system, Assistant Pill (`src/assistant/`) |
+| UI | `src/screens/`, `src/styles/app.css` | Preact + signals, Pronexa colours on the Asteria layout, Assistant Pill (`src/assistant/`) |
 | Android | `android/`, `capacitor.config.json` | Capacitor 8, the web app bundled inside the APK so it opens with no connection |
 
 ### Plugging in a real LLM
@@ -75,4 +75,4 @@ npm run android:apk  # → android/app/build/outputs/apk/debug/app-debug.apk
 - The APK is debug-signed for testing. It has been built and verified (package, bundled assets, signature), and its exact web bundle has been driven end to end in Chromium, but not yet run on a physical device in this environment.
 
 ## Credits
-UI based on the Asteria app design and the Assistant Pill by HorizonX, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL, see `src/assets/fonts/LICENSE-OFL.txt`).
+Layout based on the Asteria app design and the Assistant Pill by HorizonX, recoloured to the Pronexa palette,, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL, see `src/assets/fonts/LICENSE-OFL.txt`).

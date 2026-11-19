@@ -390,12 +390,12 @@ export function PronexaMark({ size = 120, class: cls }: { size?: number; class?:
       <defs>
         <linearGradient id="markGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="#ffffff" />
-          <stop offset="1" stop-color="#d9e4f5" />
+          <stop offset="1" stop-color="#e4efe0" />
         </linearGradient>
       </defs>
       <path d="M2 122C2 60 40 12 118 2c4 62-34 112-116 120Z" fill="url(#markGrad)" />
       <path d="M18 108C42 74 70 48 102 22" fill="none" stroke="#07101c" stroke-width="6" stroke-linecap="round" opacity=".18" />
-      <rect x="122" y="74" width="47" height="49" rx="4" fill="url(#markGrad)" />
+      <rect x="122" y="74" width="47" height="49" rx="4" fill="#d9a441" />
     </svg>
   );
 }

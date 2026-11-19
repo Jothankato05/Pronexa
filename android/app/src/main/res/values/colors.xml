@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#07101C</color>
-    <color name="colorPrimaryDark">#07101C</color>
-    <color name="colorAccent">#50A2FF</color>
-    <color name="pronexaNight">#07101C</color>
+    <color name="colorPrimary">#3B7A4F</color>
+    <color name="colorPrimaryDark">#2E6340</color>
+    <color name="colorAccent">#D9A441</color>
+    <color name="pronexaBg">#FAF7F2</color>
+    <color name="pronexaGreen">#2E6340</color>
 </resources>

@@ -4,6 +4,7 @@ import { Celebration, Skeleton, TabBar, Toast } from './components/ui';
 import { current, type Route } from './lib/router';
 import { celebrate, profile, ready, settings } from './lib/store';
 import { Today } from './screens/Today';
+import { setBarTone } from './lib/systemBars';
 
 /**
  * Route-level code splitting keeps the first load small on low-end phones:
@@ -65,10 +66,15 @@ export function App() {
     if (ready.value && profile.value) prefetchAll();
   }, [ready.value, !!profile.value]);
 
+  const { route } = current.value;
+  useEffect(() => {
+    // Light status-bar icons over the green Today header; dark icons on the off-white screens.
+    if (ready.value && profile.value) setBarTone(SCREENS[route] ? 'on-light' : 'on-green');
+  }, [route, ready.value, !!profile.value]);
+
   if (!ready.value) return <ScreenSkeleton />;
   if (!profile.value) return <Onboarding />;
 
-  const { route } = current.value;
   const hideTabs = route === 'log/confirm' || route === 'settings';
   const Screen = SCREENS[route] ?? Today;
 
