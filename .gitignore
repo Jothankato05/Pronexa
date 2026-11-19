@@ -4,3 +4,6 @@ dist
 .DS_Store
 coverage
 .vite
+
+# Tool/session state written by editor plugins (not project content)
+.anchor/
