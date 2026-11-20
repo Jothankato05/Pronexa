@@ -1,0 +1,41 @@
+name: pronexa
+description: "Pronexa: check your protein and close the gap for less. Offline-first, for Nigerian university students."
+publish_to: 'none'
+version: 0.5.0+6
+
+environment:
+  sdk: ^3.13.7
+  flutter: ">=3.47.0"
+
+# Guardrail: every dependency is pinned to an exact, reviewed version.
+# Keep this list short; each one is a supply-chain risk.
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: 2.5.6   # offline storage for profile, settings and meals
+  image_picker: 1.2.4         # Photo mode: the phone's own camera app, no camera permission
+  http: 1.6.0                 # optional AI reader endpoint and backup
+  connectivity_plus: 7.3.2    # online/offline indicator
+  flutter_svg: 2.5.0          # food and container illustrations
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/food/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+    - family: NairaSign
+      fonts:
+        - asset: assets/fonts/NairaSign.ttf

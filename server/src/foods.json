@@ -1,0 +1,1300 @@
+{
+  "dbVersion": "0.3.0",
+  "foods": [
+    {
+      "id": "beans",
+      "name": "Beans",
+      "aliases": [
+        "beans",
+        "bean",
+        "ewa",
+        "agoyin",
+        "ewa agoyin",
+        "beans porridge",
+        "porridge beans",
+        "stewed beans"
+      ],
+      "portions": [
+        "spoon",
+        "sm_pack",
+        "md_pack",
+        "plate",
+        "bowl"
+      ],
+      "defaultPortion": "spoon"
+    },
+    {
+      "id": "rice_beans",
+      "name": "Rice and beans",
+      "aliases": [
+        "rice and beans",
+        "rice & beans",
+        "rice n beans",
+        "rice with beans",
+        "beans and rice",
+        "beans with rice",
+        "waakye"
+      ],
+      "portions": [
+        "sm_pack",
+        "md_pack",
+        "lg_pack",
+        "plate"
+      ],
+      "defaultPortion": "md_pack"
+    },
+    {
+      "id": "moi_moi",
+      "name": "Moi-moi",
+      "aliases": [
+        "moi moi",
+        "moimoi",
+        "moi-moi",
+        "moin moin",
+        "moinmoin",
+        "moin-moin",
+        "olele",
+        "bean pudding"
+      ],
+      "portions": [
+        "wrap",
+        "piece"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "akara",
+      "name": "Akara",
+      "aliases": [
+        "akara",
+        "kosai",
+        "bean cake",
+        "bean cakes",
+        "beancake",
+        "bean balls",
+        "akara balls",
+        "beans cake"
+      ],
+      "portions": [
+        "ball"
+      ],
+      "defaultPortion": "ball"
+    },
+    {
+      "id": "soybeans",
+      "name": "Soybeans",
+      "aliases": [
+        "soybeans",
+        "soybean",
+        "soy beans",
+        "soya beans",
+        "soyabeans",
+        "soya bean",
+        "soyabean"
+      ],
+      "portions": [
+        "spoon",
+        "plate"
+      ],
+      "defaultPortion": "spoon"
+    },
+    {
+      "id": "soya_chunks",
+      "name": "Soya chunks",
+      "aliases": [
+        "soya chunks",
+        "soy chunks",
+        "soya chunk",
+        "chunks",
+        "tvp",
+        "soya meat",
+        "meat free chunks",
+        "textured soy"
+      ],
+      "portions": [
+        "handful",
+        "spoon"
+      ],
+      "defaultPortion": "handful"
+    },
+    {
+      "id": "tofu",
+      "name": "Tofu",
+      "aliases": [
+        "tofu",
+        "awara",
+        "wara",
+        "beske"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "groundnuts",
+      "name": "Groundnuts",
+      "aliases": [
+        "groundnut",
+        "groundnuts",
+        "ground nut",
+        "ground nuts",
+        "g-nut",
+        "gnut",
+        "peanut",
+        "peanuts"
+      ],
+      "portions": [
+        "handful",
+        "sachet"
+      ],
+      "defaultPortion": "handful"
+    },
+    {
+      "id": "okpa",
+      "name": "Okpa",
+      "aliases": [
+        "okpa",
+        "bambara",
+        "bambara nut",
+        "bambara nuts",
+        "bambara pudding",
+        "okpa wrap"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "lentils",
+      "name": "Lentils",
+      "aliases": [
+        "lentils",
+        "lentil"
+      ],
+      "portions": [
+        "spoon",
+        "bowl"
+      ],
+      "defaultPortion": "spoon"
+    },
+    {
+      "id": "soy_milk",
+      "name": "Soy milk",
+      "aliases": [
+        "soy milk",
+        "soya milk",
+        "soymilk",
+        "soyamilk"
+      ],
+      "portions": [
+        "bottle"
+      ],
+      "defaultPortion": "bottle"
+    },
+    {
+      "id": "white_rice",
+      "name": "White rice",
+      "aliases": [
+        "white rice",
+        "rice",
+        "boiled rice",
+        "plain rice",
+        "ofada",
+        "ofada rice",
+        "basmati",
+        "basmati rice"
+      ],
+      "portions": [
+        "spoon",
+        "sm_pack",
+        "md_pack",
+        "lg_pack",
+        "plate"
+      ],
+      "defaultPortion": "md_pack"
+    },
+    {
+      "id": "jollof_rice",
+      "name": "Jollof rice",
+      "aliases": [
+        "jollof",
+        "jollof rice",
+        "jolof",
+        "jellof",
+        "party rice",
+        "concoction rice",
+        "native rice",
+        "coconut rice"
+      ],
+      "portions": [
+        "spoon",
+        "sm_pack",
+        "md_pack",
+        "lg_pack",
+        "plate"
+      ],
+      "defaultPortion": "md_pack"
+    },
+    {
+      "id": "fried_rice",
+      "name": "Fried rice",
+      "aliases": [
+        "fried rice"
+      ],
+      "portions": [
+        "sm_pack",
+        "md_pack",
+        "lg_pack",
+        "plate"
+      ],
+      "defaultPortion": "md_pack"
+    },
+    {
+      "id": "spaghetti",
+      "name": "Spaghetti",
+      "aliases": [
+        "spaghetti",
+        "spag",
+        "pasta",
+        "macaroni",
+        "jollof spaghetti",
+        "spaghettis",
+        "pasta spaghetti",
+        "spag bol"
+      ],
+      "portions": [
+        "plate",
+        "md_pack",
+        "spoon"
+      ],
+      "defaultPortion": "plate"
+    },
+    {
+      "id": "noodles",
+      "name": "Instant noodles",
+      "aliases": [
+        "indomie",
+        "noodles",
+        "noodle",
+        "instant noodles",
+        "indomie noodles",
+        "golden penny noodles",
+        "indomie noodle",
+        "golden penny"
+      ],
+      "portions": [
+        "pack"
+      ],
+      "defaultPortion": "pack"
+    },
+    {
+      "id": "bread",
+      "name": "Bread",
+      "aliases": [
+        "bread",
+        "agege",
+        "agege bread",
+        "sliced bread",
+        "butter bread",
+        "bread loaf",
+        "tea bread",
+        "wheat bread"
+      ],
+      "portions": [
+        "slice"
+      ],
+      "defaultPortion": "slice"
+    },
+    {
+      "id": "eba",
+      "name": "Eba",
+      "aliases": [
+        "eba",
+        "garri swallow"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "amala",
+      "name": "Amala",
+      "aliases": [
+        "amala",
+        "lafun"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "pounded_yam",
+      "name": "Pounded yam",
+      "aliases": [
+        "pounded yam",
+        "iyan",
+        "poundo",
+        "poundo yam",
+        "pounded"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "tuwo",
+      "name": "Tuwo shinkafa",
+      "aliases": [
+        "tuwo",
+        "tuwo shinkafa",
+        "tuwo masara"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "yam",
+      "name": "Boiled yam",
+      "aliases": [
+        "yam",
+        "boiled yam",
+        "fried yam",
+        "dundun"
+      ],
+      "portions": [
+        "slice",
+        "plate"
+      ],
+      "defaultPortion": "slice"
+    },
+    {
+      "id": "plantain",
+      "name": "Fried plantain",
+      "aliases": [
+        "plantain",
+        "dodo",
+        "fried plantain",
+        "boli",
+        "roasted plantain",
+        "dodo plantain",
+        "plantains",
+        "boiled plantain"
+      ],
+      "portions": [
+        "serving",
+        "piece"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "garri_soaked",
+      "name": "Soaked garri",
+      "aliases": [
+        "soaked garri",
+        "garri",
+        "gari",
+        "drink garri",
+        "soak garri",
+        "garri soakings",
+        "garri and sugar",
+        "soaked gari"
+      ],
+      "portions": [
+        "cup"
+      ],
+      "defaultPortion": "cup"
+    },
+    {
+      "id": "abacha",
+      "name": "Abacha",
+      "aliases": [
+        "abacha",
+        "african salad",
+        "ugba"
+      ],
+      "portions": [
+        "plate"
+      ],
+      "defaultPortion": "plate"
+    },
+    {
+      "id": "egusi",
+      "name": "Egusi soup",
+      "aliases": [
+        "egusi",
+        "egusi soup",
+        "melon soup"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "efo_riro",
+      "name": "Vegetable soup",
+      "aliases": [
+        "efo",
+        "efo riro",
+        "vegetable soup",
+        "veg soup",
+        "edikang ikong",
+        "edikaikong",
+        "afang",
+        "afang soup"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "okra",
+      "name": "Okra soup",
+      "aliases": [
+        "okra",
+        "okro",
+        "okra soup",
+        "okro soup"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "ewedu",
+      "name": "Ewedu",
+      "aliases": [
+        "ewedu",
+        "ewedu soup"
+      ],
+      "portions": [
+        "serving"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "stew",
+      "name": "Tomato stew",
+      "aliases": [
+        "stew",
+        "tomato stew",
+        "red stew",
+        "sauce",
+        "pepper sauce",
+        "ofada sauce",
+        "ayamase",
+        "ofada stew"
+      ],
+      "portions": [
+        "spoon"
+      ],
+      "defaultPortion": "spoon"
+    },
+    {
+      "id": "egg",
+      "name": "Egg",
+      "aliases": [
+        "egg",
+        "eggs",
+        "boiled egg",
+        "fried egg",
+        "omelette",
+        "omelet",
+        "scrambled egg",
+        "scrambled eggs"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "chicken",
+      "name": "Chicken",
+      "aliases": [
+        "chicken",
+        "fried chicken",
+        "chicken piece",
+        "chicken lap",
+        "drumstick",
+        "chicken wing",
+        "chicken wings",
+        "chicken leg"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "beef",
+      "name": "Beef",
+      "aliases": [
+        "beef",
+        "meat",
+        "cow meat",
+        "meats",
+        "beef meat",
+        "fried meat",
+        "boiled meat",
+        "peppered meat"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "fish",
+      "name": "Fish",
+      "aliases": [
+        "fish",
+        "fried fish",
+        "titus",
+        "mackerel",
+        "panla",
+        "catfish",
+        "croaker",
+        "fish piece"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "sardine",
+      "name": "Sardines",
+      "aliases": [
+        "sardine",
+        "sardines",
+        "titus sardine",
+        "geisha",
+        "tinned fish",
+        "canned fish"
+      ],
+      "portions": [
+        "tin"
+      ],
+      "defaultPortion": "tin"
+    },
+    {
+      "id": "milk",
+      "name": "Milk",
+      "aliases": [
+        "milk",
+        "powdered milk",
+        "peak",
+        "peak milk",
+        "three crowns",
+        "dano",
+        "cowbell",
+        "milk sachet"
+      ],
+      "portions": [
+        "sachet"
+      ],
+      "defaultPortion": "sachet"
+    },
+    {
+      "id": "kuli_kuli",
+      "name": "Kuli-kuli",
+      "aliases": [
+        "kuli kuli",
+        "kulikuli",
+        "kuli",
+        "kwuli kwuli",
+        "groundnut cake",
+        "peanut cake",
+        "groundnut stick"
+      ],
+      "portions": [
+        "handful",
+        "piece"
+      ],
+      "defaultPortion": "handful"
+    },
+    {
+      "id": "peanut_butter",
+      "name": "Peanut butter",
+      "aliases": [
+        "peanut butter",
+        "groundnut butter",
+        "groundnut paste",
+        "peanut paste"
+      ],
+      "portions": [
+        "spoon"
+      ],
+      "defaultPortion": "spoon"
+    },
+    {
+      "id": "cashew",
+      "name": "Cashew nuts",
+      "aliases": [
+        "cashew",
+        "cashews",
+        "cashew nut",
+        "cashew nuts",
+        "kaju"
+      ],
+      "portions": [
+        "handful"
+      ],
+      "defaultPortion": "handful"
+    },
+    {
+      "id": "tiger_nuts",
+      "name": "Tiger nuts",
+      "aliases": [
+        "tiger nut",
+        "tiger nuts",
+        "tigernut",
+        "tigernuts",
+        "aya",
+        "ofio",
+        "imumu",
+        "ofiọ"
+      ],
+      "portions": [
+        "handful"
+      ],
+      "defaultPortion": "handful"
+    },
+    {
+      "id": "ukwa",
+      "name": "Ukwa",
+      "aliases": [
+        "ukwa",
+        "ukwa porridge",
+        "african breadfruit",
+        "breadfruit",
+        "afon",
+        "ukwa and corn"
+      ],
+      "portions": [
+        "plate",
+        "spoon"
+      ],
+      "defaultPortion": "plate"
+    },
+    {
+      "id": "pigeon_pea",
+      "name": "Fio-fio",
+      "aliases": [
+        "fio fio",
+        "fiofio",
+        "fio",
+        "pigeon pea",
+        "pigeon peas",
+        "agbugbu",
+        "otili"
+      ],
+      "portions": [
+        "spoon",
+        "plate"
+      ],
+      "defaultPortion": "spoon"
+    },
+    {
+      "id": "semo",
+      "name": "Semo",
+      "aliases": [
+        "semo",
+        "semovita",
+        "semolina",
+        "wheat",
+        "wheat meal",
+        "wheat swallow",
+        "golden penny semovita"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "fufu",
+      "name": "Fufu",
+      "aliases": [
+        "fufu",
+        "akpu",
+        "foofoo",
+        "cassava fufu",
+        "loi loi",
+        "santana"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "starch",
+      "name": "Starch",
+      "aliases": [
+        "starch",
+        "usi",
+        "starch swallow"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "yam_porridge",
+      "name": "Yam porridge",
+      "aliases": [
+        "yam porridge",
+        "porridge yam",
+        "asaro",
+        "yam pottage",
+        "pottage"
+      ],
+      "portions": [
+        "plate",
+        "md_pack",
+        "spoon"
+      ],
+      "defaultPortion": "plate"
+    },
+    {
+      "id": "chips",
+      "name": "Chips",
+      "aliases": [
+        "chips",
+        "fries",
+        "french fries",
+        "irish potato",
+        "irish potatoes",
+        "potato",
+        "potatoes",
+        "potato chips"
+      ],
+      "portions": [
+        "sm_pack",
+        "md_pack"
+      ],
+      "defaultPortion": "sm_pack"
+    },
+    {
+      "id": "sweet_potato",
+      "name": "Sweet potato",
+      "aliases": [
+        "sweet potato",
+        "sweet potatoes",
+        "dankali",
+        "boiled sweet potato",
+        "fried sweet potato"
+      ],
+      "portions": [
+        "slice",
+        "plate"
+      ],
+      "defaultPortion": "slice"
+    },
+    {
+      "id": "corn",
+      "name": "Corn",
+      "aliases": [
+        "corn",
+        "agbado",
+        "maize",
+        "roasted corn",
+        "boiled corn",
+        "corn on the cob",
+        "masara",
+        "oka"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "oats",
+      "name": "Oats",
+      "aliases": [
+        "oats",
+        "oat",
+        "quaker",
+        "quaker oats",
+        "oatmeal",
+        "oat porridge",
+        "rolled oats"
+      ],
+      "portions": [
+        "cup"
+      ],
+      "defaultPortion": "cup"
+    },
+    {
+      "id": "cereal",
+      "name": "Cereal",
+      "aliases": [
+        "cereal",
+        "golden morn",
+        "goldenmorn",
+        "cornflakes",
+        "corn flakes",
+        "cerelac",
+        "nasco",
+        "cereals"
+      ],
+      "portions": [
+        "cup"
+      ],
+      "defaultPortion": "cup"
+    },
+    {
+      "id": "ogbono",
+      "name": "Ogbono soup",
+      "aliases": [
+        "ogbono",
+        "ogbono soup",
+        "draw soup",
+        "apon",
+        "ogbolo",
+        "ogbono soup with okra"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "gbegiri",
+      "name": "Gbegiri",
+      "aliases": [
+        "gbegiri",
+        "gbegiri soup",
+        "bean soup",
+        "beans soup"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "groundnut_soup",
+      "name": "Groundnut soup",
+      "aliases": [
+        "groundnut soup",
+        "peanut soup",
+        "miyan gyada",
+        "ofe ahu"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "banga",
+      "name": "Banga soup",
+      "aliases": [
+        "banga",
+        "banga soup",
+        "ofe akwu",
+        "palm nut soup",
+        "palmnut soup",
+        "oghwo"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "bitterleaf",
+      "name": "Bitterleaf soup",
+      "aliases": [
+        "bitterleaf",
+        "bitter leaf",
+        "bitterleaf soup",
+        "bitter leaf soup",
+        "ofe onugbu",
+        "onugbu",
+        "oha",
+        "oha soup"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "pepper_soup",
+      "name": "Pepper soup",
+      "aliases": [
+        "pepper soup",
+        "peppersoup",
+        "goat meat pepper soup",
+        "goat pepper soup",
+        "catfish pepper soup",
+        "fish pepper soup",
+        "chicken pepper soup",
+        "assorted pepper soup"
+      ],
+      "portions": [
+        "bowl"
+      ],
+      "defaultPortion": "bowl"
+    },
+    {
+      "id": "miyan_kuka",
+      "name": "Miyan kuka",
+      "aliases": [
+        "miyan kuka",
+        "kuka",
+        "kuka soup",
+        "baobab soup",
+        "miyan taushe"
+      ],
+      "portions": [
+        "serving",
+        "bowl"
+      ],
+      "defaultPortion": "serving"
+    },
+    {
+      "id": "shawarma",
+      "name": "Shawarma",
+      "aliases": [
+        "shawarma",
+        "shawama",
+        "sharwama",
+        "shawarmah",
+        "chicken shawarma",
+        "beef shawarma",
+        "shawarma wrap"
+      ],
+      "portions": [
+        "wrap"
+      ],
+      "defaultPortion": "wrap"
+    },
+    {
+      "id": "burger",
+      "name": "Burger",
+      "aliases": [
+        "burger",
+        "burgers",
+        "hamburger",
+        "cheeseburger",
+        "beef burger",
+        "chicken burger"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "pizza",
+      "name": "Pizza",
+      "aliases": [
+        "pizza",
+        "pizzas",
+        "pizza slice"
+      ],
+      "portions": [
+        "slice"
+      ],
+      "defaultPortion": "slice"
+    },
+    {
+      "id": "meat_pie",
+      "name": "Meat pie",
+      "aliases": [
+        "meat pie",
+        "meatpie",
+        "meat pies",
+        "chicken pie",
+        "fish pie",
+        "pie"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "sausage_roll",
+      "name": "Sausage roll",
+      "aliases": [
+        "gala",
+        "sausage roll",
+        "sausage rolls",
+        "sausage",
+        "sausages",
+        "superbite",
+        "beefy",
+        "hot dog"
+      ],
+      "portions": [
+        "pack"
+      ],
+      "defaultPortion": "pack"
+    },
+    {
+      "id": "egg_roll",
+      "name": "Egg roll",
+      "aliases": [
+        "egg roll",
+        "eggroll",
+        "egg rolls",
+        "scotch egg",
+        "scotch eggs"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "puff_puff",
+      "name": "Puff-puff",
+      "aliases": [
+        "puff puff",
+        "puffpuff",
+        "puff",
+        "bofrot",
+        "buf buf",
+        "mikate",
+        "puff puffs"
+      ],
+      "portions": [
+        "ball"
+      ],
+      "defaultPortion": "ball"
+    },
+    {
+      "id": "chin_chin",
+      "name": "Chin-chin",
+      "aliases": [
+        "chin chin",
+        "chinchin",
+        "chin-chin"
+      ],
+      "portions": [
+        "sachet"
+      ],
+      "defaultPortion": "sachet"
+    },
+    {
+      "id": "buns",
+      "name": "Buns",
+      "aliases": [
+        "buns",
+        "bun",
+        "doughnut",
+        "doughnuts",
+        "donut",
+        "donuts"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "goat_meat",
+      "name": "Goat meat",
+      "aliases": [
+        "goat meat",
+        "goat",
+        "goatmeat",
+        "ogufe",
+        "asun",
+        "peppered goat",
+        "chevon",
+        "goat meats"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "turkey",
+      "name": "Turkey",
+      "aliases": [
+        "turkey",
+        "turkey wing",
+        "turkey wings",
+        "turkey part",
+        "peppered turkey"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "ponmo",
+      "name": "Ponmo",
+      "aliases": [
+        "ponmo",
+        "kpomo",
+        "pomo",
+        "cow skin",
+        "cowskin",
+        "kanda"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "assorted",
+      "name": "Assorted meat",
+      "aliases": [
+        "assorted",
+        "assorted meat",
+        "assorted meats",
+        "orisirisi",
+        "shaki",
+        "tripe",
+        "liver",
+        "kidney"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "gizzard",
+      "name": "Gizzard",
+      "aliases": [
+        "gizzard",
+        "gizzards",
+        "gizdodo",
+        "giz dodo",
+        "chicken gizzard",
+        "peppered gizzard"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "suya",
+      "name": "Suya",
+      "aliases": [
+        "suya",
+        "tsire",
+        "beef suya",
+        "chicken suya",
+        "ram suya",
+        "suya meat"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "kilishi",
+      "name": "Kilishi",
+      "aliases": [
+        "kilishi",
+        "kilichi",
+        "beef jerky",
+        "dried meat"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "snail",
+      "name": "Snail",
+      "aliases": [
+        "snail",
+        "snails",
+        "igbin",
+        "congo meat",
+        "peppered snail"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "dry_fish",
+      "name": "Dried fish",
+      "aliases": [
+        "dry fish",
+        "dried fish",
+        "smoked fish",
+        "stockfish",
+        "stock fish",
+        "okporoko",
+        "bonga",
+        "bonga fish"
+      ],
+      "portions": [
+        "piece"
+      ],
+      "defaultPortion": "piece"
+    },
+    {
+      "id": "yoghurt",
+      "name": "Yoghurt",
+      "aliases": [
+        "yoghurt",
+        "yogurt",
+        "yoghurts",
+        "hollandia",
+        "hollandia yoghurt",
+        "fan yogo",
+        "viju",
+        "parfait"
+      ],
+      "portions": [
+        "bottle"
+      ],
+      "defaultPortion": "bottle"
+    },
+    {
+      "id": "fura",
+      "name": "Fura da nono",
+      "aliases": [
+        "fura da nono",
+        "fura and nono",
+        "fura",
+        "nono",
+        "kindirmo"
+      ],
+      "portions": [
+        "cup"
+      ],
+      "defaultPortion": "cup"
+    }
+  ]
+}
