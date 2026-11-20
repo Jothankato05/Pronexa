@@ -4,15 +4,15 @@ Pronexa follows the Asteria design the project owner supplied, screen by screen:
 
 | Asteria screen | Pronexa screen | What carries over |
 |----------------|----------------|-------------------|
-| Splash | Welcome | Sky-to-night background, the mark, a caps headline, one white button |
+| Splash | Welcome | The mark on the canvas, a caps headline, one white button |
 | Registration | Onboarding steps | Big title, pill-shaped choices with a 10% white outline, white when chosen |
-| Dashboard | Today | Gradient header with chips, a 48 px number and four 64 px square actions; a white sheet with plain list rows |
+| Dashboard | Today | Indigo header with chips, a 48 px number and four 64 px square actions; a white sheet with plain list rows |
 | Key Feature | Close the gap, Check your meal | The number centred on the dark canvas, the details below |
 | Settings | Log a meal, Learn, Profile | Caps section labels and outlined groups of rows with blue icons |
 
 **Clean means few things on screen.** Lists are plain rows with a light icon tile, a title and a value, never boxes inside boxes. Secondary text is softer white, not another container. Copy is a title and the number, rarely a sentence. No status badges, no slogans, no exclamation marks.
 
-**Gradients:** only the two from Asteria: the header (Today, Learn hero, Photo, the target card and the question card) and the welcome background. The header gradient is darkened slightly at the top so white text on it stays above 4.5:1. No glows or blur.
+**Solid colours only.** Asteria's two gradients (header and splash) are flattened: the header and its cards are solid `indigo`, and the welcome screen is the plain `bg` canvas. No gradients, glows or blur anywhere.
 
 ## Screens
 
@@ -40,8 +40,7 @@ Screenshots are in `docs/screens/` (render them with `flutter test test_screens 
 | `bg` | `#0A0E17` | Canvas, launch screen | n/a |
 | `ink` / `ink2` / `ink3` | white / white 70% / white 60% | Text on the canvas | 19.6 / 9.6 / 7.3:1 |
 | `line` / `fill` | white 10% / white 5% | Group and input outlines / chip and button fills, hairlines | n/a |
-| `header` | `#4F6896` → `#2E3D72` → `#1C2756` → `#111A40` → `#0A0E17` | Asteria header gradient | white 5.6:1 at the top; white 70% 6.0:1 from 22% down |
-| `indigo` / `indigo2` | `#20296B` / `#293477` | Launcher icon / active nav (gradient from `#07101B`) | white 13.2 / 11.3:1 |
+| `indigo` / `indigo2` | `#20296B` / `#293477` | Today header, hero and question cards, active nav, launcher icon / profile avatar | white 13.2 / 11.3:1; white 70% 7.3:1 on indigo |
 | `blue` | `#50A2FF` | Icons, progress, switches, protein values on dark | 7.3:1 on canvas |
 | `warm` / `good` | `#F5B971` / `#5FD38A` | "Check this", delete (never red) / "Looks clear" | 11.1 / 10.6:1 |
 | `sheet`, `sInk`, `sInk2` | white, `#07101C`, `#666666` | White sheet and its text | 19.1 / 5.7:1 |

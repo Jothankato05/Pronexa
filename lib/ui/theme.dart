@@ -43,18 +43,6 @@ abstract final class C {
 
   /// Light tile behind the food illustrations, which have dark outlines.
   static const tile = Color(0xFFF2F4F7);
-
-  /// The Asteria header: sky blue fading into the canvas. Darkened at the
-  /// top so white text stays above 4.5:1.
-  static const header = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF4F6896), Color(0xFF2E3D72), Color(0xFF1C2756), Color(0xFF111A40), Color(0xFF0A0E17)],
-    stops: [0, 0.22, 0.4, 0.63, 1],
-  );
-
-  /// The active navigation button.
-  static const navActive = LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF07101B), Color(0xFF293477)]);
 }
 
 abstract final class R {

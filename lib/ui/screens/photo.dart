@@ -132,7 +132,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
                 if (photo == null) ...[
                   Container(
                     height: 300,
-                    decoration: BoxDecoration(gradient: C.header, borderRadius: BorderRadius.circular(R.xl)),
+                    decoration: BoxDecoration(color: C.indigo, borderRadius: BorderRadius.circular(R.xl)),
                     alignment: Alignment.center,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

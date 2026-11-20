@@ -44,7 +44,7 @@ class ProgressLine extends StatelessWidget {
 }
 
 /// Floating pill navigation (Asteria): translucent white, active button in
-/// the indigo gradient.
+/// solid indigo.
 class PillNav extends StatelessWidget {
   const PillNav({super.key, required this.index, required this.onTap});
 
@@ -95,7 +95,7 @@ class PillNav extends StatelessWidget {
                             curve: Motion.curve,
                             child: const DecoratedBox(
                               decoration: BoxDecoration(
-                                gradient: C.navActive,
+                                color: C.indigo,
                                 shape: BoxShape.circle,
                                 boxShadow: [BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20))],
                               ),

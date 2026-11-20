@@ -150,7 +150,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 20),
                         decoration: BoxDecoration(
-                          gradient: C.header,
+                          color: C.indigo,
                           borderRadius: BorderRadius.circular(R.xl),
                           boxShadow: const [BoxShadow(color: Color(0x80000000), blurRadius: 80, offset: Offset(0, 40))],
                         ),
@@ -225,7 +225,7 @@ class _Dots extends StatelessWidget {
   );
 }
 
-/// Welcome, after the Asteria splash: sky-to-night background, the mark,
+/// Welcome, after the Asteria splash: solid navy, the mark,
 /// a short caps headline and one white button.
 class _Welcome extends StatelessWidget {
   const _Welcome({required this.onStart});
@@ -236,15 +236,8 @@ class _Welcome extends StatelessWidget {
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
     value: lightIcons,
     child: Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF9CC8D6), Color(0xFF28328F), Color(0xFF0A0E17)],
-            stops: [0, 0.45, 0.8],
-          ),
-        ),
+      body: ColoredBox(
+        color: C.bg,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(32, 24, 32, 16),
