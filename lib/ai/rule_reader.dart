@@ -15,11 +15,27 @@ String normalise(String text) {
   s = s.replaceAll(RegExp(r'\bn(?=\d)'), '₦').replaceAll(RegExp(r'\bngn\s?(?=\d)'), '₦');
   s = s.replaceAll(RegExp(r'₦\s+'), '₦');
   s = s.replaceAll(RegExp(r'&|\+'), ' and ');
+  s = _fractions(s);
   s = s.replaceAllMapped(RegExp(r'(\d)\s*x\b'), (m) => '${m[1]} ');
   s = s.replaceAllMapped(RegExp(r'(\d)([a-z])'), (m) => '${m[1]} ${m[2]}');
   s = s.replaceAll(RegExp(r'[^\p{L}\p{N}₦.\s]', unicode: true), ' ');
   s = s.replaceAll(RegExp(r'\.(?!\d)'), ' ').replaceAll(RegExp(r'(?<!\d)\.'), ' ');
   return s.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+const _wordNumbers = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'a': 0, 'an': 0};
+
+/// "1 1/2", "1/2", "½", "one and half", "2 and a half" become decimals.
+String _fractions(String s) {
+  s = s.replaceAll('½', ' 0.5 ').replaceAll('¼', ' 0.25 ').replaceAll('¾', ' 0.75 ');
+  String dec(double v) => v == v.roundToDouble() ? v.round().toString() : v.toString();
+  s = s.replaceAllMapped(RegExp(r'(\d+)\s+(\d)/(\d)\b'), (m) => ' ${dec(int.parse(m[1]!) + int.parse(m[2]!) / int.parse(m[3]!))} ');
+  s = s.replaceAllMapped(RegExp(r'(?<![\d/])(\d)/(\d)\b'), (m) => ' ${dec(int.parse(m[1]!) / int.parse(m[2]!))} ');
+  s = s.replaceAllMapped(RegExp(r'\b(\d+|one|two|three|four|five)\s+and\s+(?:a\s+)?half\b'), (m) {
+    final n = int.tryParse(m[1]!) ?? _wordNumbers[m[1]!]!;
+    return ' ${n + 0.5} ';
+  });
+  return s;
 }
 
 List<String> _tokens(String s) => normalise(s).split(' ').where((t) => t.isNotEmpty).toList();
@@ -38,6 +54,14 @@ const _numberWords = {
   'nine': 9.0,
   'ten': 10.0,
   'couple': 2.0,
+  'pair': 2.0,
+  'double': 2.0,
+  'single': 1.0,
+  'eleven': 11.0,
+  'twelve': 12.0,
+  'dozen': 12.0,
+  'fifteen': 15.0,
+  'twenty': 20.0,
   'half': 0.5,
   'quarter': 0.25,
 };
@@ -61,6 +85,10 @@ const _sizeWords = {
   'plenty': 'lg',
   'full': 'lg',
   'extra': 'lg',
+  'baby': 'sm',
+  'giant': 'lg',
+  'xl': 'lg',
+  'sizeable': 'md',
 };
 
 const _containerWords = {
@@ -86,6 +114,18 @@ const _containerWords = {
   'wrap': 'wrap',
   'wraps': 'wrap',
   'wrapper': 'wrap',
+  'nylon': 'wrap',
+  'leaf': 'wrap',
+  'stick': 'piece',
+  'sticks': 'piece',
+  'skewer': 'piece',
+  'skewers': 'piece',
+  'cob': 'piece',
+  'cobs': 'piece',
+  'glass': 'cup',
+  'mug': 'cup',
+  'tumbler': 'cup',
+  'ladle': 'spoon',
   'ball': 'ball',
   'balls': 'ball',
   'piece': 'piece',
@@ -115,7 +155,7 @@ const _containerWords = {
   'portions': 'serving',
 };
 
-const _connectors = {'and', 'with', 'plus', 'then', 'n', 'also', 'add', 'added'};
+const _connectors = {'and', 'with', 'plus', 'then', 'n', 'nd', 'also', 'add', 'added', 'alongside', 'w'};
 
 final _stopwords =
     ('i me my we you u im ive id a an the of for from at in on to it its is was were be been am are na dey de don go come wey e o oh ah '
@@ -124,7 +164,8 @@ final _stopwords =
             'bought buying got get took take away order ordered cost costs paid pay worth price naira ngn mama put mamaput buka canteen cafeteria caf joint '
             'spot vendor hostel school campus side inside top each per total all everything whole finish finished left fried boiled roasted grilled hot '
             'cold sweet nice local fresh homemade self made cooked rest nothing else not no did didnt dont couldnt could eh some something thing things '
-            'kind type sort which what how much many ehn sef said')
+            'kind type sort which what how much many ehn sef said reach una dem dis dat wan make kuku jor omo mehn bros collect collected carry '
+            'carried chops stir style plain soup meal food')
         .split(' ')
         .toSet();
 
@@ -147,6 +188,10 @@ final List<_Alias> _aliases =
 final List<List<String>> _noProtein = noProteinWords.map(_tokens).toList()..sort((a, b) => b.length.compareTo(a.length));
 
 const _generic = {'rice', 'meat', 'garri', 'gari', 'sauce'};
+
+/// Dishes whose protein already includes their meat or fish.
+const _filledDishes = {'shawarma', 'burger', 'meat_pie', 'suya', 'pepper_soup', 'sausage_roll'};
+const _fillings = {'beef', 'chicken', 'goat_meat', 'turkey', 'fish', 'assorted'};
 final _soupIds = {
   for (final f in foods)
     if (f.group == FoodGroup.soup) f.id,
@@ -171,7 +216,8 @@ int levenshtein(String a, String b) {
 
 bool _tokenEq(String word, String target, {required bool fuzzy}) {
   if (word == target || word == '${target}s') return true;
-  if (!fuzzy) return false;
+  if (!fuzzy || _stopwords.contains(word)) return false;
+  if (word.length == target.length + 1 && word.startsWith(target) && word[word.length - 1] == word[word.length - 2]) return true;
   if ('${word}s' == target || word == '${target}es') return true;
   if (target.length >= 5 && word.length >= 4 && (word.length - target.length).abs() <= 1) return levenshtein(word, target) <= 1;
   return false;
@@ -240,6 +286,29 @@ RawReading readMeal(String input) {
   final used = List<bool>.filled(toks.length, false);
   bool free(int i, int n) => !used.sublist(i, i + n).any((u) => u);
 
+  // 0. Multi-word things with no protein ("garden egg", "plantain chips") go
+  // first, so their words are not read as foods.
+  final skipped = <String>[];
+  void takeNoProtein(bool multi) {
+    for (final w in _noProtein.where((w) => (w.length > 1) == multi)) {
+      for (var i = 0; i + w.length <= toks.length; i++) {
+        if (!free(i, w.length)) continue;
+        var ok = true;
+        for (var k = 0; k < w.length && ok; k++) {
+          ok = toks[i + k] == w[k];
+        }
+        if (ok) {
+          skipped.add(w.join(' '));
+          for (var k = i; k < i + w.length; k++) {
+            used[k] = true;
+          }
+        }
+      }
+    }
+  }
+
+  takeNoProtein(true);
+
   // 1. Food spans: longest aliases first; within a length, exact before typo-tolerant.
   final spans = <_Span>[];
   final lengths = _aliases.map((a) => a.tokens.length).toSet().toList()..sort((a, b) => b.compareTo(a));
@@ -263,23 +332,28 @@ RawReading readMeal(String input) {
   }
   spans.sort((a, b) => a.start.compareTo(b.start));
 
-  // 2. Things with no protein.
-  final skipped = <String>[];
-  for (final w in _noProtein) {
-    for (var i = 0; i + w.length <= toks.length; i++) {
-      if (!free(i, w.length)) continue;
-      var ok = true;
-      for (var k = 0; k < w.length && ok; k++) {
-        ok = toks[i + k] == w[k];
-      }
-      if (ok) {
-        skipped.add(w.join(' '));
-        for (var k = i; k < i + w.length; k++) {
-          used[k] = true;
-        }
-      }
+  // Two names for one food side by side ("titus fish", "3 eggs omelette") are
+  // one food, and a meat named right next to a dish that already has meat in it
+  // ("shawarma beef", "chicken burger") is its filling, not a second food.
+  for (var i = spans.length - 1; i > 0; i--) {
+    final a = spans[i - 1];
+    final b = spans[i];
+    if (b.start != a.end) continue;
+    final filling = (_filledDishes.contains(a.foodId) && _fillings.contains(b.foodId)) || (_filledDishes.contains(b.foodId) && _fillings.contains(a.foodId));
+    if (filling) {
+      final dish = _filledDishes.contains(a.foodId) ? a.foodId : b.foodId;
+      spans[i - 1] = _Span(a.start, b.end, dish, '${a.matched} ${b.matched}');
+      spans.removeAt(i);
+      continue;
+    }
+    if (spans[i].foodId == spans[i - 1].foodId && spans[i].start == spans[i - 1].end) {
+      spans[i - 1] = _Span(spans[i - 1].start, spans[i].end, spans[i].foodId, '${spans[i - 1].matched} ${spans[i].matched}');
+      spans.removeAt(i);
     }
   }
+
+  // 2. Single words with no protein.
+  takeNoProtein(false);
 
   // 3. Modifiers, price and unknown words.
   final mods = <_Mod>[];
@@ -406,6 +480,8 @@ RawReading readMeal(String input) {
       generic: _generic.contains(sp.matched) && foodId != 'eba',
     );
     final dup = items.indexWhere((x) => x.foodId == raw.foodId && x.portionKey == raw.portionKey);
+    // "abacha with ugba": the second name adds nothing unless it has its own amount.
+    if (dup >= 0 && raw.source == PortionSource.defaulted) continue;
     if (dup >= 0) {
       final ex = items[dup];
       items[dup] = RawItem(

@@ -100,10 +100,6 @@ class _Header extends StatelessWidget {
     final t = s.target;
     final e = s.eaten;
     final hasMeals = s.todayMeals.isNotEmpty;
-    final now = s.now;
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final date = '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
 
     return Container(
       decoration: const BoxDecoration(color: C.indigo),
@@ -111,20 +107,11 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              IconButton(
-                tooltip: 'Profile and settings',
-                style: IconButton.styleFrom(minimumSize: const Size(40, 40), padding: EdgeInsets.zero),
-                onPressed: () => openSettings(context),
-                icon: const Icon(Icons.person_outline, color: Colors.white),
-              ),
-              const Spacer(),
-              Text(
-                date,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-            ],
+          IconButton(
+            tooltip: 'Profile and settings',
+            style: IconButton.styleFrom(minimumSize: const Size(40, 40), padding: EdgeInsets.zero),
+            onPressed: () => openSettings(context),
+            icon: const Icon(Icons.person_outline, color: Colors.white),
           ),
           const SizedBox(height: 28),
           Wrap(

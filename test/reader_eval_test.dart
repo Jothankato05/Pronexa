@@ -1,12 +1,23 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pronexa/ai/rule_reader.dart';
 import 'package:pronexa/ai/validator.dart';
+import 'package:pronexa/data/foods.dart';
 
-/// Describe-it test set: English, Pidgin and price-based descriptions.
-/// This set was written with the rule reader, so it is a regression check,
-/// not an accuracy claim. Measure any real AI on fresh descriptions.
+/// Describe-it test set (test/data/describe_set.json): English, Pidgin, local
+/// names, typos, fractions and prices, checked against the offline reader.
+/// It was written alongside the reader, so it is a regression check, not an
+/// accuracy claim. Measure any real AI on fresh descriptions.
 class Case {
-  const Case(this.text, this.foods, {this.portions = const {}, this.qty = const {}, this.eaten});
+  Case.fromJson(Map<String, Object?> j)
+    : text = j['text']! as String,
+      foods = (j['foods']! as List).cast<String>(),
+      portions = ((j['portions'] ?? <String, Object?>{}) as Map).cast<String, String>(),
+      qty = ((j['qty'] ?? <String, Object?>{}) as Map).map((k, v) => MapEntry(k as String, (v as num).toDouble())),
+      eaten = (j['eaten'] as num?)?.toDouble();
+
   final String text;
   final List<String> foods;
   final Map<String, String> portions;
@@ -14,65 +25,46 @@ class Case {
   final double? eaten;
 }
 
-const cases = [
-  Case('₦1,000 rice and beans, medium takeaway', ['rice_beans'], portions: {'rice_beans': 'md_pack'}),
-  Case('I chop 2 wraps of eba with egusi and one meat', ['eba', 'egusi', 'beef'], qty: {'eba': 2, 'beef': 1}),
-  Case('rice and stew 700 naira', ['white_rice', 'stew'], portions: {'white_rice': 'sm_pack'}),
-  Case('jollof rice big pack with chicken', ['jollof_rice', 'chicken'], portions: {'jollof_rice': 'lg_pack'}),
-  Case('₦500 beans', ['beans']),
-  Case('agege bread and 5 akara', ['bread', 'akara'], qty: {'akara': 5}),
-  Case('amala and ewedu with 2 meat', ['amala', 'ewedu', 'beef'], qty: {'beef': 2}),
-  Case('small indomie with egg', ['noodles', 'egg']),
-  Case('soaked garri with groundnut and milk', ['garri_soaked', 'groundnuts', 'milk']),
-  Case('I buy moi moi for 500', ['moi_moi']),
-  Case('yam and egg sauce', ['yam', 'egg', 'stew']),
-  Case('beans and dodo', ['beans', 'plantain']),
-  Case('pounded yam with efo riro and fish', ['pounded_yam', 'efo_riro', 'fish']),
-  Case('one okpa', ['okpa'], qty: {'okpa': 1}),
-  Case('jollof spaghetti medium pack', ['spaghetti'], portions: {'spaghetti': 'md_pack'}),
-  Case('tuwo shinkafa and okra soup', ['tuwo', 'okra']),
-  Case('abacha one plate', ['abacha'], portions: {'abacha': 'plate'}),
-  Case('fried rice and chicken 2500', ['fried_rice', 'chicken']),
-  Case('bread and sardine', ['bread', 'sardine']),
-  Case('two boiled eggs and tea', ['egg'], qty: {'egg': 2}),
-  Case('soya chunks in my stew with white rice', ['soya_chunks', 'stew', 'white_rice']),
-  Case('awara and pap', ['tofu']),
-  Case('lentil porridge one bowl', ['lentils'], portions: {'lentils': 'bowl'}),
-  Case('soy milk and akara', ['soy_milk', 'akara']),
-  Case('ewa agoyin with agege, ₦800', ['beans', 'bread']),
-  Case('I chop half plate of rice', ['white_rice'], portions: {'white_rice': 'plate'}, qty: {'white_rice': 0.5}),
-  Case('eba 1 wrap and vegetable soup, I no finish am', ['eba', 'efo_riro'], eaten: 0.75),
-  Case('groundnut 1 sachet', ['groundnuts'], portions: {'groundnuts': 'sachet'}),
-  Case('jolof rice and moimoi', ['jollof_rice', 'moi_moi']),
-  Case('1k rice n beans plus 1 meat', ['rice_beans', 'beef']),
-  Case('garri and egusi soup', ['eba', 'egusi']),
-  Case('soybeans one spoon and boiled yam', ['soybeans', 'yam']),
-];
+/// Returns null when the reading matches, or what went wrong.
+String? check(Case c) {
+  final raw = readMeal(c.text);
+  final got = raw.items.map((i) => i.foodId).toList()..sort();
+  final want = [...c.foods]..sort();
+  if (got.join(',') != want.join(',')) return 'foods $got, wanted $want';
+  final reading = validate(raw);
+  for (final e in c.portions.entries) {
+    final p = reading.items.firstWhere((i) => i.item.foodId == e.key).item.portionId.key;
+    if (p != e.value) return 'portion of ${e.key} is $p, wanted ${e.value}';
+  }
+  for (final e in c.qty.entries) {
+    final q = reading.items.firstWhere((i) => i.item.foodId == e.key).item.qty;
+    if (q != e.value) return 'qty of ${e.key} is $q, wanted ${e.value}';
+  }
+  if (c.eaten != null && !reading.items.every((i) => i.item.eaten == c.eaten)) return 'eaten, wanted ${c.eaten}';
+  return null;
+}
+
+List<Case> load(String path) => (jsonDecode(File(path).readAsStringSync()) as List).map((j) => Case.fromJson(j as Map<String, Object?>)).toList();
 
 void main() {
-  var foodsOk = 0;
-  var bothOk = 0;
-  for (final c in cases) {
-    test(c.text, () {
-      final raw = readMeal(c.text);
-      final got = raw.items.map((i) => i.foodId).toList()..sort();
-      expect(got, [...c.foods]..sort(), reason: 'foods');
-      foodsOk++;
-      final reading = validate(raw);
-      for (final e in c.portions.entries) {
-        expect(reading.items.firstWhere((i) => i.item.foodId == e.key).item.portionId.key, e.value, reason: 'portion ${e.key}');
+  final cases = [...load('test/data/describe_set.json'), ...load('test/data/describe_holdout.json')];
+
+  test('every expected food id exists', () {
+    for (final c in cases) {
+      for (final id in [...c.foods, ...c.portions.keys, ...c.qty.keys]) {
+        expect(foodById.containsKey(id), isTrue, reason: '$id in "${c.text}"');
       }
-      for (final e in c.qty.entries) {
-        expect(raw.items.firstWhere((i) => i.foodId == e.key).qty, e.value, reason: 'qty ${e.key}');
-      }
-      if (c.eaten != null) {
-        expect(raw.items.every((i) => i.eaten == c.eaten), isTrue, reason: 'eaten');
-      }
-      bothOk++;
-    });
-  }
-  tearDownAll(() {
+    }
+  });
+
+  test('describe-it set: ${cases.length} descriptions', () {
+    final failures = <String>[];
+    for (final c in cases) {
+      final why = check(c);
+      if (why != null) failures.add('"${c.text}": $why');
+    }
     // ignore: avoid_print
-    print('Describe-it test set: foods $foodsOk/${cases.length}, foods+portion $bothOk/${cases.length}');
+    print('Describe-it set: ${cases.length - failures.length}/${cases.length} read correctly');
+    expect(failures, isEmpty, reason: failures.join('\n'));
   });
 }

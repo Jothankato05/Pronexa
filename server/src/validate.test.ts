@@ -8,7 +8,7 @@ test("the prompt lists every food id from the app database", () => {
 
 test("the schema rejects foods that are not in the database", () => {
   const r = ReadingSchema.safeParse({
-    items: [{ foodId: "shawarma", portionId: "plate", qty: 1, eaten: 1, portionSource: "stated", matched: "shawarma", generic: false }],
+    items: [{ foodId: "sushi", portionId: "plate", qty: 1, eaten: 1, portionSource: "stated", matched: "sushi", generic: false }],
     unknown: [],
     skipped: [],
     price: null,

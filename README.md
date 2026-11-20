@@ -12,8 +12,8 @@ Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browse
 
 | File | Size | Use |
 |------|------|-----|
-| `release/Pronexa-0.4.1-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
-| `release/Pronexa-0.4.1.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
+| `release/Pronexa-0.5.0-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
+| `release/Pronexa-0.5.0.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
 
 Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
 
@@ -24,7 +24,7 @@ Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
    - **Pick:** tap foods from the list. Works offline.
    - **Portion:** choose the pack, plate, bowl or wrap, what was in it, extras, and how much you ate. Works offline.
    - **Photo:** take a photo or choose one from the gallery. With the AI server set up, Pronexa reads the photo; otherwise you pick the foods while looking at it.
-   - **Describe:** type it in English or Pidgin, for example "₦1,000 rice and beans, medium takeaway". Read by the AI server when one is set up and online, otherwise by the phone's own reader.
+   - **Describe:** type it in English or Pidgin, for example "₦1,000 rice and beans, medium takeaway". Read by the AI server when one is set up and online, otherwise by the phone's own reader, which works fully offline: 78 foods, 576 names for them (Yoruba, Igbo, Hausa, Pidgin, brand names and common typos), 83 things with no protein (drinks, fruit, seasonings), fractions like "1½" and "half loaf", prices like "2k" and "N1500", and "I no finish am".
 3. **Confirm:** check and fix the foods, portions and how much you ate. Nothing counts until you confirm.
 4. **Today:** target, eaten and gap, as ranges.
 5. **Close the gap:** combos within your budget, additions to the meals you ate, and foods ranked by protein per ₦100. Plant protein first, and vegans never see animal products.
@@ -40,7 +40,7 @@ Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
 
 ```
 lib/
-  data/      food database (36 foods), portions, models
+  data/      food database (78 foods), portions, models
   logic/     protein calculation, diet rules, gap solver
   ai/        on-phone reader, validator (guard rail), remote reader client
   state/     app state and on-phone storage
@@ -57,7 +57,7 @@ docs/        DESIGN.md, GUARDRAILS.md, screens/
 ```bash
 flutter pub get
 flutter analyze --fatal-infos --fatal-warnings
-flutter test                       # 60 tests
+flutter test                       # unit, data, reader and app-flow tests
 flutter build apk --release        # build/app/outputs/flutter-apk/app-release.apk
 flutter test test_screens --update-goldens   # re-render docs/screens
 ```
@@ -88,7 +88,7 @@ See `docs/GUARDRAILS.md`: strict analysis, tests, pinned dependencies, no secret
 ## Limits
 
 - Protein values and portion weights are starter estimates (WAFCT 2019, USDA). A nutrition professional and real vendor measurements should check them before a pilot.
-- The 32-description test set was written with the phone's reader, so 32/32 is a regression check, not an accuracy score.
+- The offline reader is tested on 243 descriptions in `test/data/`: 183 written while building the food list (a regression check) and 60 written afterwards as a fresh check. The fresh set scored 58/60 on its first run; the two misses were fixed and now pass. Real students will phrase things differently, so collect real descriptions in a pilot and add them to the set.
 - The AI server code is tested without a live key. Measure its accuracy on fresh descriptions and photos before relying on it.
 - The APK has been built and checked but not yet run on a physical phone in this environment.
 
