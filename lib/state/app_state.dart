@@ -165,7 +165,42 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The last seven days, oldest first: protein eaten and whether anything was logged.
+  List<DaySummary> week() => [
+    for (var i = 6; i >= 0; i--)
+      () {
+        final day = now.subtract(Duration(days: i));
+        final key = dateKey(day);
+        final list = meals.where((m) => m.date == key);
+        return DaySummary(day: day, eaten: itemsProtein(list.expand((m) => m.items)), logged: list.isNotEmpty);
+      }(),
+  ];
+
+  /// Opt-in pilot export: only what the student typed and the foods they
+  /// confirmed, in the format of test/data/describe_set.json. No profile,
+  /// dates or other meals.
+  ({String json, int count}) exportDescriptions() {
+    final cases = [
+      for (final m in meals.where((m) => m.source == LogSource.describe && (m.text ?? '').trim().isNotEmpty))
+        {
+          'text': m.text!.trim(),
+          'foods': [for (final i in m.items) i.foodId],
+          'portions': {for (final i in m.items) i.foodId: i.portionId.key},
+          'qty': {for (final i in m.items) i.foodId: i.qty},
+        },
+    ];
+    return (json: const JsonEncoder.withIndent('  ').convert(cases), count: cases.length);
+  }
+
   String exportJson() => const JsonEncoder.withIndent(
     '  ',
   ).convert({'exportedAt': now.toIso8601String(), 'profile': profile?.toJson(), 'settings': settings.toJson(), 'meals': meals.map((m) => m.toJson()).toList()});
+}
+
+class DaySummary {
+  const DaySummary({required this.day, required this.eaten, required this.logged});
+
+  final DateTime day;
+  final Range eaten;
+  final bool logged;
 }

@@ -29,3 +29,8 @@ server/.env
 
 # Tool/session state written by editor plugins (not project content)
 .anchor/
+
+# APKs live on GitHub Releases, never in the repository
+release/
+*.apk
+*.aab

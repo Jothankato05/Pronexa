@@ -100,6 +100,21 @@ class SettingsScreen extends StatelessWidget {
                     messenger.showSnackBar(const SnackBar(content: Text('Copied')));
                   },
                 ),
+                GroupRow(
+                  icon: Icons.volunteer_activism_outlined,
+                  title: 'Share meal descriptions',
+                  subtitle: 'Only what you typed, to improve the reader',
+                  onTap: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final out = state.exportDescriptions();
+                    if (out.count == 0) {
+                      messenger.showSnackBar(const SnackBar(content: Text('No described meals yet')));
+                      return;
+                    }
+                    await Clipboard.setData(ClipboardData(text: out.json));
+                    messenger.showSnackBar(SnackBar(content: Text('Copied ${out.count} descriptions')));
+                  },
+                ),
                 GroupRow(icon: Icons.delete_outline, title: 'Delete all my data', color: C.warm, onTap: () => _confirmDelete(context)),
               ],
             ),

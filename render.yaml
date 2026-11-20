@@ -1,0 +1,15 @@
+# One-click deploy of the optional AI meal reader to Render (render.com):
+# New > Blueprint > pick this repository. Render asks for ANTHROPIC_API_KEY;
+# paste it there, never in the repository. See docs/AI_SERVER.md.
+services:
+  - type: web
+    name: pronexa-reader
+    runtime: docker
+    rootDir: server
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false

@@ -16,6 +16,7 @@ import 'package:pronexa/ui/draft.dart';
 import 'package:pronexa/ui/scope.dart';
 import 'package:pronexa/ui/screens/confirm.dart';
 import 'package:pronexa/ui/screens/describe.dart';
+import 'package:pronexa/ui/screens/extras.dart';
 import 'package:pronexa/ui/screens/photo.dart';
 import 'package:pronexa/ui/screens/quick_pick.dart';
 import 'package:pronexa/ui/screens/settings.dart';
@@ -113,5 +114,9 @@ void main() {
     await _shot(t, '10-pick');
     await t.pumpWidget(_wrap(s, const SettingsScreen()));
     await _shot(t, '11-profile');
+    await t.pumpWidget(_wrap(s, const PlannerScreen()));
+    await _shot(t, '12-planner');
+    await t.pumpWidget(_wrap(s, const ChallengeScreen()));
+    await _shot(t, '13-challenge');
   });
 }

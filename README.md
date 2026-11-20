@@ -8,14 +8,14 @@ An Android app (built with Flutter) for Nigerian university students. Log meals 
 
 ## Install
 
-Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browser or file manager, then open the file. Each file updates the same file from an earlier build.
+Download the APKs from the [Releases page](../../releases). Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
 
 | File | Size | Use |
 |------|------|-----|
-| `release/Pronexa-0.5.0-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
-| `release/Pronexa-0.5.0.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
+| `Pronexa-<version>-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
+| `Pronexa-<version>.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
 
-Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
+From 0.6.0 both files carry the same version code, so either one updates the other. Versions before 0.6.0 were signed with a test key: uninstall them once before installing 0.6.0 or later. Screens are in `docs/screens/`.
 
 ## What it does
 
@@ -28,6 +28,7 @@ Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
 3. **Confirm:** check and fix the foods, portions and how much you ate. Nothing counts until you confirm.
 4. **Today:** target, eaten and gap, as ranges.
 5. **Close the gap:** combos within your budget, additions to the meals you ate, and foods ranked by protein per ₦100. Plant protein first, and vegans never see animal products.
+6. **Learn:** five short protein lessons, the ₦500 challenge (close the gap with ₦500 of extra protein, and a count of days you hit your target this week), and a meal planner that builds a day of everyday campus meals within a daily budget and your diet. Today also shows the last seven days as bars.
 
 ## How it is built
 
@@ -77,9 +78,16 @@ flutter build apk --release --dart-define=PRONEXA_AI_URL=https://your-reader.exa
 
 The key stays on the server. The server uses Claude Opus 5.5 at low effort with structured output limited to the food list, and turns on Anthropic's server-side refusal fallback, so a wrongly declined request is retried on another model. After any change to `lib/data/foods.dart`, run `dart run tool/export_foods.dart`; a test fails if the server's list is out of date.
 
-### Release signing
+### Releases and signing
 
-`release/` holds an APK signed with a debug key for testing. Before publishing to the Play Store, create your own upload key (never commit it), add a `signingConfig` to `android/app/build.gradle.kts`, and rebuild.
+APKs are not kept in the repository. Push a version tag (`git tag v0.6.0 && git push origin v0.6.0`) and the Release workflow builds both APKs, signed with Pronexa's upload key, and publishes them on GitHub Releases. Setup, the four signing secrets and key backup: `docs/RELEASING.md`.
+
+### More docs
+
+- `docs/PILOT.md`: running a pilot, collecting real descriptions, the nutrition review sheet (`docs/food_review.csv`)
+- `docs/AI_SERVER.md`: turning on photo reading
+- `docs/DEMO.md`: a 3-minute demo script
+- `docs/DESIGN.md`, `docs/GUARDRAILS.md`
 
 ## Guardrails
 

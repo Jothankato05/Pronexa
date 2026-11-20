@@ -149,7 +149,14 @@ ThemeData buildTheme() {
       centerTitle: true,
       toolbarHeight: 64,
       systemOverlayStyle: lightIcons,
-      titleTextStyle: TextStyle(fontFamily: _font, fontSize: 18, fontWeight: FontWeight.w500, letterSpacing: -0.45, color: C.ink),
+      titleTextStyle: TextStyle(
+        fontFamily: _font,
+        fontFamilyFallback: _fallback,
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        letterSpacing: -0.45,
+        color: C.ink,
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -160,7 +167,7 @@ ThemeData buildTheme() {
         minimumSize: const Size(64, 60),
         shape: stadium,
         animationDuration: Motion.fast,
-        textStyle: const TextStyle(fontFamily: _font, fontSize: 17, fontWeight: FontWeight.w500),
+        textStyle: const TextStyle(fontFamily: _font, fontFamilyFallback: _fallback, fontSize: 17, fontWeight: FontWeight.w500),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -170,14 +177,14 @@ ThemeData buildTheme() {
         minimumSize: const Size(64, 60),
         shape: stadium,
         side: const BorderSide(color: C.line),
-        textStyle: const TextStyle(fontFamily: _font, fontSize: 17, fontWeight: FontWeight.w500),
+        textStyle: const TextStyle(fontFamily: _font, fontFamilyFallback: _fallback, fontSize: 17, fontWeight: FontWeight.w500),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: C.ink,
         minimumSize: const Size(48, 48),
-        textStyle: const TextStyle(fontFamily: _font, fontSize: 15, fontWeight: FontWeight.w500),
+        textStyle: const TextStyle(fontFamily: _font, fontFamilyFallback: _fallback, fontSize: 15, fontWeight: FontWeight.w500),
       ),
     ),
     iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: C.ink)),
@@ -190,7 +197,7 @@ ThemeData buildTheme() {
     snackBarTheme: const SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.white,
-      contentTextStyle: TextStyle(fontFamily: _font, fontSize: 14, color: C.sInk),
+      contentTextStyle: TextStyle(fontFamily: _font, fontFamilyFallback: _fallback, fontSize: 14, color: C.sInk),
       actionTextColor: C.sBlue,
       shape: StadiumBorder(),
     ),
@@ -208,7 +215,7 @@ ThemeData buildTheme() {
     ),
     tooltipTheme: const TooltipThemeData(
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(8))),
-      textStyle: TextStyle(fontFamily: _font, fontSize: 12, color: C.sInk),
+      textStyle: TextStyle(fontFamily: _font, fontFamilyFallback: _fallback, fontSize: 12, color: C.sInk),
     ),
     textSelectionTheme: const TextSelectionThemeData(cursorColor: C.blue, selectionColor: Color(0x6650A2FF), selectionHandleColor: C.blue),
     inputDecorationTheme: InputDecorationTheme(

@@ -67,4 +67,17 @@ void main() {
     print('Describe-it set: ${cases.length - failures.length}/${cases.length} read correctly');
     expect(failures, isEmpty, reason: failures.join('\n'));
   });
+
+  // Real descriptions from pilot students (tool/add_pilot_cases.dart). Scored,
+  // never failing: fix the reader for the misses, then move them into the set.
+  test('pilot descriptions (scored only)', () {
+    final pilot = load('test/data/describe_pilot.json');
+    if (pilot.isEmpty) return;
+    final misses = [
+      for (final c in pilot)
+        if (check(c) case final why?) '"${c.text}": $why',
+    ];
+    // ignore: avoid_print
+    print('Pilot set: ${pilot.length - misses.length}/${pilot.length} read correctly${misses.isEmpty ? '' : '\n${misses.join('\n')}'}');
+  });
 }
