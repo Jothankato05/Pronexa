@@ -43,7 +43,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.photo == null ? 'Pick foods' : 'What\'s in it?')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+        padding: const EdgeInsets.fromLTRB(28, 8, 28, 120),
         children: [
           if (widget.photo != null) ...[
             ClipRRect(
@@ -58,12 +58,12 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
             onChanged: (v) => setState(() => _q = v),
           ),
           if (showRecent) ...[
-            const Padding(padding: EdgeInsets.only(top: 20, bottom: 10), child: Label('Recent')),
+            const Padding(padding: EdgeInsets.only(top: 28), child: Label('Recent')),
             _Grid(ids: recent.take(6).toList(), picked: _picked, onTap: _toggle),
           ],
           for (final g in groupOrder)
             if (list.any((f) => f.group == g && (!showRecent || !recent.take(6).contains(f.id)))) ...[
-              Padding(padding: const EdgeInsets.only(top: 20, bottom: 10), child: Label(groupLabels[g]!)),
+              Padding(padding: const EdgeInsets.only(top: 28), child: Label(groupLabels[g]!)),
               _Grid(
                 ids: list.where((f) => f.group == g && (!showRecent || !recent.take(6).contains(f.id))).map((f) => f.id).toList(),
                 picked: _picked,
@@ -80,7 +80,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
             ? const SizedBox(width: double.infinity)
             : SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
                   child: FilledButton(
                     onPressed: () =>
                         openConfirm(context, Draft.fromFoods(_picked, source: widget.photo == null ? LogSource.quick : LogSource.photo, photo: widget.photo)),
@@ -105,9 +105,9 @@ class _Grid extends StatelessWidget {
     crossAxisCount: 2,
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
-    mainAxisSpacing: 10,
-    crossAxisSpacing: 10,
-    childAspectRatio: 1.35,
+    mainAxisSpacing: 12,
+    crossAxisSpacing: 12,
+    childAspectRatio: 1.3,
     children: [for (final id in ids) _FoodTile(food: foodById[id]!, selected: picked.contains(id), onTap: () => onTap(id))],
   );
 }
@@ -139,16 +139,27 @@ class _FoodTile extends StatelessWidget {
                 duration: Motion.of(context, Motion.fast),
                 transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
                 child: selected
-                    ? const Icon(Icons.check_circle, key: ValueKey('on'), color: Colors.white, size: 22)
+                    ? const Icon(Icons.check_circle, key: ValueKey('on'), color: Colors.black, size: 22)
                     : food.altProtein
-                    ? const Icon(Icons.eco_outlined, key: ValueKey('plant'), color: C.good, size: 18)
+                    ? const Icon(Icons.eco_outlined, key: ValueKey('plant'), color: C.blue, size: 18)
                     : const SizedBox(key: ValueKey('off')),
               ),
             ],
           ),
           const Spacer(),
-          Text(food.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
-          if (food.local != null) Text(food.local!, style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(
+            food.name,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: selectInk(selected)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (food.local != null)
+            Text(
+              food.local!,
+              style: TextStyle(fontSize: 12, color: selectInk2(selected)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
         ],
       ),
     ),

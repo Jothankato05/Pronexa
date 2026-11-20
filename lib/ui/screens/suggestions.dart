@@ -26,6 +26,8 @@ void _logItems(BuildContext context, List<MealItem> items) => openConfirm(
 );
 
 /// Step 5: ways to close the gap, ranked by budget, diet and protein per naira.
+/// Laid out like the Asteria key-feature screen: the number centred on the
+/// dark canvas, the lists on a white sheet.
 class SuggestionsScreen extends StatelessWidget {
   const SuggestionsScreen({super.key});
 
@@ -40,178 +42,143 @@ class SuggestionsScreen extends StatelessWidget {
     final gap = hasMeals ? state.gap : state.target;
     final closed = hasMeals && gap.mid <= 0;
     final r = solve(gap: gap, budget: s.budget, diet: p.diet, allergies: p.allergies, plantFirst: plantFirst, meals: state.todayMeals);
-    final text = Theme.of(context).textTheme;
 
-    return SafeArea(
-      bottom: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, navClearance),
-        children: [
-          Text('Close the gap', style: text.headlineSmall),
-          const SizedBox(height: 16),
-          Panel(
-            color: C.indigo,
-            padding: const EdgeInsets.all(24),
-            child: closed
-                ? const Text(
-                    "Today's gap is closed.",
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        hasMeals ? 'LEFT TO EAT TODAY' : 'TODAY\'S TARGET',
-                        style: const TextStyle(color: C.onIndigo2, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w500),
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: ColoredBox(
+            color: C.bg,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(28, 8, 28, 36),
+                child: Column(
+                  children: [
+                    const PageTitle('Close the gap'),
+                    const SizedBox(height: 28),
+                    AnimatedSwitcher(
+                      duration: Motion.of(context, Motion.medium),
+                      transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
+                      child: Text(
+                        closed ? 'Closed' : fmtRange(gap),
+                        key: ValueKey(closed ? 'closed' : fmtRange(gap)),
+                        style: Theme.of(context).textTheme.displaySmall,
                       ),
-                      const SizedBox(height: 6),
-                      AnimatedSwitcher(
-                        duration: Motion.of(context, Motion.medium),
-                        transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
-                        child: Text(
-                          fmtRange(gap),
-                          key: ValueKey(fmtRange(gap)),
-                          style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, height: 1.1),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(hasMeals ? 'LEFT TO EAT TODAY' : "TODAY'S TARGET", style: Theme.of(context).textTheme.labelSmall),
+                    const SizedBox(height: 32),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        for (final b in _budgets)
+                          SelectPill(
+                            label: b >= 1000 ? '₦${b ~/ 1000}k' : fmtNaira(b),
+                            selected: s.budget == b,
+                            onTap: () => state.updateSettings(s.copyWith(budget: b)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Group(
+                      children: [
+                        GroupRow(
+                          icon: Icons.eco_outlined,
+                          title: 'Plant protein first',
+                          trailing: Switch(
+                            value: plantFirst,
+                            onChanged: vegan ? null : (v) => state.updateSettings(s.copyWith(plantFirst: v)),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-          ),
-          const Padding(padding: EdgeInsets.only(top: 20, bottom: 10), child: Label('Budget')),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final b in _budgets)
-                SelectPill(
-                  label: fmtNaira(b),
-                  selected: s.budget == b,
-                  onTap: () => state.updateSettings(s.copyWith(budget: b)),
+                      ],
+                    ),
+                  ],
                 ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Panel(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Plant protein first'),
-              value: plantFirst,
-              onChanged: vegan ? null : (v) => state.updateSettings(s.copyWith(plantFirst: v)),
+              ),
             ),
           ),
-          if (!closed && r.combos.isNotEmpty) ...[
-            const SectionTitle('Ways to close it'),
-            for (final (i, c) in r.combos.indexed)
-              Appear(
-                key: ValueKey('${c.title}-${s.budget}'),
-                index: i,
-                child: _ComboCard(combo: c, gap: gap),
-              ),
-          ],
-          if (r.upgrades.isNotEmpty) ...[
-            SectionTitle(hasMeals ? 'Add to your meals' : 'Add to common meals'),
-            Panel(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Column(
-                children: [
-                  for (var i = 0; i < r.upgrades.length; i++) ...[if (i > 0) const Divider(), _UpgradeRow(u: r.upgrades[i])],
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: WhiteSheet(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!closed)
+                  for (final (i, c) in r.combos.indexed)
+                    Appear(
+                      key: ValueKey('${c.title}-${s.budget}-$plantFirst'),
+                      index: i,
+                      child: _Combo(combo: c, top: i == 0 ? 0 : 24),
+                    ),
+                if (r.upgrades.isNotEmpty) ...[
+                  SheetTitle(hasMeals ? 'Add to your meals' : 'Add to common meals', top: closed || r.combos.isEmpty ? 0 : 32),
+                  for (final u in r.upgrades) _UpgradeRow(u: u),
                 ],
-              ),
+                const SheetTitle('Most protein per ₦100', top: 32),
+                if (r.ranked.isEmpty) const EmptyState(title: 'Nothing fits that budget', icon: 'handful', onSheet: true),
+                for (final sug in r.ranked.take(8))
+                  SheetRow(
+                    icon: sug.food.icon,
+                    title: sug.food.name,
+                    subtitle: sug.caveat ?? portionLabel(sug.food.id, sug.item.portionId, sug.item.qty),
+                    subtitleColor: sug.caveat != null ? C.sWarm : null,
+                    value: '+${fmtRange(sug.protein)}',
+                    valueSub: fmtPrice(sug.price),
+                    onTap: () => _logItems(context, [sug.item]),
+                  ),
+                const SizedBox(height: 12),
+                Text(
+                  [
+                    if (r.hiddenCount > 0) '${r.hiddenCount} hidden for ${dietLabels[p.diet]!.$1.toLowerCase()}${p.allergies.isEmpty ? '' : ' and allergies'}',
+                    'Prices from $pricesAsOf',
+                  ].join(' · '),
+                  style: const TextStyle(fontSize: 12, color: C.sInk2),
+                ),
+                const Footnote(onSheet: true),
+                const SizedBox(height: navClearance - 24),
+              ],
             ),
-          ],
-          const SectionTitle('Most protein for your money'),
-          if (r.ranked.isEmpty)
-            const Panel(
-              child: EmptyState(title: 'Nothing fits that budget', body: 'Try a bigger budget.', icon: 'handful'),
-            )
-          else
-            Panel(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Column(
-                children: [
-                  for (var i = 0; i < r.ranked.take(8).length; i++) ...[if (i > 0) const Divider(), _SuggestionRow(s: r.ranked[i])],
-                ],
-              ),
-            ),
-          if (r.hiddenCount > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Text(
-                '${r.hiddenCount} hidden for ${dietLabels[p.diet]!.$1.toLowerCase()}${p.allergies.isEmpty ? '' : ' and allergies'}',
-                style: text.bodySmall,
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text('Prices from $pricesAsOf', style: text.bodySmall),
           ),
-          const Footnote(),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _ComboCard extends StatelessWidget {
-  const _ComboCard({required this.combo, required this.gap});
+class _Combo extends StatelessWidget {
+  const _Combo({required this.combo, required this.top});
 
   final Combo combo;
-  final Range gap;
+  final double top;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Panel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(combo.title, style: Theme.of(context).textTheme.titleMedium)),
-              Tag(
-                combo.closesGap ? 'Closes it' : '${(combo.protein.mid / (gap.mid == 0 ? 1 : gap.mid) * 100).round()}% of gap',
-                tone: combo.closesGap ? Tone.good : Tone.gap,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          for (final it in combo.items)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  IconTile(it.food.icon, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(it.food.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                        Text(portionLabel(it.food.id, it.item.portionId, it.item.qty), style: Theme.of(context).textTheme.bodySmall),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '+${fmtRange(it.protein)}',
-                    style: const TextStyle(color: C.blueInk, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-          const Divider(),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: Text('About ${fmtRange(combo.protein)} for ~${fmtNaira(combo.cost)}', style: const TextStyle(fontWeight: FontWeight.w500)),
-              ),
-              TextButton(onPressed: () => _logItems(context, combo.items.map((i) => i.item).toList()), child: const Text('I ate this')),
-            ],
-          ),
-        ],
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SheetTitle(
+        combo.title,
+        top: top,
+        trailing: TextButton(onPressed: () => _logItems(context, combo.items.map((i) => i.item).toList()), child: const Text('I ate this')),
       ),
-    ),
+      for (final it in combo.items)
+        SheetRow(
+          icon: it.food.icon,
+          title: it.food.name,
+          subtitle: portionLabel(it.food.id, it.item.portionId, it.item.qty),
+          value: '+${fmtRange(it.protein)}',
+          valueSub: fmtPrice(it.price),
+        ),
+      Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Text(
+          '${fmtRange(combo.protein)} for ~${fmtNaira(combo.cost)}${combo.closesGap ? ' · closes the gap' : ''}',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: combo.closesGap ? C.sGood : C.sInk2),
+        ),
+      ),
+    ],
   );
 }
 
@@ -225,91 +192,14 @@ class _UpgradeRow extends StatelessWidget {
     final change = u.swapFrom != null
         ? 'Swap ${u.swapFrom!.name.toLowerCase()} for ${f.name.toLowerCase()}'
         : 'Add ${portionLabel(f.id, u.suggestion.item.portionId, u.suggestion.item.qty)} ${f.name.toLowerCase()}';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(u.title, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 2),
-          Text(
-            change,
-            style: const TextStyle(fontWeight: FontWeight.w500, color: C.blueInk),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              Tag('+${fmtRange(u.proteinChange)}', tone: Tone.good),
-              Tag('${u.costChange >= 0 ? '+' : '−'}${fmtNaira(u.costChange.abs())}'),
-              Tag('${u.suggestion.per100.toStringAsFixed(1)} g per ₦100', tone: Tone.value),
-            ],
-          ),
-          if (u.suggestion.caveat != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(u.suggestion.caveat!, style: const TextStyle(color: C.warm, fontSize: 13)),
-            ),
-        ],
-      ),
+    return SheetRow(
+      icon: f.icon,
+      title: change,
+      subtitle: u.suggestion.caveat ?? u.title,
+      subtitleColor: u.suggestion.caveat != null ? C.sWarm : null,
+      value: '+${fmtRange(u.proteinChange)}',
+      valueSub: '${u.costChange >= 0 ? '+' : '−'}${fmtNaira(u.costChange.abs())}',
+      onTap: () => _logItems(context, [u.suggestion.item]),
     );
   }
-}
-
-class _SuggestionRow extends StatelessWidget {
-  const _SuggestionRow({required this.s});
-  final Suggestion s;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 14),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        IconTile(s.food.icon),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(child: Text(s.food.name, style: Theme.of(context).textTheme.titleMedium)),
-                  Text(
-                    '+${fmtRange(s.protein)}',
-                    style: const TextStyle(color: C.blueInk, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-              Text(portionLabel(s.food.id, s.item.portionId, s.item.qty), style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  Tag(fmtPrice(s.price)),
-                  Tag('${s.per100.toStringAsFixed(1)} g per ₦100', tone: Tone.value),
-                  if (s.gapShare > 0) Tag('${(s.gapShare * 100).round()}% of gap', tone: Tone.good),
-                ],
-              ),
-              if (s.caveat != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(s.caveat!, style: const TextStyle(color: C.warm, fontSize: 13)),
-                ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                  onPressed: () => _logItems(context, [s.item]),
-                  child: const Text('I ate this'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
 }

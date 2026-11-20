@@ -73,13 +73,13 @@ class _FoodPickerSheetState extends State<_FoodPickerSheet> {
           ),
           Expanded(
             child: list.isEmpty
-                ? const EmptyState(title: 'Not in the list yet', body: 'Try another word, like "swallow" or "soup".')
+                ? const EmptyState(title: 'Not in the list yet')
                 : ListView(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                     children: [
                       for (final g in groupOrder)
                         if (list.any((f) => f.group == g)) ...[
-                          Padding(padding: const EdgeInsets.only(top: 12, bottom: 8), child: Label(groupLabels[g]!)),
+                          Padding(padding: const EdgeInsets.only(top: 16), child: Label(groupLabels[g]!)),
                           for (final f in list.where((f) => f.group == g))
                             ListTile(
                               contentPadding: EdgeInsets.zero,

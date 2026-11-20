@@ -4,19 +4,20 @@ import 'package:flutter/services.dart';
 import '../../data/foods.dart';
 import '../../data/models.dart';
 import '../../logic/calc.dart';
-import '../../logic/diet.dart';
 import '../draft.dart';
 import '../nav.dart';
 import '../scope.dart';
 import '../theme.dart';
-import '../widgets/assistant_pill.dart';
 import '../widgets/bits.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
 import 'home_shell.dart';
 
-const _examples = ['₦1,000 rice and beans, medium pack', 'Eba and egusi with one meat', 'Bread and 4 akara', 'Soaked garri and groundnut'];
+/// Secondary text on the gradient header (white at 70%).
+const _soft = Color(0xB3FFFFFF);
 
+/// Today, laid out like the Asteria dashboard: a gradient header with the key
+/// number and four actions, then a white sheet with the meals.
 class TodayScreen extends StatelessWidget {
   const TodayScreen({super.key, required this.onTab});
 
@@ -26,65 +27,56 @@ class TodayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final list = state.todayMeals;
-    final gap = state.gap;
-    final closed = list.isNotEmpty && gap.mid <= 0;
-    final textTheme = Theme.of(context).textTheme;
+    final closed = list.isNotEmpty && state.gap.mid <= 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: lightIcons,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          _Header(closed: closed),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: AssistantPill(
-              examples: _examples,
-              onSubmit: (text) => openDescribe(context, text: text),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, navClearance),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SectionTitle(
-                  "Today's meals",
-                  trailing: list.isNotEmpty && !closed ? TextButton(onPressed: () => onTab(2), child: const Text('Close the gap')) : null,
-                ),
-                if (list.isEmpty)
-                  const Appear(
-                    child: Panel(child: EmptyState(title: 'Nothing logged yet')),
-                  )
-                else
-                  Panel(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Column(
-                      children: [
-                        for (final (i, m) in list.indexed)
-                          Appear(
-                            key: ValueKey(m.id),
-                            index: i,
-                            child: _MealRow(meal: m),
-                          ),
-                      ],
-                    ),
+      // The white sheet fills whatever space the header leaves.
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(child: _Header(closed: closed)),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: WhiteSheet(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SheetTitle(
+                    "Today's meals",
+                    trailing: list.isNotEmpty && !closed ? TextButton(onPressed: () => onTab(2), child: const Text('Close the gap')) : null,
                   ),
-                if (closed) ...[
-                  const SizedBox(height: 16),
-                  Appear(
-                    child: Panel(
-                      color: C.goodBg,
-                      child: Text('Gap closed for today', style: textTheme.titleMedium?.copyWith(color: C.good)),
+                  if (list.isEmpty) const Appear(child: EmptyState(title: 'Nothing logged yet', onSheet: true)),
+                  for (final (i, m) in list.indexed)
+                    Appear(
+                      key: ValueKey(m.id),
+                      index: i,
+                      child: _MealRow(meal: m),
                     ),
-                  ),
+                  if (closed)
+                    const Appear(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 12),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: C.sGood, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'Gap closed for today',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: C.sGood),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (state.profile?.diet == Diet.vegan && list.isNotEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: Text('B12: fortified foods or a supplement.', style: TextStyle(fontSize: 12, color: C.sInk2)),
+                    ),
+                  const Footnote(onSheet: true),
+                  const SizedBox(height: navClearance - 24),
                 ],
-                if (state.profile?.diet == Diet.vegan && list.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text('B12: fortified foods or a supplement.', style: textTheme.bodySmall),
-                ],
-                const Footnote(),
-              ],
+              ),
             ),
           ),
         ],
@@ -110,11 +102,8 @@ class _Header extends StatelessWidget {
     final date = '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
 
     return Container(
-      padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 12, 20, 28),
-      decoration: const BoxDecoration(
-        color: C.indigo,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(R.xl)),
-      ),
+      decoration: const BoxDecoration(gradient: C.header),
+      padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 8, 24, 36),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,101 +111,60 @@ class _Header extends StatelessWidget {
             children: [
               IconButton(
                 tooltip: 'Profile and settings',
+                style: IconButton.styleFrom(minimumSize: const Size(40, 40), padding: EdgeInsets.zero),
                 onPressed: () => openSettings(context),
                 icon: const Icon(Icons.person_outline, color: Colors.white),
               ),
-              Expanded(
-                child: Text(
-                  date,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: C.onIndigo2, fontSize: 13),
-                ),
+              const Spacer(),
+              Text(
+                date,
+                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
               ),
-              const SizedBox(width: 48),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _MiniPill(label: 'Target', value: '~${t.mid.round()} g'),
-              _MiniPill(label: 'Gap', value: closed ? 'closed' : fmtRange(hasMeals ? s.gap : t)),
-              _MiniPill(label: dietLabels[s.profile!.diet]!.$1, value: null),
+              SoftChip(label: 'Target', value: '~${t.mid.round()} g'),
+              SoftChip(label: 'Gap', value: closed ? 'closed' : fmtRange(hasMeals ? s.gap : t), dim: closed),
             ],
           ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Semantics(
-                      label: 'About ${e.mid.round()} grams of protein eaten today',
-                      excludeSemantics: true,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          CountUp(
-                            value: e.mid,
-                            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w500, color: Colors.white, height: 1),
-                          ),
-                          const Text(' g', style: TextStyle(fontSize: 22, color: C.onIndigo2)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(hasMeals ? 'eaten · ${fmtRange(e)}' : 'eaten today', style: const TextStyle(color: C.onIndigo2, fontSize: 14)),
-                  ],
+          const SizedBox(height: 36),
+          Semantics(
+            label: 'About ${e.mid.round()} grams of protein eaten today',
+            excludeSemantics: true,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                CountUp(value: e.mid, style: Theme.of(context).textTheme.displaySmall!),
+                const Text(
+                  ' g',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500, color: _soft),
                 ),
-              ),
-              ProteinRing(value: e.mid, max: t.mid),
-            ],
+                const Spacer(),
+                Text(hasMeals ? fmtRange(e) : 'eaten today', style: const TextStyle(color: _soft, fontSize: 14)),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
+          ProgressLine(value: e.mid, max: t.mid),
+          const SizedBox(height: 36),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _Action(icon: Icons.grid_view_rounded, label: 'Pick', primary: true, onTap: () => openQuickPick(context)),
               _Action(icon: Icons.takeout_dining_outlined, label: 'Portion', onTap: () => openPortion(context)),
               _Action(icon: Icons.photo_camera_outlined, label: 'Photo', onTap: () => openPhoto(context)),
-              _Action(icon: Icons.edit_note, label: 'Describe', onTap: () => openDescribe(context)),
+              _Action(icon: Icons.edit_outlined, label: 'Describe', onTap: () => openDescribe(context)),
             ],
           ),
         ],
       ),
     );
   }
-}
-
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({required this.label, required this.value});
-
-  final String label;
-  final String? value;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(99)),
-    child: Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: label.toUpperCase(),
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.8, color: Colors.white),
-          ),
-          if (value != null)
-            TextSpan(
-              text: '  $value',
-              style: const TextStyle(fontSize: 12, color: Colors.white),
-            ),
-        ],
-      ),
-    ),
-  );
 }
 
 class _Action extends StatelessWidget {
@@ -237,20 +185,27 @@ class _Action extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(R.md),
-        child: Column(
-          children: [
-            Container(
-              width: 62,
-              height: 62,
-              decoration: BoxDecoration(color: primary ? Colors.white : Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(R.md)),
-              child: Icon(icon, color: primary ? C.indigo : Colors.white),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label.toUpperCase(),
-              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: C.onIndigo2),
-            ),
-          ],
+        child: SizedBox(
+          width: 72,
+          child: Column(
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: primary ? Colors.white : C.fill,
+                  borderRadius: BorderRadius.circular(17.8),
+                  boxShadow: primary ? const [BoxShadow(color: Color(0x1A000000), blurRadius: 15, offset: Offset(0, 10))] : null,
+                ),
+                child: Icon(icon, color: primary ? Colors.black : Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label.toUpperCase(),
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, letterSpacing: 1, color: _soft),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -276,30 +231,13 @@ class _MealRow extends StatelessWidget {
         ? 'Dinner'
         : 'Late snack';
     final time = '${meal.time.hour.toString().padLeft(2, '0')}:${meal.time.minute.toString().padLeft(2, '0')}';
-    return InkWell(
+    return SheetRow(
+      icon: first?.icon ?? 'plate',
+      title: title,
+      subtitle: '$label · $time',
+      value: '+${fmtRange(p)}',
+      valueSub: 'protein',
       onTap: () => _openActions(context, title),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: [
-            IconTile(first?.icon ?? 'plate'),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Text('$label · $time', style: Theme.of(context).textTheme.bodySmall),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [Text('+${fmtRange(p)}', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: C.blueInk))],
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -313,17 +251,16 @@ class _MealRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(title, style: Theme.of(sheet).textTheme.titleLarge),
-            const SizedBox(height: 16),
-            FilledButton.icon(
+            const SizedBox(height: 20),
+            FilledButton(
               onPressed: () {
                 Navigator.pop(sheet);
                 openConfirm(context, Draft.fromMeal(meal));
               },
-              icon: const Icon(Icons.edit_outlined),
-              label: const Text('Edit'),
+              child: const Text('Edit'),
             ),
             const SizedBox(height: 8),
-            TextButton.icon(
+            TextButton(
               style: TextButton.styleFrom(foregroundColor: C.warm),
               onPressed: () async {
                 Navigator.pop(sheet);
@@ -338,8 +275,7 @@ class _MealRow extends StatelessWidget {
                   ),
                 );
               },
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Remove'),
+              child: const Text('Remove'),
             ),
           ],
         ),

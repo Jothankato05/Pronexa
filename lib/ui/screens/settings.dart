@@ -8,7 +8,9 @@ import '../../logic/diet.dart';
 import '../scope.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 
+/// Profile and data, laid out like the Asteria settings screen.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -17,7 +19,6 @@ class SettingsScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final p = state.profile!;
     final s = state.settings;
-    final text = Theme.of(context).textTheme;
     final target = state.target;
 
     Future<void> setP(Profile next) => state.saveProfile(next);
@@ -25,34 +26,39 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+        padding: const EdgeInsets.fromLTRB(28, 8, 28, 40),
         children: [
-          Panel(
-            color: C.indigo,
+          Appear(
             child: Row(
               children: [
-                const CircleAvatar(
-                  radius: 28,
-                  backgroundColor: C.indigo2,
-                  child: Icon(Icons.person_outline, color: Colors.white),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF4A5B90), Color(0xFF5C739D)]),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: const Icon(Icons.person_outline, color: Colors.white, size: 36),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 24),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text('${target.mid.round()} g a day', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500, letterSpacing: -0.6)),
+                      const SizedBox(height: 4),
                       Text(
-                        'About ${target.mid.round()} g of protein a day',
-                        style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
+                        '${dietLabels[p.diet]!.$1} · ${fmtRange(target)}'.toUpperCase(),
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, letterSpacing: 1, color: C.blue),
                       ),
-                      Text('${fmtRange(target)} · ${dietLabels[p.diet]!.$1}', style: const TextStyle(color: C.onIndigo2, fontSize: 13)),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          const SectionTitle('Diet'),
+          const SizedBox(height: 40),
+          const Label('Diet'),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -65,7 +71,8 @@ class SettingsScreen extends StatelessWidget {
                 ),
             ],
           ),
-          const SectionTitle('Allergies'),
+          const SizedBox(height: 32),
+          const Label('Allergies'),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -74,29 +81,28 @@ class SettingsScreen extends StatelessWidget {
                 SelectPill(
                   label: allergenLabels[a]!,
                   selected: p.allergies.contains(a),
-                  onTap: () => setP(p.copyWith(allergies: p.allergies.contains(a) ? (p.allergies.where((x) => x != a).toList()) : [...p.allergies, a])),
+                  onTap: () => setP(p.copyWith(allergies: p.allergies.contains(a) ? p.allergies.where((x) => x != a).toList() : [...p.allergies, a])),
                 ),
             ],
           ),
-          const SectionTitle('Weight and activity'),
-          Panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: Text('Weight', style: text.titleMedium)),
-                    QtyStepper(
-                      value: (p.weightKg ?? defaultWeightKg).toDouble(),
-                      min: 30,
-                      max: 200,
-                      format: (v) => '${v.round()} kg',
-                      onChanged: (v) => setP(p.copyWith(weightKg: v.round())),
-                    ),
-                  ],
+          const SizedBox(height: 32),
+          const Label('Body'),
+          Group(
+            children: [
+              GroupRow(
+                icon: Icons.monitor_weight_outlined,
+                title: 'Weight',
+                trailing: QtyStepper(
+                  value: (p.weightKg ?? defaultWeightKg).toDouble(),
+                  min: 30,
+                  max: 200,
+                  format: (v) => '${v.round()}',
+                  onChanged: (v) => setP(p.copyWith(weightKg: v.round())),
                 ),
-                const SizedBox(height: 14),
-                Wrap(
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
@@ -108,68 +114,62 @@ class SettingsScreen extends StatelessWidget {
                       ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SectionTitle('Data'),
-          Panel(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Low-data mode'),
+          const SizedBox(height: 32),
+          const Label('Data'),
+          Group(
+            children: [
+              GroupRow(
+                icon: Icons.data_saver_on_outlined,
+                title: 'Low-data mode',
+                trailing: Switch(
                   value: s.lowData,
                   onChanged: (v) => state.updateSettings(s.copyWith(lowData: v)),
                 ),
-                const Divider(),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.copy_outlined),
-                  title: const Text('Copy my data'),
-                  onTap: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    await Clipboard.setData(ClipboardData(text: state.exportJson()));
-                    messenger.showSnackBar(const SnackBar(content: Text('Copied')));
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.delete_outline, color: C.warm),
-                  title: const Text('Delete all my data', style: TextStyle(color: C.warm)),
-                  onTap: () => _confirmDelete(context),
-                ),
-              ],
-            ),
+              ),
+              GroupRow(
+                icon: Icons.copy_outlined,
+                title: 'Copy my data',
+                onTap: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  await Clipboard.setData(ClipboardData(text: state.exportJson()));
+                  messenger.showSnackBar(const SnackBar(content: Text('Copied')));
+                },
+              ),
+              GroupRow(icon: Icons.delete_outline, title: 'Delete all my data', color: C.warm, onTap: () => _confirmDelete(context)),
+            ],
           ),
-          const SectionTitle('Demo'),
-          Panel(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Column(
-              children: [
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.restaurant_outlined),
-                  title: const Text('Load a demo day'),
-                  onTap: () async {
-                    final nav = Navigator.of(context);
-                    await state.loadDemoDay();
-                    nav.pop();
-                  },
-                ),
-                const Divider(),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Pretend the reader is down'),
+          const SizedBox(height: 32),
+          const Label('Demo'),
+          Group(
+            children: [
+              GroupRow(
+                icon: Icons.restaurant_outlined,
+                title: 'Load a demo day',
+                onTap: () async {
+                  final nav = Navigator.of(context);
+                  await state.loadDemoDay();
+                  nav.pop();
+                },
+              ),
+              GroupRow(
+                icon: Icons.cloud_off_outlined,
+                title: 'Pretend the reader is down',
+                trailing: Switch(
                   value: s.simulateAiDown,
                   onChanged: (v) => state.updateSettings(s.copyWith(simulateAiDown: v)),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SectionTitle('About the numbers'),
-          Text('${foods.length} foods from WAFCT 2019 and USDA. Prices from $pricesAsOf. Pending review by a nutritionist.', style: text.bodyMedium),
+          const SizedBox(height: 32),
+          Text(
+            '${foods.length} foods from WAFCT 2019 and USDA. Prices from $pricesAsOf. Pending review by a nutritionist.',
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
           const Footnote(),
         ],
       ),
@@ -185,7 +185,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: C.warm),
+            style: FilledButton.styleFrom(backgroundColor: C.warm, minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Delete'),
           ),

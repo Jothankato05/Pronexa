@@ -1,8 +1,18 @@
 # Pronexa design
 
-Dark navy, flat and quiet. The layout keeps the structure of the Asteria design the project owner supplied (an indigo header block with the key number and four actions, navy list panels, a floating white pill navigation) and the Assistant Pill for describing meals.
+Pronexa follows the Asteria design the project owner supplied, screen by screen:
 
-**No gradients, glows or blur.** Solid fills only. Copy is as short as it can be: a title and the number, rarely a sentence. No status badges, no slogans, no filler, no exclamation marks.
+| Asteria screen | Pronexa screen | What carries over |
+|----------------|----------------|-------------------|
+| Splash | Welcome | Sky-to-night background, the mark, a caps headline, one white button |
+| Registration | Onboarding steps | Big title, pill-shaped choices with a 10% white outline, white when chosen |
+| Dashboard | Today | Gradient header with chips, a 48 px number and four 64 px square actions; a white sheet with plain list rows |
+| Key Feature | Close the gap, Check your meal | The number centred on the dark canvas, the details below |
+| Settings | Log a meal, Learn, Profile | Caps section labels and outlined groups of rows with blue icons |
+
+**Clean means few things on screen.** Lists are plain rows with a light icon tile, a title and a value, never boxes inside boxes. Secondary text is softer white, not another container. Copy is a title and the number, rarely a sentence. No status badges, no slogans, no exclamation marks.
+
+**Gradients:** only the two from Asteria: the header (Today, Learn hero, Photo, the target card and the question card) and the welcome background. The header gradient is darkened slightly at the top so white text on it stays above 4.5:1. No glows or blur.
 
 ## Screens
 
@@ -27,31 +37,30 @@ Screenshots are in `docs/screens/` (render them with `flutter test test_screens 
 
 | Token | Value | Use | Contrast |
 |-------|-------|-----|----------|
-| `bg` | `#07101C` | App background, launch screen | n/a |
-| `surface` / `surface2` | `#111A2C` / `#18233A` | Panels / tracks, steppers | n/a |
-| `line` | `#222E46` | Hairlines | n/a |
-| `ink` / `ink2` / `ink3` | `#FFFFFF` / `#C3C8D1` / `#9AA3B2` | Text | 19.1 / 11.4 / 7.5:1 on bg; ink3 6.8:1 on surface |
-| `indigo` | `#20296B` | Header, hero panels, Assistant Pill, launcher icon | white 13.2:1 |
-| `indigo2` | `#293477` | Selected pills, rows and tiles | white 11.3:1 |
-| `onIndigo2` | `#B9C2E8` | Secondary text on indigo | 7.5:1 |
-| `blue` / `blueInk` | `#50A2FF` / `#8FC2FF` | Ring, focus, switches / protein numbers on panels | 6.6 / 9.4:1 on surface |
-| `good` / `goodBg` | `#5FD38A` / `#13291F` | "Looks clear", gap closed | 9.3:1 on surface |
-| `warm` / `warmBg` | `#F5B971` / `#2A2116` | Gaps, guesses, delete (never red) | 10.0:1 on surface |
-| `tile` | `#E9EDF5` | Light tile behind food illustrations | n/a |
+| `bg` | `#0A0E17` | Canvas, launch screen | n/a |
+| `ink` / `ink2` / `ink3` | white / white 70% / white 60% | Text on the canvas | 19.6 / 9.6 / 7.3:1 |
+| `line` / `fill` | white 10% / white 5% | Group and input outlines / chip and button fills, hairlines | n/a |
+| `header` | `#4F6896` → `#2E3D72` → `#1C2756` → `#111A40` → `#0A0E17` | Asteria header gradient | white 5.6:1 at the top; white 70% 6.0:1 from 22% down |
+| `indigo` / `indigo2` | `#20296B` / `#293477` | Launcher icon / active nav (gradient from `#07101B`) | white 13.2 / 11.3:1 |
+| `blue` | `#50A2FF` | Icons, progress, switches, protein values on dark | 7.3:1 on canvas |
+| `warm` / `good` | `#F5B971` / `#5FD38A` | "Check this", delete (never red) / "Looks clear" | 11.1 / 10.6:1 |
+| `sheet`, `sInk`, `sInk2` | white, `#07101C`, `#666666` | White sheet and its text | 19.1 / 5.7:1 |
+| `sTile` | `#F2F4F7` | Icon tiles (also on dark, so the food drawings stay visible) | n/a |
+| `sGood` / `sWarm` | `#007A2E` / `#9A4A08` | Green and amber text on the sheet | 5.5 / 6.3:1 |
 
-Primary buttons are white with `bg` text (19.1:1). The nav pill is white; its idle icons are `#5C6478` (5.9:1) and the active button is `indigo`.
+Primary buttons are white with black text, 60 px tall. Selected pills, choices and tiles turn white with black text.
 
 ## Type
 
-Poppins (Regular, Medium, SemiBold; OFL, bundled as TTF), with the ₦ glyph from a 1.4 KB Nunito subset as fallback. Sizes: 44 display number, 26 page title, 18 section title, 16 body, 14 secondary, 12.5 caption, 11 caps label.
+Asteria uses Gotham, which isn't bundled (no licence). Pronexa uses Poppins (Regular, Medium, SemiBold; OFL, bundled as TTF), mostly Medium as Asteria does, with the ₦ glyph from a 1.4 KB Nunito subset as fallback. Sizes follow Asteria: 48 key number (−2.4 tracking), 30 onboarding title, 18 screen and section titles, 16 row titles, 12 subtitles, 10 caps labels.
 
 ## Shape
 
-Radii 13 (icon tiles), 18 (action tiles), 22 (panels), 30 (header and sheets), pill for buttons and chips. Tap targets 44–62 px.
+Radii 13 (icon tiles), 18 (action buttons), 22 (picker tiles), 30 (groups, cards and sheets), pill for buttons, chips and choices. Tap targets 44–72 px. Side padding 28.
 
 ## Assistant Pill (`lib/ui/widgets/assistant_pill.dart`)
 
-A 64 px pill in `indigo` with a flat orb on the left (blue disc with a white seed). The orb turns into a progress ring while reading. Example prompts rotate every 3 seconds with a short fade and rise (stopped under reduced motion). The send button turns white when there is text. The WebGL plasma orb from the original file was removed with the other glow effects.
+A 64 px pill with a 5% white fill and a 10% outline (blue when focused), and a flat orb on the left (blue disc with a white seed). The orb turns into a progress ring while reading. Example prompts rotate every 3 seconds with a short fade and rise (stopped under reduced motion). The send button turns white when there is text. The WebGL plasma orb from the original file was removed with the other glow effects.
 
 ## Motion (`lib/ui/widgets/motion.dart`)
 

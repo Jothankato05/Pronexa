@@ -95,9 +95,9 @@ class AssistantPillState extends State<AssistantPill> {
       height: 64,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: C.indigo,
+        color: C.fill,
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: _focus.hasFocus ? C.blue : C.indigo, width: 1.5),
+        border: Border.all(color: _focus.hasFocus ? C.blue : C.line, width: _focus.hasFocus ? 1.5 : 1),
       ),
       child: Row(
         children: [
@@ -107,7 +107,7 @@ class AssistantPillState extends State<AssistantPill> {
             child: widget.busy
                 ? Semantics(
                     liveRegion: true,
-                    child: Text(widget.status ?? 'Reading…', style: const TextStyle(color: C.onIndigo2, fontSize: 15)),
+                    child: Text(widget.status ?? 'Reading…', style: const TextStyle(color: C.ink3, fontSize: 15)),
                   )
                 : Stack(
                     alignment: Alignment.centerLeft,
@@ -129,7 +129,7 @@ class AssistantPillState extends State<AssistantPill> {
                               key: ValueKey(hint),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: C.onIndigo2, fontSize: 15),
+                              style: const TextStyle(color: C.ink3, fontSize: 15),
                             ),
                           ),
                         ),
@@ -171,13 +171,13 @@ class AssistantPillState extends State<AssistantPill> {
                 curve: Motion.curve,
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(color: canSend ? Colors.white : C.indigo2, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: canSend ? Colors.white : C.fill, shape: BoxShape.circle),
                 child: Material(
                   type: MaterialType.transparency,
                   child: InkWell(
                     customBorder: const CircleBorder(),
                     onTap: canSend ? _send : null,
-                    child: Icon(Icons.arrow_upward, color: canSend ? C.indigo : C.onIndigo2, semanticLabel: 'Read my meal'),
+                    child: Icon(Icons.arrow_upward, color: canSend ? Colors.black : C.ink3, semanticLabel: 'Read my meal'),
                   ),
                 ),
               ),

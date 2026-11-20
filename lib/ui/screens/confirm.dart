@@ -94,22 +94,36 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(d.editingId != null ? 'Edit meal' : 'Check your meal')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
         children: [
           if (d.photo != null)
             Padding(
-              padding: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.only(bottom: 20),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(R.lg),
-                child: Image.memory(d.photo!, height: 140, width: double.infinity, fit: BoxFit.cover, semanticLabel: 'Your meal photo'),
+                borderRadius: BorderRadius.circular(R.xl),
+                child: Image.memory(d.photo!, height: 160, width: double.infinity, fit: BoxFit.cover, semanticLabel: 'Your meal photo'),
               ),
             ),
+          // The meal total, centred like the Asteria balance.
+          Center(
+            child: AnimatedSwitcher(
+              duration: Motion.of(context, Motion.fast),
+              transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
+              child: Text(d.items.isEmpty ? '0 g' : fmtRange(total), key: ValueKey(fmtRange(total)), style: text.displaySmall),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(child: Text('PROTEIN IN THIS MEAL', style: text.labelSmall)),
+          if (d.confidence != null) ...[const SizedBox(height: 16), Center(child: _ConfidenceBar(d.confidence!))],
           if (d.text != null)
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text('"${d.text}"', style: text.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
+              padding: const EdgeInsets.only(top: 16),
+              child: Text(
+                '"${d.text}"',
+                textAlign: TextAlign.center,
+                style: text.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+              ),
             ),
-          if (d.confidence != null) _ConfidenceBar(d.confidence!),
           AnimatedSize(
             duration: Motion.of(context, Motion.medium),
             curve: Motion.curve,
@@ -119,14 +133,15 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
               child: q == null
                   ? const SizedBox(width: double.infinity)
                   : Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Panel(
-                        color: C.indigo,
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(gradient: C.header, borderRadius: BorderRadius.circular(R.xl)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(q.text, style: text.titleMedium),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 14),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
@@ -138,106 +153,60 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
                     ),
             ),
           ),
-          const SectionTitle('Foods', top: 20),
-          if (d.items.isEmpty)
-            const Panel(
-              child: EmptyState(title: 'No foods yet', body: 'Add what you ate.'),
-            ),
-          for (final (i, it) in d.items.indexed)
-            Appear(
-              key: ValueKey(it.key),
-              index: i,
-              child: _ItemCard(
-                it: it,
-                onChange: (next) => _update(it, next),
-                onRemove: () => setState(() => d.items = d.items.where((x) => x.key != it.key).toList()),
-              ),
-            ),
-          const SizedBox(height: 4),
-          OutlinedButton.icon(
-            onPressed: () async {
-              final f = await pickFood(context, title: 'Add a food');
-              if (f == null) return;
-              setState(
-                () => d.items = [
-                  ...d.items,
-                  DraftItem(
-                    key: newKey(),
-                    item: MealItem(foodId: f.id, portionId: f.defaultPortion, qty: f.defaultQty),
+          const SizedBox(height: 32),
+          const Label('Foods'),
+          Group(
+            children: [
+              if (d.items.isEmpty) const GroupRow(icon: Icons.restaurant_outlined, title: 'No foods yet'),
+              for (final (i, it) in d.items.indexed)
+                Appear(
+                  key: ValueKey(it.key),
+                  index: i,
+                  child: _ItemRow(
+                    it: it,
+                    onChange: (next) => _update(it, next),
+                    onRemove: () => setState(() => d.items = d.items.where((x) => x.key != it.key).toList()),
                   ),
-                ],
-              );
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Add a food'),
+                ),
+              GroupRow(
+                icon: Icons.add,
+                title: 'Add a food',
+                trailing: const SizedBox.shrink(),
+                onTap: () async {
+                  final f = await pickFood(context, title: 'Add a food');
+                  if (f == null) return;
+                  setState(
+                    () => d.items = [
+                      ...d.items,
+                      DraftItem(
+                        key: newKey(),
+                        item: MealItem(foodId: f.id, portionId: f.defaultPortion, qty: f.defaultQty),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
           if (d.notes.isNotEmpty || d.price != null) ...[
-            const SizedBox(height: 16),
-            Panel(
-              color: C.surface2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [if (d.price != null) const _Note('Price is only a clue to the size.'), for (final n in d.notes) _Note(n)],
+            const SizedBox(height: 20),
+            for (final n in [if (d.price != null) 'Price is only a clue to the size.', ...d.notes])
+              Padding(
+                padding: const EdgeInsets.only(left: 16, bottom: 6),
+                child: Text(n, style: text.bodySmall),
               ),
-            ),
-          ],
-          if (d.items.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Panel(
-              color: C.indigo,
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'This meal',
-                      style: TextStyle(color: C.onIndigo2, fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  AnimatedSwitcher(
-                    duration: Motion.of(context, Motion.fast),
-                    transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
-                    child: Text(
-                      fmtRange(total),
-                      key: ValueKey(fmtRange(total)),
-                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
           const Footnote(),
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
           child: FilledButton(onPressed: d.items.isEmpty || _saving ? null : _save, child: Text(d.editingId != null ? 'Save changes' : 'Add to today')),
         ),
       ),
     );
   }
-}
-
-class _Note extends StatelessWidget {
-  const _Note(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 3),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 2),
-          child: Icon(Icons.info_outline, size: 16, color: C.ink3),
-        ),
-        const SizedBox(width: 8),
-        Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
-      ],
-    ),
-  );
 }
 
 class _ConfidenceBar extends StatelessWidget {
@@ -246,40 +215,38 @@ class _ConfidenceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (title, bg, fg) = switch (c) {
-      Confidence.high => ('Looks clear', C.goodBg, C.good),
-      Confidence.medium => ('Check the marked parts', C.warmBg, C.warm),
-      Confidence.low => ('Not sure. Check each food', C.warmBg, C.warm),
+    final (title, fg) = switch (c) {
+      Confidence.high => ('Looks clear', C.good),
+      Confidence.medium => ('Check the marked parts', C.warm),
+      Confidence.low => ('Not sure. Check each food', C.warm),
     };
     return Semantics(
       liveRegion: true,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: AnimatedContainer(
-          duration: Motion.of(context, Motion.medium),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(99)),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(c == Confidence.high ? Icons.check_circle_outline : Icons.help_outline, color: fg, size: 18),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  title,
-                  style: TextStyle(color: fg, fontWeight: FontWeight.w500, fontSize: 14),
-                ),
+      child: AnimatedContainer(
+        duration: Motion.of(context, Motion.medium),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(color: fg.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(99)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(c == Confidence.high ? Icons.check_circle_outline : Icons.help_outline, color: fg, size: 16),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(color: fg, fontWeight: FontWeight.w500, fontSize: 13),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _ItemCard extends StatelessWidget {
-  const _ItemCard({required this.it, required this.onChange, required this.onRemove});
+/// One food: tile, name, size and amount, protein. Tap to change any of it.
+class _ItemRow extends StatelessWidget {
+  const _ItemRow({required this.it, required this.onChange, required this.onRemove});
 
   final DraftItem it;
   final ValueChanged<MealItem> onChange;
@@ -289,183 +256,115 @@ class _ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final f = foodById[it.item.foodId]!;
     final p = itemProtein(it.item);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Panel(
-        padding: const EdgeInsets.fromLTRB(14, 12, 6, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                IconTile(f.icon, size: 44),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _EditChip(
-                    label: f.name,
-                    guess: it.generic,
-                    big: true,
-                    onTap: () async {
-                      final next = await pickFood(context, title: 'Change food');
-                      if (next == null) return;
-                      final keep = next.hasPortion(it.item.portionId);
-                      onChange(
-                        it.item.copyWith(foodId: next.id, portionId: keep ? it.item.portionId : next.defaultPortion, qty: keep ? it.item.qty : next.defaultQty),
-                      );
-                    },
-                  ),
-                ),
-                IconButton(tooltip: 'Remove ${f.name}', onPressed: onRemove, icon: const Icon(Icons.close)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _EditChip(label: portionLabel(f.id, it.item.portionId, it.item.qty), guess: it.isGuess, onTap: () => _portionSheet(context, f)),
-                _EditChip(label: eatenLabel(it.item.eaten), onTap: () => _eatenSheet(context)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Row(
-                children: [
-                  Expanded(child: Text(it.isGuess ? 'Check the size' : (f.local ?? ''), style: Theme.of(context).textTheme.bodySmall)),
-                  Text(
-                    fmtRange(p),
-                    style: const TextStyle(color: C.blueInk, fontWeight: FontWeight.w500, fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    final detail = '${portionLabel(f.id, it.item.portionId, it.item.qty)} · ${eatenLabel(it.item.eaten).toLowerCase()}';
+    return Semantics(
+      button: true,
+      label: '${f.name}, $detail, ${fmtRange(p)}. Change',
+      excludeSemantics: true,
+      child: GroupRow(
+        leading: IconTile(f.icon, size: 44),
+        title: it.generic ? '${f.name}?' : f.name,
+        subtitle: it.isGuess ? 'Check size: $detail' : detail,
+        trailing: Text(
+          fmtRange(p),
+          style: const TextStyle(color: C.blue, fontWeight: FontWeight.w500, fontSize: 15),
         ),
+        onTap: () => _edit(context, f),
       ),
     );
   }
 
-  Future<void> _portionSheet(BuildContext context, Food f) => showModalBottomSheet<void>(
+  Future<void> _edit(BuildContext context, Food food) => showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (sheet) => StatefulBuilder(
-      builder: (sheet, setSheet) {
-        var item = it.item;
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('How much ${f.name.toLowerCase()}?', style: Theme.of(sheet).textTheme.titleLarge),
-                const SizedBox(height: 12),
-                for (final p in f.portions)
-                  ChoiceRow(
-                    leading: IconTile(portionMeta[p.id]!.icon, size: 40),
-                    title: capitalise(p.label ?? portionMeta[p.id]!.one),
-                    subtitle: p.price == null ? null : 'about ${fmtPrice(p.price!)}',
-                    selected: item.portionId == p.id,
-                    onTap: () {
-                      item = item.copyWith(portionId: p.id);
-                      onChange(item);
+    builder: (sheet) {
+      var item = it.item;
+      var f = food;
+      return StatefulBuilder(
+        builder: (sheet, setSheet) {
+          void set(MealItem next) {
+            item = next;
+            onChange(next);
+            setSheet(() {});
+          }
+
+          return SafeArea(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(sheet).size.height * 0.85),
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                children: [
+                  Row(
+                    children: [
+                      IconTile(f.icon, size: 44),
+                      const SizedBox(width: 14),
+                      Expanded(child: Text(f.name, style: Theme.of(sheet).textTheme.titleLarge)),
+                      TextButton(
+                        onPressed: () async {
+                          final next = await pickFood(context, title: 'Change food');
+                          if (next == null) return;
+                          final keep = next.hasPortion(item.portionId);
+                          f = next;
+                          set(item.copyWith(foodId: next.id, portionId: keep ? item.portionId : next.defaultPortion, qty: keep ? item.qty : next.defaultQty));
+                        },
+                        child: const Text('Change'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Label('Size'),
+                  for (final p in f.portions)
+                    ChoiceRow(
+                      title: capitalise(p.label ?? portionMeta[p.id]!.one),
+                      subtitle: p.price == null ? null : 'about ${fmtPrice(p.price!)}',
+                      selected: item.portionId == p.id,
+                      onTap: () => set(item.copyWith(portionId: p.id)),
+                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text('How many', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                      ),
+                      QtyStepper(
+                        value: item.qty,
+                        step: portionMeta[item.portionId]!.container || item.qty < 1 ? 0.25 : 1,
+                        format: fmtQty,
+                        onChanged: (v) => set(item.copyWith(qty: v)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Label('How much you ate'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final (v, label) in eatenOptions)
+                        SelectPill(
+                          label: label,
+                          selected: item.eaten == v,
+                          onTap: () => set(item.copyWith(eaten: v)),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(onPressed: () => Navigator.pop(sheet), child: const Text('Done')),
+                  TextButton(
+                    style: TextButton.styleFrom(foregroundColor: C.warm),
+                    onPressed: () {
                       Navigator.pop(sheet);
+                      onRemove();
                     },
+                    child: Text('Remove ${f.name.toLowerCase()}'),
                   ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text('How many?', style: TextStyle(fontWeight: FontWeight.w500)),
-                    ),
-                    QtyStepper(
-                      value: item.qty,
-                      step: portionMeta[item.portionId]!.container || item.qty < 1 ? 0.25 : 1,
-                      format: fmtQty,
-                      onChanged: (v) {
-                        item = item.copyWith(qty: v);
-                        onChange(item);
-                        setSheet(() {});
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    ),
-  );
-
-  Future<void> _eatenSheet(BuildContext context) => showModalBottomSheet<void>(
-    context: context,
-    builder: (sheet) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('How much did you eat?', style: Theme.of(sheet).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            for (final (v, label) in eatenOptions)
-              ChoiceRow(
-                title: label,
-                selected: it.item.eaten == v,
-                onTap: () {
-                  onChange(it.item.copyWith(eaten: v));
-                  Navigator.pop(sheet);
-                },
+                ],
               ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-class _EditChip extends StatelessWidget {
-  const _EditChip({required this.label, required this.onTap, this.guess = false, this.big = false});
-
-  final String label;
-  final VoidCallback onTap;
-  final bool guess;
-  final bool big;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: '$label. Change',
-    excludeSemantics: true,
-    child: Material(
-      color: guess ? C.warmBg : C.surface2,
-      shape: StadiumBorder(side: BorderSide(color: guess ? C.warm : Colors.transparent)),
-      child: InkWell(
-        customBorder: const StadiumBorder(),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 40),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    label,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: big ? 16 : 14, fontWeight: FontWeight.w500, color: guess ? C.warm : C.ink),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Icon(Icons.edit_outlined, size: 14, color: guess ? C.warm : C.ink3),
-              ],
             ),
-          ),
-        ),
-      ),
-    ),
+          );
+        },
+      );
+    },
   );
 }

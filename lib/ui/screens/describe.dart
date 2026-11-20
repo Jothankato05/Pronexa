@@ -78,7 +78,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Describe')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: const EdgeInsets.fromLTRB(28, 8, 28, 32),
         children: [
           AssistantPill(
             key: _pill,
@@ -92,8 +92,12 @@ class _DescribeScreenState extends State<DescribeScreen> {
           if (fail != null) ...[
             const SizedBox(height: 20),
             Appear(
-              child: Panel(
-                color: fail.reason == ReadFailure.nothingFound ? C.surface : C.warmBg,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(R.xl),
+                  border: Border.all(color: C.line),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -109,7 +113,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
             ),
           ],
           if (!_busy) ...[
-            const Padding(padding: EdgeInsets.only(top: 28, bottom: 10), child: Label('Examples')),
+            const Padding(padding: EdgeInsets.only(top: 40), child: Label('Try')),
             Wrap(
               spacing: 8,
               runSpacing: 8,
