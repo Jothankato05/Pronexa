@@ -34,3 +34,10 @@ server/.env
 release/
 *.apk
 *.aab
+
+
+# The food recogniser is built into assets/models by tool/food_model/convert.py
+assets/models/*.onnx
+assets/models/*.labels.json
+tool/food_model/.cache/
+*.pth

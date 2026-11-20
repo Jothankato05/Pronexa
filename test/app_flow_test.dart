@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pronexa/ai/food_lens.dart';
 import 'package:pronexa/data/models.dart';
 import 'package:pronexa/main.dart';
 import 'package:pronexa/state/app_state.dart';
@@ -33,12 +34,21 @@ class FakePicker extends ImagePicker {
   Future<LostDataResponse> retrieveLostData() async => LostDataResponse.empty();
 }
 
+/// The real recogniser needs the phone's ONNX Runtime; tests use none.
+class NoLens implements FoodLens {
+  @override
+  Future<bool> isAvailable() async => false;
+
+  @override
+  Future<List<LensGuess>> recognise(Uint8List photo) async => const [];
+}
+
 AppState _state({bool withProfile = true}) {
   final storage = MemoryStorage();
   if (withProfile) {
     storage.data['profile'] = jsonEncode(const Profile(diet: Diet.none, allergies: [], weightKg: 60, activity: Activity.moderate).toJson());
   }
-  return AppState(storage: storage, clock: () => DateTime(2026, 11, 20, 13));
+  return AppState(storage: storage, lens: NoLens(), clock: () => DateTime(2026, 11, 20, 13));
 }
 
 Future<void> _pumpApp(WidgetTester tester, AppState state) async {
@@ -121,7 +131,7 @@ void main() {
     await _tapText(tester, 'Take a photo');
     expect(find.byType(Image), findsOneWidget, reason: 'the photo is shown');
     // No AI server in tests, so the student picks the foods.
-    expect(find.textContaining('Photo reading is off'), findsOneWidget);
+    expect(find.text('Pick the foods myself'), findsOneWidget);
     await _tapText(tester, 'Pick the foods myself');
     expect(find.text("What's in it?"), findsOneWidget);
     await _tapText(tester, 'Akara');

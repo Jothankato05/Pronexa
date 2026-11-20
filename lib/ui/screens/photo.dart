@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../ai/food_lens.dart';
 import '../../ai/meal_reader.dart';
+import '../../data/foods.dart';
 import '../../data/models.dart';
 import '../draft.dart';
 import '../nav.dart';
 import '../scope.dart';
 import '../theme.dart';
+import '../widgets/common.dart';
 import '../widgets/motion.dart';
 
 /// Photo mode. Uses the phone's own camera app through image_picker, so the
@@ -34,12 +37,46 @@ class _PhotoScreenState extends State<PhotoScreen> {
   bool _busy = false;
   String? _message;
 
+  // On-phone recogniser.
+  bool _lens = false;
+  bool _looking = false;
+  List<LensGuess>? _guesses;
+
   @override
   void initState() {
     super.initState();
+    unawaited(_checkLens());
     // On low-memory Android phones the system can close Pronexa while the camera
     // app is open. This recovers the photo when the app comes back.
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) unawaited(_recoverLost());
+  }
+
+  Future<void> _checkLens() async {
+    final available = await AppScope.read(context).lens.isAvailable();
+    if (!mounted) return;
+    setState(() => _lens = available);
+    if (available && _photo != null) unawaited(_recognise());
+  }
+
+  Future<void> _recognise() async {
+    final photo = _photo;
+    if (photo == null || !_lens) return;
+    setState(() {
+      _looking = true;
+      _guesses = null;
+    });
+    List<LensGuess> found;
+    try {
+      found = await AppScope.read(context).lens.recognise(photo).timeout(const Duration(seconds: 30));
+    } on Exception {
+      // Includes the time limit: fall back to picking by hand.
+      found = const [];
+    }
+    if (!mounted || _photo != photo) return;
+    setState(() {
+      _looking = false;
+      _guesses = found;
+    });
   }
 
   Future<void> _recoverLost() async {
@@ -91,7 +128,13 @@ class _PhotoScreenState extends State<PhotoScreen> {
       setState(() => _message = 'Photo too large. Try the camera.');
       return;
     }
-    setState(() => _photo = bytes);
+    setState(() {
+      _photo = bytes;
+      _guesses = null;
+    });
+    final state = AppScope.read(context);
+    final canRead = state.reader.hasRemote && state.online && !state.settings.lowData && !state.settings.simulateAiDown;
+    if (!canRead) unawaited(_recognise());
   }
 
   Future<void> _read() async {
@@ -111,6 +154,39 @@ class _PhotoScreenState extends State<PhotoScreen> {
       case ReadFail(:final reason):
         setState(() => _message = reason == ReadFailure.nothingFound ? 'No foods found. Pick them yourself.' : "Couldn't read it. Pick the foods yourself.");
     }
+  }
+
+  /// What the on-phone recogniser shows under the photo.
+  Widget _lensPanel() {
+    final text = Theme.of(context).textTheme;
+    if (!_lens) return Text('Pick the foods you see.', style: text.bodyMedium, textAlign: TextAlign.center);
+    if (_looking) {
+      return const Column(
+        children: [
+          LinearProgressIndicator(minHeight: 4),
+          SizedBox(height: 12),
+          Text('Looking at your photo…', textAlign: TextAlign.center),
+        ],
+      );
+    }
+    final g = _guesses;
+    if (g == null) return const SizedBox.shrink();
+    if (g.isEmpty) return Text("Couldn't tell. Pick the foods you see.", style: text.bodyMedium, textAlign: TextAlign.center);
+    return Appear(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Label('Looks like'),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [for (final x in g) _GuessChip(name: foodById[x.foodId]!.name, score: x.score)],
+          ),
+          const SizedBox(height: 10),
+          Text('Check before adding: guesses can be wrong.', style: text.bodySmall),
+        ],
+      ),
+    );
   }
 
   @override
@@ -171,19 +247,11 @@ class _PhotoScreenState extends State<PhotoScreen> {
                       label: Text(_busy ? 'Reading the photo…' : 'Read the photo'),
                     )
                   else
-                    Text(
-                      state.settings.lowData
-                          ? 'Low-data mode: pick the foods you see.'
-                          : !state.online
-                          ? 'No internet: pick the foods you see.'
-                          : 'Photo reading is off: pick the foods you see.',
-                      style: text.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  const SizedBox(height: 10),
+                    _lensPanel(),
+                  const SizedBox(height: 16),
                   (canRead ? OutlinedButton.new : FilledButton.new)(
-                    onPressed: _busy ? null : () => openQuickPick(context, photo: photo),
-                    child: const Text('Pick the foods myself'),
+                    onPressed: _busy || _looking ? null : () => openQuickPick(context, photo: photo, suggested: [...?_guesses?.map((g) => g.foodId)]),
+                    child: Text((_guesses?.isNotEmpty ?? false) ? 'Check and add foods' : 'Pick the foods myself'),
                   ),
                   const SizedBox(height: 4),
                   TextButton.icon(onPressed: _busy ? null : () => setState(() => _photo = null), icon: const Icon(Icons.refresh), label: const Text('Retake')),
@@ -208,4 +276,35 @@ class _PhotoScreenState extends State<PhotoScreen> {
       ),
     );
   }
+}
+
+class _GuessChip extends StatelessWidget {
+  const _GuessChip({required this.name, required this.score});
+
+  final String name;
+  final double score;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    decoration: BoxDecoration(
+      color: C.fill,
+      borderRadius: BorderRadius.circular(99),
+      border: Border.all(color: C.line),
+    ),
+    child: Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: name,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: C.ink),
+          ),
+          TextSpan(
+            text: '  ${(score * 100).round()}%',
+            style: const TextStyle(fontSize: 12, color: C.ink3),
+          ),
+        ],
+      ),
+    ),
+  );
 }

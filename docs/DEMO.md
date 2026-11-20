@@ -20,7 +20,8 @@ Open Pronexa. **Start** → Vegan → no allergies → 60 kg → On my feet a lo
    - "Nothing is counted until the student confirms. Price is only a clue to the size."
 3. **Add to today.** The number counts up; the gap shrinks.
 
-Optional: **Photo** → take a picture of a plate → pick the foods while looking at it.
+Then **Photo**: snap a plate of eba and egusi (or jollof). Still in airplane mode, Pronexa shows "Looks like: Egusi · Eba". Tap them, add.
+- "The food recogniser runs on the phone. No internet, and the photo never leaves the phone."
 
 ## 1:30 Close the gap for less (40 s)
 
@@ -46,6 +47,6 @@ Close: "Pronexa: check your protein, close the gap for less."
 ## Likely questions
 
 - **How accurate is it?** Values are starter estimates from WAFCT 2019 and USDA, shown as ranges; a nutritionist review sheet is ready (`docs/food_review.csv`). The offline reader passes 243 descriptions, including 60 written after it was built (58/60 first time).
-- **What about photos?** With the optional AI server, Pronexa reads the photo; the AI can only choose foods from the list, and protein comes from the database, not the AI.
+- **What about photos?** An open Nigerian food model (41 foods) runs on the phone. On 96 independent photos the right food was among its suggestions 95% of the time. It only suggests; the student taps and confirms, and protein comes from the database.
 - **Privacy?** No account, nothing uploaded unless the student taps "Read the photo". Cloud backup is off.
 - **Next?** A campus pilot to collect real descriptions (`docs/PILOT.md`) and a vendor map.

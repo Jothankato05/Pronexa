@@ -9,11 +9,9 @@ Release APKs are signed with Pronexa's upload key, `android/pronexa-upload.jks`,
 Local signed build (both files present):
 
 ```bash
+python tool/food_model/convert.py --out assets/models   # once; see docs/PHOTO.md
 flutter build apk --release -P force-version-code-ignoring-abi=true
-flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64 -P force-version-code-ignoring-abi=true
 ```
-
-`force-version-code-ignoring-abi` gives every APK of a version the same version code, so the small and full APKs can update each other.
 
 Without the key files, release builds fall back to the debug key (fine for testing, not for students).
 
@@ -38,7 +36,7 @@ Then for each version:
 2. Commit and merge to `main`.
 3. Tag it: `git tag v0.6.0 && git push origin v0.6.0`, or open **Actions → Release → Run workflow** and type the tag.
 
-The workflow runs the tests, builds both APKs signed with the key, and publishes them with checksums at `https://github.com/<owner>/Pronexa/releases`.
+The workflow builds the food recogniser into the app, runs the tests, builds one APK signed with the key, and publishes it with a checksum at `https://github.com/<owner>/Pronexa/releases`.
 
 ## Play Store (later)
 

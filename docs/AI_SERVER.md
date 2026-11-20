@@ -1,6 +1,6 @@
-# Turning on photo reading (optional AI server)
+# The optional AI server
 
-Pronexa works fully offline without this. The server adds two things: reading **photos** of meals, and a second opinion on unusual **descriptions**. Students still check everything on the Confirm screen, and protein numbers still come only from the app's food list.
+Pronexa works fully offline without this: descriptions are read on the phone, and photos are recognised on the phone (`docs/PHOTO.md`). The server adds a second opinion for foods outside the on-phone recogniser's 41 (chips, shawarma, suya…) and for unusual descriptions. Students still check everything on the Confirm screen, and protein numbers still come only from the app's food list.
 
 You need two things only you can create: a hosting account and an Anthropic API key. Setting it up takes about 15 minutes.
 

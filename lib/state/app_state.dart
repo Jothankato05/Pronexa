@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../ai/food_lens.dart';
 import '../ai/meal_reader.dart';
 import '../data/models.dart';
 import '../logic/calc.dart';
@@ -15,10 +16,16 @@ const keepDays = 120;
 
 /// App state. One ChangeNotifier, no extra framework.
 class AppState extends ChangeNotifier {
-  AppState({required this.storage, MealReader? reader, DateTime Function()? clock}) : reader = reader ?? MealReader(), _clock = clock ?? DateTime.now;
+  AppState({required this.storage, MealReader? reader, FoodLens? lens, DateTime Function()? clock})
+    : reader = reader ?? MealReader(),
+      lens = lens ?? OnDeviceLens(),
+      _clock = clock ?? DateTime.now;
 
   final Storage storage;
   final MealReader reader;
+
+  /// On-phone food recogniser for Photo mode (downloaded once).
+  final FoodLens lens;
   final DateTime Function() _clock;
   final _random = Random.secure();
 

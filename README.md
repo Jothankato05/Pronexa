@@ -8,14 +8,9 @@ An Android app (built with Flutter) for Nigerian university students. Log meals 
 
 ## Install
 
-Download the APKs from the [Releases page](../../releases). Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
+Download `Pronexa-<version>.apk` from the [Releases page](../../releases). One APK for every phone, Android 7.0 or newer (about 205 MB, because it includes the on-phone food recogniser). On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
 
-| File | Size | Use |
-|------|------|-----|
-| `Pronexa-<version>-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
-| `Pronexa-<version>.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
-
-From 0.6.0 both files carry the same version code, so either one updates the other. Versions before 0.6.0 were signed with a test key: uninstall them once before installing 0.6.0 or later. Screens are in `docs/screens/`.
+Versions before 0.6.0 were signed with a test key: uninstall them once before installing 0.6.0 or later. Screens are in `docs/screens/`.
 
 ## What it does
 
@@ -23,7 +18,7 @@ From 0.6.0 both files carry the same version code, so either one updates the oth
 2. **Log a meal, four ways:**
    - **Pick:** tap foods from the list. Works offline.
    - **Portion:** choose the pack, plate, bowl or wrap, what was in it, extras, and how much you ate. Works offline.
-   - **Photo:** take a photo or choose one from the gallery. With the AI server set up, Pronexa reads the photo; otherwise you pick the foods while looking at it.
+   - **Photo:** take a photo or choose one from the gallery. Pronexa recognises Nigerian foods on the phone, offline (41 foods: swallows, soups, rice dishes, proteins), and shows them first so you tap what's really there. See `docs/PHOTO.md`.
    - **Describe:** type it in English or Pidgin, for example "₦1,000 rice and beans, medium takeaway". Read by the AI server when one is set up and online, otherwise by the phone's own reader, which works fully offline: 78 foods, 576 names for them (Yoruba, Igbo, Hausa, Pidgin, brand names and common typos), 83 things with no protein (drinks, fruit, seasonings), fractions like "1½" and "half loaf", prices like "2k" and "N1500", and "I no finish am".
 3. **Confirm:** check and fix the foods, portions and how much you ate. Nothing counts until you confirm.
 4. **Today:** target, eaten and gap, as ranges.
@@ -85,7 +80,8 @@ APKs are not kept in the repository. Push a version tag (`git tag v0.6.0 && git 
 ### More docs
 
 - `docs/PILOT.md`: running a pilot, collecting real descriptions, the nutrition review sheet (`docs/food_review.csv`)
-- `docs/AI_SERVER.md`: turning on photo reading
+- `docs/PHOTO.md`: the on-phone food recogniser (how it works, accuracy, licence)
+- `docs/AI_SERVER.md`: the optional AI server
 - `docs/DEMO.md`: a 3-minute demo script
 - `docs/DESIGN.md`, `docs/GUARDRAILS.md`
 
@@ -102,4 +98,4 @@ See `docs/GUARDRAILS.md`: strict analysis, tests, pinned dependencies, no secret
 
 ## Credits
 
-Look and layout follow the Asteria app design and the Assistant Pill by HorizonX, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL).
+Photo recogniser: Nigerian Food Lens by yusasif (Apache-2.0). Look and layout follow the Asteria app design and the Assistant Pill by HorizonX, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL).

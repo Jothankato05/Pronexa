@@ -20,9 +20,9 @@ permissions:
 
 jobs:
   release:
-    name: Signed APKs
+    name: Signed APK
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
@@ -48,6 +48,13 @@ jobs:
         with:
           flutter-version: '3.47.9'
           channel: stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build the on-phone food recogniser into the app
+        run: |
+          pip install -r tool/food_model/requirements.txt
+          python tool/food_model/convert.py --out assets/models --cache /tmp/food_model
       - run: flutter pub get
       - name: Tests
         run: flutter test
@@ -63,8 +70,6 @@ jobs:
           if [ -n "$AI_URL" ]; then DEFINE="--dart-define=PRONEXA_AI_URL=$AI_URL"; fi
           flutter build apk --release -P force-version-code-ignoring-abi=true $DEFINE
           cp build/app/outputs/flutter-apk/app-release.apk "Pronexa-${TAG#v}.apk"
-          flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64 -P force-version-code-ignoring-abi=true $DEFINE
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "Pronexa-${TAG#v}-small.apk"
           sha256sum Pronexa-*.apk > SHA256SUMS.txt
       - name: Remove keystore
         if: always()
@@ -74,8 +79,7 @@ jobs:
           tag_name: ${{ env.TAG }}
           name: Pronexa ${{ env.TAG }}
           body: |
-            **The `-small` APK**: most Android phones (Tecno, Infinix, itel, Samsung A). Try this first.
-            **The other APK**: every phone. Use it if the small one says "App not installed". Either one updates the other.
+            One APK for every Android phone. It includes the on-phone food recogniser, so Photo mode works offline from the first launch.
 
             Android 7.0 or newer. Allow "Install unknown apps" for your browser or file manager, then open the file. Checksums are in SHA256SUMS.txt.
           files: |
