@@ -89,12 +89,12 @@ void main() {
     await _size(t);
     final s = _state();
     await s.load();
-    final reading = validate(readMeal('rice and stew 700 naira and shawarma'));
+    final reading = validate(readMeal('rice and stew 700 naira and sushi'));
     await t.pumpWidget(
       _wrap(
         s,
         ConfirmScreen(
-          draft: Draft.fromReading(reading, source: LogSource.describe, text: 'rice and stew 700 naira and shawarma'),
+          draft: Draft.fromReading(reading, source: LogSource.describe, text: 'rice and stew 700 naira and sushi'),
         ),
       ),
     );

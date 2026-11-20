@@ -69,6 +69,9 @@ const _unit = <String, (PortionId, double)>{
   'soybeans': (PortionId.spoon, 1),
   'soya_chunks': (PortionId.handful, 1),
   'groundnuts': (PortionId.sachet, 1),
+  'kuli_kuli': (PortionId.handful, 1),
+  'peanut_butter': (PortionId.spoon, 1),
+  'pigeon_pea': (PortionId.spoon, 2),
   'beans': (PortionId.spoon, 2),
   'akara': (PortionId.ball, 4),
   'tofu': (PortionId.piece, 3),
@@ -85,7 +88,23 @@ const _unit = <String, (PortionId, double)>{
 };
 
 /// Bought ready to eat from a vendor.
-const _ready = {'moi_moi', 'akara', 'okpa', 'groundnuts', 'soy_milk', 'tofu', 'egg', 'beans', 'chicken', 'beef', 'fish', 'sardine', 'milk'};
+const _ready = {
+  'moi_moi',
+  'akara',
+  'okpa',
+  'groundnuts',
+  'kuli_kuli',
+  'peanut_butter',
+  'soy_milk',
+  'tofu',
+  'egg',
+  'beans',
+  'chicken',
+  'beef',
+  'fish',
+  'sardine',
+  'milk',
+};
 
 /// Pairings people already eat.
 const _pairings = <String, List<String>>{
@@ -94,14 +113,19 @@ const _pairings = <String, List<String>>{
   'fried_rice': ['moi_moi', 'soya_chunks', 'egg', 'beef'],
   'yam': ['akara', 'beans', 'groundnuts', 'egg', 'fish'],
   'plantain': ['beans', 'akara', 'egg'],
-  'bread': ['akara', 'groundnuts', 'soy_milk', 'egg', 'sardine'],
-  'garri_soaked': ['groundnuts', 'soy_milk', 'milk'],
+  'bread': ['akara', 'peanut_butter', 'groundnuts', 'soy_milk', 'egg', 'sardine'],
+  'garri_soaked': ['groundnuts', 'kuli_kuli', 'soy_milk', 'milk'],
   'noodles': ['soya_chunks', 'egg', 'tofu'],
   'spaghetti': ['soya_chunks', 'beans', 'egg', 'sardine'],
   'eba': ['tofu', 'soya_chunks', 'fish', 'beef'],
   'amala': ['tofu', 'beans', 'fish', 'beef'],
   'pounded_yam': ['tofu', 'soya_chunks', 'fish', 'beef'],
   'tuwo': ['beans', 'tofu', 'fish', 'beef'],
+  'semo': ['tofu', 'soya_chunks', 'fish', 'beef'],
+  'fufu': ['tofu', 'soya_chunks', 'fish', 'beef'],
+  'starch': ['tofu', 'fish', 'beef'],
+  'yam_porridge': ['beans', 'fish', 'egg'],
+  'chips': ['egg', 'chicken'],
   'abacha': ['groundnuts', 'fish'],
 };
 
@@ -112,6 +136,8 @@ const _pairLine = {
   'tofu': 'Ask for awara in the stew.',
   'akara': 'Add akara.',
   'groundnuts': 'Add a handful of groundnuts.',
+  'kuli_kuli': 'Add a handful of kuli-kuli.',
+  'peanut_butter': 'Spread a spoon of peanut butter.',
   'soy_milk': 'Add a bottle of soy milk.',
   'milk': 'Add two spoons of milk.',
   'egg': 'Add one or two eggs.',

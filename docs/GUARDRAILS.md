@@ -17,7 +17,7 @@ Rules this codebase follows so that fast, AI-assisted ("vibe") coding stays safe
 | Rule | How it's applied | Checked by |
 |------|------------------|------------|
 | Logic is tested | Calculation, diet safety, solver and AI guard rails: `test/logic_test.dart` | `flutter test` |
-| AI behaviour has a regression set | 32 English, Pidgin and price-based descriptions: `test/reader_eval_test.dart`. It was written with the rules, so it is a regression check, not an accuracy claim | `flutter test` |
+| AI behaviour has a test set | 243 English and Pidgin descriptions with prices, sizes, fractions, local names and typos in `test/data/`: `describe_set.json` (183, written with the reader) and `describe_holdout.json` (60, written afterwards; 58/60 on first run). Food list integrity is tested too: no name points to two foods, protein values are plausible, animal foods are flagged | `flutter test` |
 | Real user flows are tested | Onboarding, Pick, Describe, Photo (with a fake camera) and vegan suggestions: `test/app_flow_test.dart` | `flutter test` |
 | Safety rules have explicit tests | "A vegan never sees an animal product" runs at every budget and in both modes | `flutter test` |
 | Server checks are tested | Schema rejects unknown foods; portions and quantities are clamped: `server/src/validate.test.ts` | `npm test` |

@@ -21,6 +21,32 @@ void main() {
       }
     });
     test('ids are unique', () => expect(foods.map((f) => f.id).toSet().length, foods.length));
+    test('no name belongs to two foods', () {
+      final owner = <String, String>{};
+      final clashes = <String>[];
+      for (final f in foods) {
+        for (final a in f.aliases.map(normalise)) {
+          final prev = owner[a];
+          if (prev != null && prev != f.id) clashes.add('"$a": $prev and ${f.id}');
+          owner[a] = f.id;
+        }
+      }
+      expect(clashes, isEmpty);
+    });
+    test('protein values are plausible and every portion has grams', () {
+      for (final f in foods) {
+        expect(f.proteinPer100g, inInclusiveRange(0.1, 60), reason: f.id);
+        expect(f.portions, isNotEmpty, reason: f.id);
+        for (final p in f.portions) {
+          expect(p.grams, greaterThan(0), reason: '${f.id} ${p.id}');
+        }
+      }
+    });
+    test('animal foods are never marked plant', () {
+      for (final f in foods.where((f) => f.group == FoodGroup.animal)) {
+        expect(f.animal, isNotNull, reason: f.id);
+      }
+    });
   });
 
   group('calculation', () {
@@ -146,13 +172,13 @@ void main() {
       final v = validate(
         RawReading.fromJson({
           'items': [
-            {'foodId': 'shawarma'},
+            {'foodId': 'sushi'},
             {'foodId': 'beans', 'portionId': 'spoon', 'qty': 2},
           ],
         }),
       );
       expect(v.items.map((i) => i.item.foodId), ['beans']);
-      expect(v.rejected, ['shawarma']);
+      expect(v.rejected, ['sushi']);
     });
     test('invalid portions fall back and quantities are clamped', () {
       final v = validate(
@@ -192,8 +218,8 @@ void main() {
       expect(v.question, isNull);
     });
     test('unknown words get an honest question', () {
-      final v = validate(readMeal('rice and shawarma'));
-      expect(v.unknown, contains('shawarma'));
+      final v = validate(readMeal('rice and sushi'));
+      expect(v.unknown, contains('sushi'));
       expect(v.question!.options.map((o) => o.label), ['Skip']);
     });
     test('no-protein items are noted', () {
