@@ -89,22 +89,22 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
       child: Scaffold(
         appBar: AppBar(title: Text('Portion · ${_step + 1} of 4')),
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+          padding: const EdgeInsets.fromLTRB(28, 8, 28, 32),
           children: [
             TweenAnimationBuilder<double>(
               tween: Tween(end: (_step + 1) / 4),
               duration: Motion.of(context, Motion.slow),
               curve: Motion.curve,
-              builder: (context, v, _) => LinearProgressIndicator(value: v, borderRadius: BorderRadius.circular(4), minHeight: 5),
+              builder: (context, v, _) => LinearProgressIndicator(value: v, borderRadius: BorderRadius.circular(4), minHeight: 4),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
             FadeSwap(
               id: _step,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(_titles[_step], style: text.titleLarge),
-                  const SizedBox(height: 14),
+                  Text(_titles[_step], style: text.headlineSmall),
+                  const SizedBox(height: 28),
                   ...switch (_step) {
                     0 => [_containers()],
                     1 => _fillStep(),
@@ -120,7 +120,7 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
             ? null
             : SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
                   child: FilledButton(
                     onPressed: _step == 1 && _fill.isEmpty ? null : () => _step == 3 ? _finish() : setState(() => _step++),
                     child: Text(_step == 3 ? 'Check my meal' : (_step == 2 && !_extras.values.any((v) => v > 0) ? 'Nothing else' : 'Next')),
@@ -135,15 +135,14 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
     crossAxisCount: 3,
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
-    mainAxisSpacing: 10,
-    crossAxisSpacing: 10,
+    mainAxisSpacing: 12,
+    crossAxisSpacing: 12,
     childAspectRatio: 0.82,
     children: [
       for (final c in containers)
         _Tile(
           icon: portionMeta[c]!.icon,
           title: _containerLabel[c]!,
-          subtitle: portionMeta[c]!.hint,
           selected: _container == c,
           onTap: () => setState(() {
             _container = c;
@@ -159,8 +158,8 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
       childAspectRatio: 0.9,
       children: [
         for (final f in _fillFoods)
@@ -175,61 +174,49 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
     if (_container == PortionId.wrap && _fill.isNotEmpty) ...[
       const SizedBox(height: 16),
       Appear(
-        child: Panel(
-          child: Row(
-            children: [
-              const Expanded(child: Text('How many wraps?')),
-              QtyStepper(value: _wraps, min: 0.5, max: 6, step: 0.5, onChanged: (v) => setState(() => _wraps = v)),
-            ],
-          ),
+        child: Group(
+          children: [
+            GroupRow(
+              icon: Icons.circle_outlined,
+              title: 'Wraps',
+              trailing: QtyStepper(value: _wraps, min: 0.5, max: 6, step: 0.5, onChanged: (v) => setState(() => _wraps = v)),
+            ),
+          ],
         ),
       ),
     ],
   ];
 
   List<Widget> _extrasStep() => [
-    for (final id in (_container == PortionId.wrap ? _swallowExtras : _extraIds).where((id) => !_fill.contains(id)))
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Panel(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            children: [
-              IconTile(foodById[id]!.icon, size: 44),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(foodById[id]!.name, style: Theme.of(context).textTheme.titleMedium),
-                    Text(portionMeta[foodById[id]!.defaultPortion]!.one, style: Theme.of(context).textTheme.bodySmall),
-                  ],
-                ),
-              ),
-              QtyStepper(value: _extras[id] ?? 0, min: 0, max: 10, onChanged: (v) => setState(() => _extras[id] = v)),
-            ],
+    Group(
+      children: [
+        for (final id in (_container == PortionId.wrap ? _swallowExtras : _extraIds).where((id) => !_fill.contains(id)))
+          GroupRow(
+            leading: IconTile(foodById[id]!.icon, size: 40),
+            title: foodById[id]!.name,
+            subtitle: portionMeta[foodById[id]!.defaultPortion]!.one,
+            trailing: QtyStepper(value: _extras[id] ?? 0, min: 0, max: 10, onChanged: (v) => setState(() => _extras[id] = v)),
           ),
-        ),
-      ),
+      ],
+    ),
   ];
 
   Widget _eatenStep() => GridView.count(
     crossAxisCount: 2,
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
-    mainAxisSpacing: 10,
-    crossAxisSpacing: 10,
+    mainAxisSpacing: 12,
+    crossAxisSpacing: 12,
     childAspectRatio: 1.4,
     children: [for (final (v, label) in eatenOptions) _EatenTile(fraction: v, label: label, selected: _eaten == v, onTap: () => setState(() => _eaten = v))],
   );
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.icon, required this.title, required this.selected, required this.onTap, this.subtitle});
+  const _Tile({required this.icon, required this.title, required this.selected, required this.onTap});
 
   final String icon;
   final String title;
-  final String? subtitle;
   final bool selected;
   final VoidCallback onTap;
 
@@ -252,15 +239,8 @@ class _Tile extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             maxLines: 2,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: selectInk(selected)),
           ),
-          if (subtitle != null)
-            Text(
-              subtitle!,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              style: const TextStyle(fontSize: 11, color: C.ink3),
-            ),
         ],
       ),
     ),
@@ -290,10 +270,18 @@ class _EatenTile extends StatelessWidget {
           SizedBox(
             width: 48,
             height: 48,
-            child: CircularProgressIndicator(value: fraction, strokeWidth: 22, backgroundColor: selected ? C.indigo : C.surface2, color: C.blue),
+            child: CircularProgressIndicator(
+              value: fraction,
+              strokeWidth: 22,
+              backgroundColor: selected ? C.sTile : const Color(0x1FFFFFFF),
+              color: selected ? C.indigo2 : C.blue,
+            ),
           ),
           const SizedBox(height: 10),
-          Text(label, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: selectInk(selected)),
+          ),
         ],
       ),
     ),

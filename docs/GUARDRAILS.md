@@ -65,7 +65,7 @@ Rules this codebase follows so that fast, AI-assisted ("vibe") coding stays safe
 | Text scaling | Rows use `Flexible` or `Expanded`; widget tests run with a wide test font to catch overflow |
 | Reduced motion | Every transition, count-up and rotating example is skipped when the system asks for less motion |
 | Contrast | Every text and background pair meets WCAG AA (see `docs/DESIGN.md`) |
-| Light on old phones | Release build is AOT-compiled; ripple effect instead of shader-based sparkle; no gradients or blur; photos downscaled to 1280 px |
+| Light on old phones | Release build is AOT-compiled; ripple effect instead of shader-based sparkle; no blur, and only the two simple Asteria gradients; photos downscaled to 1280 px |
 
 ## 7. If you have your own guardrail list
 

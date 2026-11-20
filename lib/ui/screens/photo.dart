@@ -12,7 +12,6 @@ import '../draft.dart';
 import '../nav.dart';
 import '../scope.dart';
 import '../theme.dart';
-import '../widgets/common.dart';
 import '../widgets/motion.dart';
 
 /// Photo mode. Uses the phone's own camera app through image_picker, so the
@@ -123,7 +122,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Photo')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+        padding: const EdgeInsets.fromLTRB(28, 8, 28, 32),
         children: [
           FadeSwap(
             id: photo == null,
@@ -131,32 +130,34 @@ class _PhotoScreenState extends State<PhotoScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (photo == null) ...[
-                  Panel(
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                  Container(
+                    height: 300,
+                    decoration: BoxDecoration(gradient: C.header, borderRadius: BorderRadius.circular(R.xl)),
+                    alignment: Alignment.center,
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 72,
-                          height: 72,
-                          decoration: const BoxDecoration(color: C.indigo, shape: BoxShape.circle),
-                          child: const Icon(Icons.photo_camera_outlined, size: 32, color: Colors.white),
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(color: const Color(0x1CFFFFFF), borderRadius: BorderRadius.circular(R.lg)),
+                          child: const Icon(Icons.photo_camera_outlined, size: 44, color: Colors.white),
                         ),
-                        const SizedBox(height: 16),
-                        Text('Shoot from above, in good light', style: text.bodyMedium, textAlign: TextAlign.center),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'SHOOT FROM ABOVE, IN GOOD LIGHT',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, letterSpacing: 1, color: Color(0xB3FFFFFF)),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  FilledButton.icon(onPressed: () => _take(ImageSource.camera), icon: const Icon(Icons.photo_camera), label: const Text('Take a photo')),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () => _take(ImageSource.gallery),
-                    icon: const Icon(Icons.photo_library_outlined),
-                    label: const Text('Choose from gallery'),
-                  ),
+                  const SizedBox(height: 32),
+                  FilledButton(onPressed: () => _take(ImageSource.camera), child: const Text('Take a photo')),
+                  const SizedBox(height: 8),
+                  TextButton(onPressed: () => _take(ImageSource.gallery), child: const Text('Choose from gallery')),
                 ] else ...[
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(R.lg),
+                    borderRadius: BorderRadius.circular(R.xl),
                     child: AspectRatio(
                       aspectRatio: 4 / 3,
                       child: Image.memory(photo, fit: BoxFit.cover, semanticLabel: 'Your meal photo'),
@@ -195,9 +196,10 @@ class _PhotoScreenState extends State<PhotoScreen> {
             Appear(
               child: Semantics(
                 liveRegion: true,
-                child: Panel(
-                  color: C.warmBg,
-                  child: Text(_message!, style: text.bodyMedium?.copyWith(color: C.warm)),
+                child: Text(
+                  _message!,
+                  textAlign: TextAlign.center,
+                  style: text.bodyMedium?.copyWith(color: C.warm),
                 ),
               ),
             ),

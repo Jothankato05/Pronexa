@@ -49,19 +49,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         },
         child: Scaffold(
           appBar: AppBar(
-            leading: IconButton(tooltip: 'Back', onPressed: () => setState(() => _step--), icon: const Icon(Icons.arrow_back)),
-            title: Text('Step $_step of 5'),
+            leading: BackChevron(onPressed: () => setState(() => _step--)),
+            title: Semantics(
+              label: 'Step $_step of 5',
+              child: _Dots(step: _step),
+            ),
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
             children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(end: _step / 5),
-                duration: Motion.of(context, Motion.slow),
-                curve: Motion.curve,
-                builder: (context, v, _) => LinearProgressIndicator(value: v, borderRadius: BorderRadius.circular(4), minHeight: 5),
-              ),
-              const SizedBox(height: 24),
               FadeSwap(
                 id: _step,
                 child: Column(
@@ -69,13 +65,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   children: switch (_step) {
                     1 => [
                       Text('What do you eat?', style: text.headlineSmall),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 32),
                       for (final d in Diet.values)
                         ChoiceRow(title: dietLabels[d]!.$1, subtitle: dietLabels[d]!.$2, selected: _diet == d, onTap: () => setState(() => _diet = d)),
                     ],
                     2 => [
                       Text('Any food allergies?', style: text.headlineSmall),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 32),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -95,41 +91,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ],
                     3 => [
                       Text('Your weight', style: text.headlineSmall),
-                      const SizedBox(height: 24),
-                      Panel(
-                        child: Column(
-                          children: [
-                            Text(_weightKnown ? '$_weight kg' : 'Not sure', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 16),
-                            QtyStepper(
-                              value: _weight.toDouble(),
-                              min: 30,
-                              max: 200,
-                              format: (v) => '${v.round()}',
-                              onChanged: (v) => setState(() {
-                                _weight = v.round();
-                                _weightKnown = true;
-                              }),
-                            ),
-                            const SizedBox(height: 16),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              alignment: WrapAlignment.center,
-                              children: [
-                                for (final kg in [45, 55, 65, 75, 85])
-                                  SelectPill(
-                                    label: '$kg',
-                                    selected: _weightKnown && _weight == kg,
-                                    onTap: () => setState(() {
-                                      _weight = kg;
-                                      _weightKnown = true;
-                                    }),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      const SizedBox(height: 48),
+                      Column(
+                        children: [
+                          Text(_weightKnown ? '$_weight kg' : 'Not sure', style: text.displaySmall),
+                          const SizedBox(height: 24),
+                          QtyStepper(
+                            value: _weight.toDouble(),
+                            min: 30,
+                            max: 200,
+                            format: (v) => '${v.round()}',
+                            onChanged: (v) => setState(() {
+                              _weight = v.round();
+                              _weightKnown = true;
+                            }),
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              for (final kg in [45, 55, 65, 75, 85])
+                                SelectPill(
+                                  label: '$kg',
+                                  selected: _weightKnown && _weight == kg,
+                                  onTap: () => setState(() {
+                                    _weight = kg;
+                                    _weightKnown = true;
+                                  }),
+                                ),
+                            ],
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       SelectPill(
@@ -143,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ],
                     4 => [
                       Text('How active are you?', style: text.headlineSmall),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 32),
                       for (final a in Activity.values)
                         ChoiceRow(
                           title: activityInfo[a]!.label,
@@ -153,36 +147,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                     ],
                     _ => [
-                      Panel(
-                        color: C.indigo,
-                        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 20),
+                        decoration: BoxDecoration(
+                          gradient: C.header,
+                          borderRadius: BorderRadius.circular(R.xl),
+                          boxShadow: const [BoxShadow(color: Color(0x80000000), blurRadius: 80, offset: Offset(0, 40))],
+                        ),
                         child: Column(
                           children: [
                             const Text(
                               'YOUR DAILY PROTEIN',
-                              style: TextStyle(color: C.onIndigo2, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w500),
+                              style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w500),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 12),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               textBaseline: TextBaseline.alphabetic,
                               children: [
-                                CountUp(
-                                  value: target.mid,
-                                  style: const TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w500),
-                                ),
-                                const Text(
-                                  ' g',
-                                  style: TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w500),
-                                ),
+                                CountUp(value: target.mid, style: text.displaySmall!.copyWith(fontSize: 56)),
+                                Text(' g', style: text.displaySmall!.copyWith(fontSize: 56)),
                               ],
                             ),
-                            Text(fmtRange(target), style: const TextStyle(color: C.onIndigo2, fontSize: 15)),
+                            const SizedBox(height: 8),
+                            Text(fmtRange(target), style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: 15)),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       Text('A health worker can give you a personal number.', style: text.bodySmall, textAlign: TextAlign.center),
                     ],
                   },
@@ -192,7 +185,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           bottomNavigationBar: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
               child: FilledButton(
                 onPressed: !_canContinue
                     ? null
@@ -209,6 +202,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
+/// Step dots (Asteria key-feature pager): the current step is a white bar.
+class _Dots extends StatelessWidget {
+  const _Dots({required this.step});
+
+  final int step;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      for (var i = 1; i <= 5; i++)
+        AnimatedContainer(
+          duration: Motion.of(context, Motion.medium),
+          curve: Motion.curve,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          width: i == step ? 22 : 8,
+          height: 8,
+          decoration: BoxDecoration(color: i <= step ? Colors.white : const Color(0x33FFFFFF), borderRadius: BorderRadius.circular(4)),
+        ),
+    ],
+  );
+}
+
+/// Welcome, after the Asteria splash: sky-to-night background, the mark,
+/// a short caps headline and one white button.
 class _Welcome extends StatelessWidget {
   const _Welcome({required this.onStart});
 
@@ -218,36 +236,47 @@ class _Welcome extends StatelessWidget {
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
     value: lightIcons,
     child: Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
-              const Center(child: Appear(offset: 24, child: PronexaMark(width: 120))),
-              const Spacer(),
-              const Appear(
-                index: 2,
-                child: Text(
-                  'Pronexa',
-                  style: TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w500),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF9CC8D6), Color(0xFF28328F), Color(0xFF0A0E17)],
+            stops: [0, 0.45, 0.8],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 24, 32, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Spacer(flex: 3),
+                const Center(child: Appear(offset: 24, child: PronexaMark(width: 150))),
+                const Spacer(flex: 4),
+                const Appear(
+                  index: 2,
+                  child: Text(
+                    'CHECK YOUR PROTEIN',
+                    style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w500, height: 1, letterSpacing: -0.5),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              const Appear(
-                index: 3,
-                child: Text('Check your protein. Close the gap for less.', style: TextStyle(color: C.ink2, fontSize: 17)),
-              ),
-              const SizedBox(height: 32),
-              Appear(
-                index: 4,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(onPressed: onStart, child: const Text('Start')),
+                const SizedBox(height: 10),
+                const Appear(
+                  index: 3,
+                  child: Text('Close the gap for less.', style: TextStyle(color: Color(0x99FFFFFF), fontSize: 16)),
                 ),
-              ),
-            ],
+                const SizedBox(height: 36),
+                Appear(
+                  index: 4,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(onPressed: onStart, child: const Text('Start')),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         ),
       ),

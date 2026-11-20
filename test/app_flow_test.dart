@@ -91,6 +91,7 @@ void main() {
   testWidgets('Describe reads Pidgin/price text and asks for confirmation', (tester) async {
     final state = _state();
     await _pumpApp(tester, state);
+    await _tapText(tester, 'DESCRIBE');
     await tester.enterText(find.byType(TextField).first, '₦1,000 rice and beans, medium takeaway');
     await tester.testTextInput.receiveAction(TextInputAction.send);
     await tester.pumpAndSettle(const Duration(seconds: 2));
