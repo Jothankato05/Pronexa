@@ -115,6 +115,14 @@ class SettingsScreen extends StatelessWidget {
                     messenger.showSnackBar(SnackBar(content: Text('Copied ${out.count} descriptions')));
                   },
                 ),
+                GroupRow(
+                  icon: Icons.photo_library_outlined,
+                  title: 'Photo memory',
+                  subtitle: state.memory.length == 0
+                      ? 'Learns from meals you confirm in Photo'
+                      : '${state.memory.length} photos, ${state.memory.foodsKnown} foods learned',
+                  trailing: state.memory.length == 0 ? const SizedBox.shrink() : TextButton(onPressed: state.clearPhotoMemory, child: const Text('Clear')),
+                ),
                 GroupRow(icon: Icons.delete_outline, title: 'Delete all my data', color: C.warm, onTap: () => _confirmDelete(context)),
               ],
             ),

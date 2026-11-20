@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../ai/food_lens.dart';
+import '../ai/photo_memory.dart';
 import '../ai/meal_reader.dart';
 import '../data/models.dart';
 import '../logic/calc.dart';
@@ -24,8 +25,11 @@ class AppState extends ChangeNotifier {
   final Storage storage;
   final MealReader reader;
 
-  /// On-phone food recogniser for Photo mode (downloaded once).
+  /// On-phone food recogniser for Photo mode.
   final FoodLens lens;
+
+  /// What the phone has learned from the student's confirmed photos.
+  PhotoMemory memory = PhotoMemory();
   final DateTime Function() _clock;
   final _random = Random.secure();
 
@@ -53,6 +57,7 @@ class AppState extends ChangeNotifier {
       final raw = _decode(await storage.read('meals'));
       final cutoff = dateKey(now.subtract(const Duration(days: keepDays)));
       meals = raw is List ? raw.map(Meal.fromJson).whereType<Meal>().where((m) => m.date.compareTo(cutoff) >= 0).toList() : [];
+      memory = PhotoMemory.fromJson(_decode(await storage.read('photoMemory')));
     } on Exception {
       // Corrupt or unreadable storage: start clean rather than crash.
       meals = [];
@@ -93,7 +98,14 @@ class AppState extends ChangeNotifier {
   String _newId() => 'm_${now.millisecondsSinceEpoch.toRadixString(36)}_${_random.nextInt(1 << 32).toRadixString(36)}';
 
   /// Saves a confirmed meal. Returns it, so the UI can show the total.
-  Future<Meal> saveMeal({required List<MealItem> items, required LogSource source, String? text, int? price, String? editingId}) async {
+  Future<Meal> saveMeal({
+    required List<MealItem> items,
+    required LogSource source,
+    String? text,
+    int? price,
+    String? editingId,
+    Float32List? photoFeatures,
+  }) async {
     final before = gap.mid;
     final existing = editingId == null ? null : meals.where((m) => m.id == editingId).firstOrNull;
     final meal = existing != null
@@ -104,6 +116,10 @@ class AppState extends ChangeNotifier {
       celebrateTick++;
       settings = settings.copyWith(lastCelebrated: todayKey);
       await storage.write('settings', jsonEncode(settings.toJson()));
+    }
+    // Learn from a confirmed photo: the foods the student actually ate.
+    if (photoFeatures != null && existing == null && memory.learn(items.map((i) => i.foodId).toList(), photoFeatures, todayKey)) {
+      await storage.write('photoMemory', jsonEncode(memory.toJson()));
     }
     notifyListeners();
     await _saveMeals();
@@ -164,8 +180,15 @@ class AppState extends ChangeNotifier {
     await storage.write('settings', jsonEncode(settings.toJson()));
   }
 
+  Future<void> clearPhotoMemory() async {
+    memory = PhotoMemory();
+    await storage.write('photoMemory', '[]');
+    notifyListeners();
+  }
+
   Future<void> resetAll() async {
     await storage.clear();
+    memory = PhotoMemory();
     profile = null;
     meals = [];
     settings = const Settings();

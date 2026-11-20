@@ -18,7 +18,7 @@ Versions before 0.6.0 were signed with a test key: uninstall them once before in
 2. **Log a meal, four ways:**
    - **Pick:** tap foods from the list. Works offline.
    - **Portion:** choose the pack, plate, bowl or wrap, what was in it, extras, and how much you ate. Works offline.
-   - **Photo:** take a photo or choose one from the gallery. Pronexa recognises Nigerian foods on the phone, offline (41 foods: swallows, soups, rice dishes, proteins), and shows them first so you tap what's really there. See `docs/PHOTO.md`.
+   - **Photo:** take a photo or choose one from the gallery. Pronexa recognises Nigerian foods on the phone, offline (41 foods: swallows, soups, rice dishes, proteins), and shows them first so you tap what's really there. It also learns: once you confirm a photo of a new food (chips, suya), similar photos suggest it next time, all on the phone. See `docs/PHOTO.md`.
    - **Describe:** type it in English or Pidgin, for example "₦1,000 rice and beans, medium takeaway". Read by the AI server when one is set up and online, otherwise by the phone's own reader, which works fully offline: 78 foods, 576 names for them (Yoruba, Igbo, Hausa, Pidgin, brand names and common typos), 83 things with no protein (drinks, fruit, seasonings), fractions like "1½" and "half loaf", prices like "2k" and "N1500", and "I no finish am".
 3. **Confirm:** check and fix the foods, portions and how much you ate. Nothing counts until you confirm.
 4. **Today:** target, eaten and gap, as ranges.
@@ -80,7 +80,7 @@ APKs are not kept in the repository. Push a version tag (`git tag v0.6.0 && git 
 ### More docs
 
 - `docs/PILOT.md`: running a pilot, collecting real descriptions, the nutrition review sheet (`docs/food_review.csv`)
-- `docs/PHOTO.md`: the on-phone food recogniser (how it works, accuracy, licence)
+- `docs/PHOTO.md`: the on-phone food recogniser and photo memory (how they work, accuracy, licence)
 - `docs/AI_SERVER.md`: the optional AI server
 - `docs/DEMO.md`: a 3-minute demo script
 - `docs/DESIGN.md`, `docs/GUARDRAILS.md`

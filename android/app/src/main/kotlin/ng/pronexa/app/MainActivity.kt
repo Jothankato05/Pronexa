@@ -26,8 +26,8 @@ class MainActivity : FlutterActivity() {
                     // Never on the main thread: loading and running the model take seconds.
                     lensThread.execute {
                         try {
-                            val scores = engine().run(image)
-                            main.post { result.success(scores) }
+                            val out = engine().run(image)
+                            main.post { result.success(mapOf("scores" to out[0], "features" to out[1])) }
                         } catch (t: Throwable) {
                             // Includes OutOfMemoryError: report it and let the student pick by hand.
                             closeEngine()

@@ -23,11 +23,31 @@ On 96 independent photos of 12 Nigerian dishes (a different public dataset, `cic
 
 Strong: egusi, akara, jollof, ogbono, okra soup, nkwobi. Weaker as first guess: banga, amala, pounded yam, ewedu (mixed up with similar soups and swallows). Some of those internet photos may resemble the model's training data, so expect lower numbers on real campus photos.
 
-**It does not know foods outside its 41**, for example chips, shawarma, suya, puff-puff or meat pie. For those it may suggest something similar-looking (chips can come up as plantain), and the student picks the right food themselves.
+**It does not know foods outside its 41**, for example chips, shawarma, suya, puff-puff or meat pie. For those it may suggest something similar-looking (chips can come up as plantain), and the student picks the right food themselves. The phone then learns them (below).
+
+## Learning new foods on the phone
+
+Pronexa adapts to each student's food without retraining or the internet (`lib/ai/photo_memory.dart`):
+
+1. When a meal logged from a photo is added, the photo's fingerprint is kept with the foods the student confirmed. The fingerprint is the model's 1280 image features, stored as 8-bit numbers (1.3 KB). The photo itself is never kept.
+2. For each new photo, Pronexa finds the most similar remembered photo. If it is close enough (cosine similarity at least 0.65), that meal's foods come first, ticked, before the model's own guesses.
+3. Up to 200 photos are kept (about 260 KB); the oldest are forgotten first, and near-copies of the same meal are not stored twice. Profile → Photo memory shows how much has been learned and can clear it. Deleting all data clears it too.
+
+This covers foods the model was never trained on (chips, suya, shawarma) and a student's usual plates (their buka's jollof and chicken).
+
+Measured on 164 public photos of 6 dishes the model does not know (chin chin, puff-puff, suya, pepper soup, ofada rice, yam porridge), over 30 to 40 random trials each:
+
+| Photos already confirmed of that dish | Next photo of it gets the right food first |
+|---|---|
+| 1 | 54% |
+| 3 | 69% |
+| 5 | 75% |
+
+About 12 to 14% of other photos picked up one wrong learned suggestion. Suggestions are only taps: the student still checks every food, and protein still comes only from the food database.
 
 ## Privacy
 
-The photo never leaves the phone for recognition. If the optional AI server is set up (`docs/AI_SERVER.md`), "Read the photo" can still send it there, only when tapped and never in low-data mode.
+The photo never leaves the phone for recognition or learning, and learned fingerprints stay on the phone. If the optional AI server is set up (`docs/AI_SERVER.md`), "Read the photo" can still send it there, only when tapped and never in low-data mode.
 
 ## Building it
 

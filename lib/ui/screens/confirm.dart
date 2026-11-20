@@ -81,7 +81,14 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final total = itemsProtein(d.items.map((i) => i.item));
-    await state.saveMeal(items: d.items.map((i) => i.item).toList(), source: d.source, text: d.text, price: d.price, editingId: d.editingId);
+    await state.saveMeal(
+      items: d.items.map((i) => i.item).toList(),
+      source: d.source,
+      text: d.text,
+      price: d.price,
+      editingId: d.editingId,
+      photoFeatures: d.photoFeatures,
+    );
     nav.popUntil((r) => r.isFirst);
     messenger.showSnackBar(SnackBar(content: Text(d.editingId != null ? 'Meal updated' : 'Added: about ${fmtRange(total)} protein')));
   }

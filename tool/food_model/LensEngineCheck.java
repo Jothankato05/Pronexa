@@ -22,7 +22,10 @@ public final class LensEngineCheck {
     try (LensEngine engine = new LensEngine(args[0])) {
       for (int r = 0; r < runs; r++) {
         long t = System.nanoTime();
-        float[] s = engine.run(image);
+        float[][] out = engine.run(image);
+        float[] s = out[0];
+        double norm = 0;
+        for (float v : out[1]) norm += v * v;
         StringBuilder top = new StringBuilder();
         boolean[] used = new boolean[s.length];
         for (int k = 0; k < 4; k++) {
@@ -31,7 +34,7 @@ public final class LensEngineCheck {
           used[best] = true;
           top.append(String.format("%d:%.3f ", best, s[best]));
         }
-        System.out.printf("run %d: %d ms, top %s%n", r + 1, (System.nanoTime() - t) / 1_000_000, top);
+        System.out.printf("run %d: %d ms, top %s| fingerprint %d values, length %.4f%n", r + 1, (System.nanoTime() - t) / 1_000_000, top, out[1].length, Math.sqrt(norm));
       }
     }
   }

@@ -18,6 +18,7 @@ import java.util.Collections;
 public final class LensEngine implements AutoCloseable {
   public static final int SIZE = 384;
   public static final int LABELS = 41;
+  public static final int FEATURES = 1280;
 
   private final String modelPath;
   private final OrtEnvironment env = OrtEnvironment.getEnvironment();
@@ -46,20 +47,22 @@ public final class LensEngine implements AutoCloseable {
 
   /**
    * @param image 384 x 384 RGB values in 0..1, row by row (NHWC), as built by the app.
-   * @return one probability per label, in label order.
+   * @return {scores, features}: one probability per label in label order, and the photo's
+   *     unit-length fingerprint (the app's photo memory compares these to learn new foods).
    */
-  public synchronized float[] run(float[] image) throws OrtException {
+  public synchronized float[][] run(float[] image) throws OrtException {
     if (image == null || image.length != SIZE * SIZE * 3) {
       throw new IllegalArgumentException("Expected " + (SIZE * SIZE * 3) + " values");
     }
     long[] shape = {1, SIZE, SIZE, 3};
     try (OnnxTensor input = OnnxTensor.createTensor(env, FloatBuffer.wrap(image), shape);
         OrtSession.Result out = session().run(Collections.singletonMap("image", input))) {
-      float[][] scores = (float[][]) out.get(0).getValue();
-      if (scores.length != 1 || scores[0].length != LABELS) {
+      float[][] scores = (float[][]) out.get("scores").get().getValue();
+      float[][] features = (float[][]) out.get("features").get().getValue();
+      if (scores.length != 1 || scores[0].length != LABELS || features.length != 1 || features[0].length != FEATURES) {
         throw new IllegalStateException("Unexpected model output");
       }
-      return scores[0];
+      return new float[][] {scores[0], features[0]};
     }
   }
 

@@ -17,8 +17,8 @@ import 'widgets/common.dart';
 Future<void> _push(BuildContext context, Widget page) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 
 Future<void> openDescribe(BuildContext context, {String text = ''}) => _push(context, DescribeScreen(initialText: text));
-Future<void> openQuickPick(BuildContext context, {Uint8List? photo, List<String> suggested = const []}) =>
-    _push(context, QuickPickScreen(photo: photo, suggested: suggested));
+Future<void> openQuickPick(BuildContext context, {Uint8List? photo, List<String> suggested = const [], Float32List? photoFeatures}) =>
+    _push(context, QuickPickScreen(photo: photo, suggested: suggested, photoFeatures: photoFeatures));
 Future<void> openPortion(BuildContext context) => _push(context, const PortionModeScreen());
 Future<void> openPhoto(BuildContext context) => _push(context, const PhotoScreen());
 Future<void> openConfirm(BuildContext context, Draft draft) => _push(context, ConfirmScreen(draft: draft));

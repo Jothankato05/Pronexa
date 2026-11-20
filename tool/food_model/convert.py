@@ -9,8 +9,11 @@ exactly the original model's answers) and pronexa-food-v1.labels.json. The
 app bundles both.
 
 Model input: "image", float32 [1, 384, 384, 3], RGB in 0..1 (centre-cropped
-square). Normalisation and sigmoid are inside the graph. Output: "scores",
-float32 [1, 41], one probability per label.
+square). Normalisation and sigmoid are inside the graph. Outputs: "scores",
+float32 [1, 41], one probability per label; and "features", float32
+[1, 1280], the photo's unit-length fingerprint (pooled image features before
+the classifier). The app keeps fingerprints of confirmed photos on the phone
+so it learns new foods without retraining (lib/ai/photo_memory.dart).
 
 Run: pip install -r tool/food_model/requirements.txt
      python tool/food_model/convert.py --out assets/models
@@ -63,7 +66,7 @@ def load_state_dict(path: pathlib.Path) -> dict:
 
 
 class Wrapped(nn.Module):
-    """NHWC 0..1 RGB in, sigmoid scores out."""
+    """NHWC 0..1 RGB in; sigmoid scores and a unit-length fingerprint out."""
 
     def __init__(self, net: nn.Module):
         super().__init__()
@@ -73,7 +76,9 @@ class Wrapped(nn.Module):
 
     def forward(self, x):
         x = (x.permute(0, 3, 1, 2) - self.mean) / self.std
-        return torch.sigmoid(self.net(x))
+        f = torch.flatten(self.net.avgpool(self.net.features(x)), 1)
+        scores = torch.sigmoid(self.net.classifier(f))
+        return scores, f / f.norm(dim=1, keepdim=True).clamp_min(1e-6)
 
 
 def main() -> None:
@@ -98,7 +103,7 @@ def main() -> None:
 
     final = out / "pronexa-food-v1.onnx"
     x = torch.rand(1, SIZE, SIZE, 3)
-    torch.onnx.export(model, (x,), final, input_names=["image"], output_names=["scores"], opset_version=17, dynamo=False)
+    torch.onnx.export(model, (x,), final, input_names=["image"], output_names=["scores", "features"], opset_version=17, dynamo=False)
     onnx.checker.check_model(str(final))
 
     # The exported model must give PyTorch's answers.
@@ -108,13 +113,14 @@ def main() -> None:
     for _ in range(3):
         r = rng.random((1, SIZE, SIZE, 3), dtype=np.float32)
         with torch.no_grad():
-            want = model(torch.from_numpy(r)).numpy()
-        worst = max(worst, float(np.abs(session.run(None, {"image": r})[0] - want).max()))
+            want = [t.numpy() for t in model(torch.from_numpy(r))]
+        got = session.run(None, {"image": r})
+        worst = max(worst, *(float(np.abs(g - w).max()) for g, w in zip(got, want)))
     if worst > 1e-4:
         raise SystemExit(f"ONNX export differs from PyTorch ({worst:.6f})")
 
     (out / "pronexa-food-v1.labels.json").write_text(
-        json.dumps({"source": f"https://huggingface.co/{REPO}/tree/{REVISION}", "license": "Apache-2.0", "input": [1, SIZE, SIZE, 3], "labels": labels}, indent=2) + "\n"
+        json.dumps({"source": f"https://huggingface.co/{REPO}/tree/{REVISION}", "license": "Apache-2.0", "input": [1, SIZE, SIZE, 3], "features": 1280, "labels": labels}, indent=2) + "\n"
     )
     print(f"{final} written ({final.stat().st_size / 1e6:.1f} MB, sha256 {sha256(final)}, max difference from PyTorch {worst:.2e})")
 

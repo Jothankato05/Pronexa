@@ -13,12 +13,25 @@ import '../data/foods.dart';
 /// ONNX Runtime (android/app/src/main/java/ng/pronexa/app/LensEngine.java). It only suggests foods: the student picks
 /// and confirms, and protein still comes only from the food database.
 
-/// One suggestion: a database food and how sure the model is (0..1).
+/// One suggestion: a database food and how sure it is (0..1). [learned]
+/// suggestions come from the student's own confirmed photos (PhotoMemory).
 class LensGuess {
-  const LensGuess(this.foodId, this.score);
+  const LensGuess(this.foodId, this.score, {this.learned = false});
 
   final String foodId;
   final double score;
+  final bool learned;
+}
+
+/// What the recogniser saw: its own suggestions, and the photo's fingerprint
+/// (1280 numbers, unit length) for the on-phone photo memory.
+class LensResult {
+  const LensResult(this.guesses, [this.features]);
+
+  final List<LensGuess> guesses;
+  final Float32List? features;
+
+  static const empty = LensResult([]);
 }
 
 abstract class FoodLens {
@@ -28,7 +41,7 @@ abstract class FoodLens {
   /// Starts loading the model in the background, ahead of the first photo.
   Future<void> prepare();
 
-  Future<List<LensGuess>> recognise(Uint8List photo);
+  Future<LensResult> recognise(Uint8List photo);
 }
 
 /// The model's 41 labels, in output order, and the database foods each one
@@ -98,6 +111,7 @@ List<LensGuess> guessesFromScores(List<double> scores, {double threshold = 0.2, 
 /// recognises foods offline from the first launch.
 const lensAsset = 'assets/models/pronexa-food-v1.onnx';
 const lensSize = 384;
+const lensFeatures = 1280;
 
 /// Runs the bundled model with ONNX Runtime on the phone, through
 /// MainActivity's "pronexa/lens" channel. The native side does the work on a
@@ -128,11 +142,13 @@ class OnDeviceLens implements FoodLens {
   }
 
   @override
-  Future<List<LensGuess>> recognise(Uint8List photo) async {
+  Future<LensResult> recognise(Uint8List photo) async {
     final input = await lensInput(photo);
-    final scores = await _channel.invokeMethod<Float32List>('recognise', {'image': input});
-    if (scores == null || scores.length != lensLabels.length) return const [];
-    return guessesFromScores([for (final v in scores) v.toDouble()]);
+    final out = await _channel.invokeMapMethod<String, Object?>('recognise', {'image': input});
+    final scores = out?['scores'];
+    final features = out?['features'];
+    if (scores is! Float32List || scores.length != lensLabels.length) return LensResult.empty;
+    return LensResult(guessesFromScores([for (final v in scores) v.toDouble()]), features is Float32List && features.length == lensFeatures ? features : null);
   }
 }
 

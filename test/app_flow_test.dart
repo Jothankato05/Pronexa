@@ -43,7 +43,7 @@ class NoLens implements FoodLens {
   Future<void> prepare() async {}
 
   @override
-  Future<List<LensGuess>> recognise(Uint8List photo) async => const [];
+  Future<LensResult> recognise(Uint8List photo) async => LensResult.empty;
 }
 
 AppState _state({bool withProfile = true}) {

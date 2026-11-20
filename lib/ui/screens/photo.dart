@@ -41,6 +41,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
   bool _lens = false;
   bool _looking = false;
   List<LensGuess>? _guesses;
+  Float32List? _features;
 
   @override
   void initState() {
@@ -66,18 +67,27 @@ class _PhotoScreenState extends State<PhotoScreen> {
     setState(() {
       _looking = true;
       _guesses = null;
+      _features = null;
     });
-    List<LensGuess> found;
+    final state = AppScope.read(context);
+    var result = LensResult.empty;
     try {
-      found = await AppScope.read(context).lens.recognise(photo).timeout(const Duration(seconds: 60));
+      result = await state.lens.recognise(photo).timeout(const Duration(seconds: 60));
     } on Exception {
       // Includes the time limit: fall back to picking by hand.
-      found = const [];
     }
     if (!mounted || _photo != photo) return;
+    // What this phone has learned from confirmed photos comes first, then the
+    // recogniser's own suggestions.
+    final learned = result.features == null ? const <LensGuess>[] : state.memory.recall(result.features!);
+    final merged = <String, LensGuess>{for (final g in learned) g.foodId: g};
+    for (final g in result.guesses) {
+      merged.putIfAbsent(g.foodId, () => g);
+    }
     setState(() {
       _looking = false;
-      _guesses = found;
+      _guesses = merged.values.take(5).toList();
+      _features = result.features;
     });
   }
 
@@ -182,10 +192,13 @@ class _PhotoScreenState extends State<PhotoScreen> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: [for (final x in g) _GuessChip(name: foodById[x.foodId]!.name, score: x.score)],
+            children: [for (final x in g) _GuessChip(name: foodById[x.foodId]!.name, score: x.score, learned: x.learned)],
           ),
           const SizedBox(height: 10),
-          Text('Check before adding: guesses can be wrong.', style: text.bodySmall),
+          Text(
+            g.any((x) => x.learned) ? 'Ticked items are from meals you confirmed before. Check before adding.' : 'Check before adding: guesses can be wrong.',
+            style: text.bodySmall,
+          ),
         ],
       ),
     );
@@ -252,7 +265,9 @@ class _PhotoScreenState extends State<PhotoScreen> {
                     _lensPanel(),
                   const SizedBox(height: 16),
                   (canRead ? OutlinedButton.new : FilledButton.new)(
-                    onPressed: _busy || _looking ? null : () => openQuickPick(context, photo: photo, suggested: [...?_guesses?.map((g) => g.foodId)]),
+                    onPressed: _busy || _looking
+                        ? null
+                        : () => openQuickPick(context, photo: photo, suggested: [...?_guesses?.map((g) => g.foodId)], photoFeatures: _features),
                     child: Text((_guesses?.isNotEmpty ?? false) ? 'Check and add foods' : 'Pick the foods myself'),
                   ),
                   const SizedBox(height: 4),
@@ -281,32 +296,30 @@ class _PhotoScreenState extends State<PhotoScreen> {
 }
 
 class _GuessChip extends StatelessWidget {
-  const _GuessChip({required this.name, required this.score});
+  const _GuessChip({required this.name, required this.score, this.learned = false});
 
   final String name;
   final double score;
+  final bool learned;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     decoration: BoxDecoration(
-      color: C.fill,
+      color: learned ? C.indigo2 : C.fill,
       borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: C.line),
+      border: Border.all(color: learned ? C.blue : C.line),
     ),
-    child: Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: name,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: C.ink),
-          ),
-          TextSpan(
-            text: '  ${(score * 100).round()}%',
-            style: const TextStyle(fontSize: 12, color: C.ink3),
-          ),
-        ],
-      ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (learned) ...[const Icon(Icons.check_circle, size: 16, color: C.blue, semanticLabel: 'From your confirmed meals'), const SizedBox(width: 6)],
+        Text(
+          name,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: C.ink),
+        ),
+        if (!learned) ...[const SizedBox(width: 8), Text('${(score * 100).round()}%', style: const TextStyle(fontSize: 12, color: C.ink3))],
+      ],
     ),
   );
 }
