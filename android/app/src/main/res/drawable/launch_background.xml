@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Flat launch screen: brand green with the Pronexa mark. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/pronexa_green" />
+    <item>
+        <bitmap android:gravity="center" android:src="@mipmap/launch_mark" />
+    </item>
+</layer-list>

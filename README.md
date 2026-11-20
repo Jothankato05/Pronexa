@@ -1,78 +1,97 @@
-# Pronexa: making every meal count
+# Pronexa
 
-An offline-first protein-gap app for Nigerian university students. Describe meals in naira, packs, wraps and spoons (never grams), see an honest estimate of your protein gap, and get affordable ways to close it, with beans, moi-moi, akara, soya, tofu (awara), groundnuts, okpa and lentils at the centre.
+Check your protein. Close the gap for less.
 
-It ships as an **Android APK** (Capacitor) and as an installable **PWA** from the same code.
+An Android app (built with Flutter) for Nigerian university students. Log meals the way you buy them, in naira, packs, wraps and spoons, see an estimate of how much protein you've had, and get cheap ways to close the gap. Beans, moi-moi, akara, soya, awara, groundnuts, okpa and lentils come first.
 
-> Nutrition awareness tool, not medical advice. Every number is an estimate.
+> Estimates only. Not medical advice.
 
-## Get the app
+## Install
 
-![Pronexa screens](release/screens.png)
+Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browser or file manager, then open the file. Either file replaces earlier Pronexa test builds.
 
+| File | Size | Use |
+|------|------|-----|
+| `release/Pronexa-0.2.0-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
+| `release/Pronexa-0.2.0.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
 
-- **Android:** [`release/Pronexa-0.1.0-debug.apk`](release/Pronexa-0.1.0-debug.apk) (5.2 MB, Android 7.0+, debug-signed). On the phone, allow "Install unknown apps" for your browser or file manager, then open the file.
-- **Web / PWA:** `npm install && npm run build && npm run preview`, then open it on a phone and use "Add to home screen".
+Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
 
-## The five-step flow
+## What it does
 
-1. **Onboarding:** diet (no restrictions, vegetarian, vegan, pescatarian, dairy-free, egg-free), allergies asked separately, then weight and activity. This gives a daily target shown as a range.
-2. **Log a meal:** Quick pick (Nigerian food list), Portion mode (pack, plate, bowl or wrap pictures, then all, ¾, ½ or ¼ eaten), or **Describe it** in the Assistant Pill, in English or Pidgin, e.g. `₦1,000 rice and beans, medium takeaway`.
-3. **Confirm:** editable chips for food, portion and amount eaten; a confidence level; one simple question when unsure. Nothing is counted until you confirm.
-4. **Today (Protein Gap):** target, eaten and gap as ranges, with a progress ring and a small celebration when the gap closes.
-5. **Gap Solver:** combos that close the gap within your budget, upgrades to the meals you already ate, and foods ranked by protein per ₦100. Each shows the protein change, the cost and a one-line reason. Plant-first toggle. Vegans are never shown animal products.
+1. **Set up:** diet (no restrictions, vegetarian, vegan, pescatarian, dairy-free, egg-free), allergies asked separately, weight and activity. This gives a daily target as a range.
+2. **Log a meal, four ways:**
+   - **Pick:** tap foods from the list. Works offline.
+   - **Portion:** choose the pack, plate, bowl or wrap, what was in it, extras, and how much you ate. Works offline.
+   - **Photo:** take a photo or choose one from the gallery. With the AI server set up, Pronexa reads the photo; otherwise you pick the foods while looking at it.
+   - **Describe:** type it in English or Pidgin, for example "₦1,000 rice and beans, medium takeaway". Read by the AI server when one is set up and online, otherwise by the phone's own reader.
+3. **Confirm:** check and fix the foods, portions and how much you ate. Nothing counts until you confirm.
+4. **Today:** target, eaten and gap, as ranges.
+5. **Close the gap:** combos within your budget, additions to the meals you ate, and foods ranked by protein per ₦100. Plant protein first, and vegans never see animal products.
 
-Later features (Photo mode, ₦500 Protein Challenge, Plant-based Meal Planner, Campus Protein Map, lessons) are "coming soon" screens.
+## How it is built
 
-## How it works
+| Part | Language | Where |
+|------|----------|-------|
+| App | Dart (Flutter 3.47) | `lib/` |
+| Android shell | Kotlin, Gradle | `android/` |
+| Optional AI meal reader | TypeScript (Node 22, Anthropic SDK) | `server/` |
+| Food-list export, icon tool | Dart, JavaScript | `tool/` |
 
-| Layer | Where | Notes |
-|-------|-------|-------|
-| Food database | `src/data/foods.ts` | 36 Nigerian foods, protein per 100 g with sources, portion presets in grams, date-stamped campus prices (Oct 2026) |
-| Calculation engine | `src/lib/calc.ts` | `protein = per100g × grams × qty × eaten`, with an uncertainty band per portion type. No AI touches the numbers |
-| AI interpreter | `src/ai/` | Any interpreter only *picks* food ids from the database. `validate.ts` drops unknown foods, fixes portions, uses price only as a clue, and decides confidence and the one question |
-| Gap Solver | `src/lib/solver.ts` | Deterministic ranking (value per ₦, gap fit, plant bonus) with strict diet and allergen filtering. Works offline |
-| Offline storage | `src/lib/db.ts`, `src/lib/store.ts` | IndexedDB (localStorage fallback). An opt-in sync queue with a stub adapter |
-| UI | `src/screens/`, `src/styles/app.css` | Preact + signals, Pronexa colours on the Asteria layout, Assistant Pill (`src/assistant/`) |
-| Android | `android/`, `capacitor.config.json` | Capacitor 8, the web app bundled inside the APK so it opens with no connection |
-
-### Plugging in a real LLM
-The offline demo uses a rule-based interpreter (`src/ai/mockInterpreter.ts`) with the same contract as the real thing. To use a model, deploy a small endpoint that calls your LLM with `SYSTEM_PROMPT` and `RESPONSE_SCHEMA` from `src/ai/llmInterpreter.ts`, then build with:
-
-```bash
-VITE_AI_ENDPOINT=https://your-endpoint.example/interpret npm run build
+```
+lib/
+  data/      food database (36 foods), portions, models
+  logic/     protein calculation, diet rules, gap solver
+  ai/        on-phone reader, validator (guard rail), remote reader client
+  state/     app state and on-phone storage
+  ui/        theme, widgets, screens
+test/        unit, regression and end-to-end widget tests
+server/      AI meal reader (text and photos)
+docs/        DESIGN.md, GUARDRAILS.md, screens/
 ```
 
-Never ship an API key in the app. Whatever the model returns still goes through `validate()`.
-
-### Offline behaviour
-Logging (Quick pick and Portion mode), the tracker, the gap and the Gap Solver all work with no connection. Describe it needs the network; when offline or when the AI is down, it falls back kindly to Quick pick. Descriptions you've used before are answered from the phone. **Low-data mode** switches to the system font, keeps the orb still, and syncs only when you tap.
+**The AI reads; the database counts.** Any reader (the phone's rules or the AI server) may only pick food ids from the database. `lib/ai/validator.dart` drops anything else, fixes portions, and decides how sure it is and what to ask. Protein numbers come only from `lib/data/foods.dart`.
 
 ## Develop
 
 ```bash
-npm install
-npm run dev          # local dev server
-npm test             # 55 tests: database, calculation, diet safety, solver, AI guard rails
-npm run eval         # the 32-description Describe-it test set (English, Pidgin, price-based)
-npm run build        # production web build (PWA + service worker)
+flutter pub get
+flutter analyze --fatal-infos --fatal-warnings
+flutter test                       # 60 tests
+flutter build apk --release        # build/app/outputs/flutter-apk/app-release.apk
+flutter test test_screens --update-goldens   # re-render docs/screens
 ```
 
-### Build the APK
-Needs JDK 21 and the Android SDK (platform 36, build-tools 36).
+### Turn on the AI reader (optional)
+
+The app works without it. To read photos and handle unusual descriptions, deploy `server/` and build the app with its address:
 
 ```bash
-echo "sdk.dir=$ANDROID_HOME" > android/local.properties
-npm run android:apk  # → android/app/build/outputs/apk/debug/app-debug.apk
+cd server
+npm ci && npm run build
+ANTHROPIC_API_KEY=... npm start      # or: docker build -t pronexa-reader . && docker run -e ANTHROPIC_API_KEY=... -p 8080:8080 pronexa-reader
+
+# then build the app pointing at it (HTTPS only):
+flutter build apk --release --dart-define=PRONEXA_AI_URL=https://your-reader.example.com
 ```
 
-`node scripts/make-android-res.mjs` regenerates the launcher icons and splash screens. For a Play Store build, create your own release keystore (never commit it), configure `signingConfigs` in `android/app/build.gradle`, and run `npm run android:release`.
+The key stays on the server. The server uses Claude Opus 5.5 at low effort with structured output limited to the food list, and turns on Anthropic's server-side refusal fallback, so a wrongly declined request is retried on another model. After any change to `lib/data/foods.dart`, run `dart run tool/export_foods.dart`; a test fails if the server's list is out of date.
 
-## Honest notes
-- Protein values and portion weights are **starter estimates** from WAFCT 2019 and USDA data. A qualified nutrition professional and real vendor measurements should check them before a pilot.
-- The Describe-it test set was written alongside the rule-based parser, so its 32/32 score is a regression check, not an accuracy claim. Measure a real LLM on fresh descriptions.
-- Sync uses a stub adapter (no backend yet). Backup is opt-in.
-- The APK is debug-signed for testing. It has been built and verified (package, bundled assets, signature), and its exact web bundle has been driven end to end in Chromium, but not yet run on a physical device in this environment.
+### Release signing
+
+`release/` holds an APK signed with a debug key for testing. Before publishing to the Play Store, create your own upload key (never commit it), add a `signingConfig` to `android/app/build.gradle.kts`, and rebuild.
+
+## Guardrails
+
+See `docs/GUARDRAILS.md`: strict analysis, tests, pinned dependencies, no secrets in the app, input validation, a privacy-first photo flow, minimal permissions, and accessibility. CI runs the checks on every push.
+
+## Limits
+
+- Protein values and portion weights are starter estimates (WAFCT 2019, USDA). A nutrition professional and real vendor measurements should check them before a pilot.
+- The 32-description test set was written with the phone's reader, so 32/32 is a regression check, not an accuracy score.
+- The AI server code is tested without a live key. Measure its accuracy on fresh descriptions and photos before relying on it.
+- The APK has been built and checked but not yet run on a physical phone in this environment.
 
 ## Credits
-Layout based on the Asteria app design and the Assistant Pill by HorizonX, recoloured to the Pronexa palette,, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL, see `src/assets/fonts/LICENSE-OFL.txt`).
+
+Layout based on the Asteria app design and the Assistant Pill by HorizonX, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL).

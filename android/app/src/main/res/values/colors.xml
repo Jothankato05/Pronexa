@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3B7A4F</color>
-    <color name="colorPrimaryDark">#2E6340</color>
-    <color name="colorAccent">#D9A441</color>
-    <color name="pronexaBg">#FAF7F2</color>
-    <color name="pronexaGreen">#2E6340</color>
+    <color name="pronexa_green">#2E6340</color>
+    <color name="pronexa_bg">#FAF7F2</color>
+    <color name="ic_launcher_background">#2E6340</color>
 </resources>
