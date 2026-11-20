@@ -43,6 +43,9 @@ class FakeLens implements FoodLens {
   Future<bool> isAvailable() async => available;
 
   @override
+  Future<void> prepare() async {}
+
+  @override
   Future<List<LensGuess>> recognise(Uint8List photo) async {
     recognised++;
     return guesses;

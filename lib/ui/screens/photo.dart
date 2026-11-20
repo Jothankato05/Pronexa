@@ -52,7 +52,9 @@ class _PhotoScreenState extends State<PhotoScreen> {
   }
 
   Future<void> _checkLens() async {
-    final available = await AppScope.read(context).lens.isAvailable();
+    final lens = AppScope.read(context).lens;
+    final available = await lens.isAvailable();
+    if (available) unawaited(lens.prepare());
     if (!mounted) return;
     setState(() => _lens = available);
     if (available && _photo != null) unawaited(_recognise());
@@ -67,7 +69,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
     });
     List<LensGuess> found;
     try {
-      found = await AppScope.read(context).lens.recognise(photo).timeout(const Duration(seconds: 30));
+      found = await AppScope.read(context).lens.recognise(photo).timeout(const Duration(seconds: 60));
     } on Exception {
       // Includes the time limit: fall back to picking by hand.
       found = const [];

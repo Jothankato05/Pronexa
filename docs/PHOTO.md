@@ -6,7 +6,9 @@ Photo mode recognises Nigerian foods **on the phone, with no internet**. The stu
 
 - **Nigerian Food Lens** by yusasif, https://huggingface.co/yusasif/Nigerian-food-recognision, Apache-2.0, pinned to commit `36a13b5`.
 - EfficientNetV2-S, multi-label: it reports every food it sees on the plate, from 41 foods (swallows, soups, proteins, rice dishes, snacks).
-- `tool/food_model/convert.py` checks the download's SHA-256, loads only the weights (no code from the file runs), adds the resizing/normalisation step, and exports `assets/models/pronexa-food-v1.onnx` (81 MB, full precision, same answers as the original to 1e-6). It runs on the phone with ONNX Runtime (`flutter_onnxruntime`).
+- `tool/food_model/convert.py` checks the download's SHA-256, loads only the weights (no code from the file runs), adds the resizing/normalisation step, and exports `assets/models/pronexa-food-v1.onnx` (81 MB, full precision, same answers as the original to 1e-6). It runs on the phone with ONNX Runtime 1.28 (`android/app/src/main/java/ng/pronexa/app/LensEngine.java`), on a background thread started by `MainActivity` (the `pronexa/lens` channel). The model starts loading when Photo mode opens. If recognition fails or takes more than 60 seconds, Photo mode falls back to picking by hand.
+
+Never run the model on Android's main thread: loading it takes seconds, and Android kills an app that freezes that long (this was the 0.7.0 crash). `tool/food_model/LensEngineCheck.java` runs the same engine class on a desktop JVM against the real model.
 - The 41 labels map to Pronexa foods in `lib/ai/food_lens.dart` (`lensLabels`). Labels with no protein (ogi, onion, tomato) or no database food (shrimp) are ignored.
 - Suggestions: up to four foods scoring 0.2 or more. The model card suggests 0.3 for automatic use; Pronexa only suggests, so it prefers missing fewer foods.
 

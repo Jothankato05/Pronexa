@@ -55,6 +55,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName(if (releaseStore != null) "release" else "debug")
+            // Keep ONNX Runtime's JNI classes intact through shrinking (see the file).
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }
@@ -67,4 +69,9 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // On-phone food recogniser (Photo mode). Run off the main thread by MainActivity.
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.28.0")
 }

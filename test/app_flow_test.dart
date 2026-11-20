@@ -40,6 +40,9 @@ class NoLens implements FoodLens {
   Future<bool> isAvailable() async => false;
 
   @override
+  Future<void> prepare() async {}
+
+  @override
   Future<List<LensGuess>> recognise(Uint8List photo) async => const [];
 }
 

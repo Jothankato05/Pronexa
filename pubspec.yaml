@@ -1,7 +1,7 @@
 name: pronexa
 description: "Pronexa: check your protein and close the gap for less. Offline-first, for Nigerian university students."
 publish_to: 'none'
-version: 0.7.0+8
+version: 0.7.1+9
 
 environment:
   sdk: ^3.13.7
@@ -17,7 +17,6 @@ dependencies:
   http: 1.6.0                 # optional AI reader endpoint and backup
   connectivity_plus: 7.3.2    # online/offline indicator
   flutter_svg: 2.5.0          # food and container illustrations
-  flutter_onnxruntime: 1.9.0  # on-phone food recogniser (Photo mode), runs offline
 
 dev_dependencies:
   flutter_test:

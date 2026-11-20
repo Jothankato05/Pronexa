@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 import 'package:flutter/services.dart';
 
 import '../data/foods.dart';
@@ -10,7 +9,8 @@ import '../data/foods.dart';
 /// On-phone food recogniser for Photo mode.
 ///
 /// The model ("Nigerian Food Lens", Apache-2.0, converted by
-/// tool/food_model/convert.py) ships inside the app and runs offline. It only suggests foods: the student picks
+/// tool/food_model/convert.py) ships inside the app and runs offline with
+/// ONNX Runtime (android/app/src/main/java/ng/pronexa/app/LensEngine.java). It only suggests foods: the student picks
 /// and confirms, and protein still comes only from the food database.
 
 /// One suggestion: a database food and how sure the model is (0..1).
@@ -24,6 +24,9 @@ class LensGuess {
 abstract class FoodLens {
   /// Whether this build includes the recogniser.
   Future<bool> isAvailable();
+
+  /// Starts loading the model in the background, ahead of the first photo.
+  Future<void> prepare();
 
   Future<List<LensGuess>> recognise(Uint8List photo);
 }
@@ -96,9 +99,12 @@ List<LensGuess> guessesFromScores(List<double> scores, {double threshold = 0.2, 
 const lensAsset = 'assets/models/pronexa-food-v1.onnx';
 const lensSize = 384;
 
-/// Runs the bundled model with ONNX Runtime on the phone.
+/// Runs the bundled model with ONNX Runtime on the phone, through
+/// MainActivity's "pronexa/lens" channel. The native side does the work on a
+/// background thread (loading and running the model take seconds; doing that
+/// on Android's main thread gets the app killed as not responding).
 class OnDeviceLens implements FoodLens {
-  OrtSession? _session;
+  static const _channel = MethodChannel('pronexa/lens');
   bool? _available;
 
   @override
@@ -113,19 +119,20 @@ class OnDeviceLens implements FoodLens {
   }
 
   @override
-  Future<List<LensGuess>> recognise(Uint8List photo) async {
-    final session = _session ??= await OnnxRuntime().createSessionFromAsset(lensAsset);
-    final input = await OrtValue.fromList(await lensInput(photo), [1, lensSize, lensSize, 3]);
+  Future<void> prepare() async {
     try {
-      final out = await session.run({'image': input});
-      final scores = (await out['scores']!.asFlattenedList()).map((v) => (v as num).toDouble()).toList();
-      for (final v in out.values) {
-        await v.dispose();
-      }
-      return guessesFromScores(scores);
-    } finally {
-      await input.dispose();
+      await _channel.invokeMethod<void>('prepare');
+    } on Exception {
+      // Not on Android, or no engine: recognise() will report it.
     }
+  }
+
+  @override
+  Future<List<LensGuess>> recognise(Uint8List photo) async {
+    final input = await lensInput(photo);
+    final scores = await _channel.invokeMethod<Float32List>('recognise', {'image': input});
+    if (scores == null || scores.length != lensLabels.length) return const [];
+    return guessesFromScores([for (final v in scores) v.toDouble()]);
   }
 }
 
