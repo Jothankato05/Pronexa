@@ -1,5 +1,5 @@
 // Dev tool: renders the flat navy Pronexa launcher icons and launch mark into the
-// Android resources. Needs Node 22 and Playwright (Chromium) on the machine:
+// Android and iOS resources. Needs Node 22 and Playwright (Chromium) on the machine:
 //   node tool/make_icons.mjs
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -25,6 +25,19 @@ for (const [d, k] of Object.entries(dens)) {
   // Adaptive foreground: the mark inside the 66/108 safe zone, transparent around it.
   await render(fg, `<div style="width:${fg}px;height:${fg}px;display:grid;place-items:center"><div style="width:${fg * 0.42}px">${MARK}</div></div>`, `${RES}mipmap-${d}/ic_launcher_foreground.png`);
   await render(Math.round(96 * k), `<div style="width:${Math.round(96 * k)}px;height:${Math.round(96 * k)}px;display:grid;place-items:center"><div style="width:${Math.round(96 * k) * 0.8}px">${MARK}</div></div>`, `${RES}mipmap-${d}/launch_mark.png`);
+}
+// iOS: full-bleed squares (iOS rounds the corners itself) and the launch mark.
+const IOS = new URL('../ios/Runner/Assets.xcassets/', import.meta.url).pathname;
+const icons = [[20, [1, 2, 3]], [29, [1, 2, 3]], [40, [1, 2, 3]], [60, [2, 3]], [76, [1, 2]], [83.5, [2]], [1024, [1]]];
+for (const [pt, scales] of icons) {
+  for (const k of scales) {
+    const px = Math.round(pt * k);
+    await render(px, tile(px, '0', 0.56), `${IOS}AppIcon.appiconset/Icon-App-${pt}x${pt}@${k}x.png`);
+  }
+}
+for (const k of [1, 2, 3]) {
+  const px = 77 * k;
+  await render(px, `<div style="width:${px}px;height:${px}px;display:grid;place-items:center"><div style="width:${px}px">${MARK}</div></div>`, `${IOS}LaunchImage.imageset/LaunchImage${k === 1 ? '' : `@${k}x`}.png`);
 }
 await browser.close();
 console.log('icons written');

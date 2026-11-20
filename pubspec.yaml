@@ -17,9 +17,13 @@ dependencies:
   http: 1.6.0                 # optional AI reader endpoint and backup
   connectivity_plus: 7.3.2    # online/offline indicator
   flutter_svg: 2.5.0          # food and container illustrations
+  pronexa_lens:               # iOS side of the on-phone food recogniser (local, in this repo)
+    path: packages/pronexa_lens
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:           # runs the recogniser on a real iOS simulator in CI
     sdk: flutter
   flutter_lints: 6.0.0
 

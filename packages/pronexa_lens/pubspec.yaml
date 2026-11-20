@@ -1,0 +1,18 @@
+name: pronexa_lens
+description: "iOS side of Pronexa's on-phone food recogniser. Android's lives in the app (MainActivity.kt)."
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.13.7
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: PronexaLensPlugin
