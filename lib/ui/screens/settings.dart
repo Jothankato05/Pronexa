@@ -34,10 +34,7 @@ class SettingsScreen extends StatelessWidget {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF4A5B90), Color(0xFF5C739D)]),
-                    borderRadius: BorderRadius.circular(22),
-                  ),
+                  decoration: BoxDecoration(color: C.indigo2, borderRadius: BorderRadius.circular(22)),
                   child: const Icon(Icons.person_outline, color: Colors.white, size: 36),
                 ),
                 const SizedBox(width: 24),

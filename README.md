@@ -12,8 +12,8 @@ Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browse
 
 | File | Size | Use |
 |------|------|-----|
-| `release/Pronexa-0.4.0-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
-| `release/Pronexa-0.4.0.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
+| `release/Pronexa-0.4.1-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
+| `release/Pronexa-0.4.1.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
 
 Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
 

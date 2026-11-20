@@ -136,7 +136,7 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
                       padding: const EdgeInsets.only(top: 24),
                       child: Container(
                         padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(gradient: C.header, borderRadius: BorderRadius.circular(R.xl)),
+                        decoration: BoxDecoration(color: C.indigo, borderRadius: BorderRadius.circular(R.xl)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

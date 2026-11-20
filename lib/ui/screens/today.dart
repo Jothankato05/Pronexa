@@ -13,10 +13,10 @@ import '../widgets/common.dart';
 import '../widgets/motion.dart';
 import 'home_shell.dart';
 
-/// Secondary text on the gradient header (white at 70%).
+/// Secondary text on the indigo header (white at 70%).
 const _soft = Color(0xB3FFFFFF);
 
-/// Today, laid out like the Asteria dashboard: a gradient header with the key
+/// Today, laid out like the Asteria dashboard: an indigo header with the key
 /// number and four actions, then a white sheet with the meals.
 class TodayScreen extends StatelessWidget {
   const TodayScreen({super.key, required this.onTab});
@@ -31,55 +31,59 @@ class TodayScreen extends StatelessWidget {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: lightIcons,
-      // The white sheet fills whatever space the header leaves.
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: _Header(closed: closed)),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: WhiteSheet(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SheetTitle(
-                    "Today's meals",
-                    trailing: list.isNotEmpty && !closed ? TextButton(onPressed: () => onTab(2), child: const Text('Close the gap')) : null,
-                  ),
-                  if (list.isEmpty) const Appear(child: EmptyState(title: 'Nothing logged yet', onSheet: true)),
-                  for (final (i, m) in list.indexed)
-                    Appear(
-                      key: ValueKey(m.id),
-                      index: i,
-                      child: _MealRow(meal: m),
+      // Solid indigo behind everything, so the sheet's rounded corners and any
+      // overscroll show the header colour. The white sheet fills the rest.
+      child: ColoredBox(
+        color: C.indigo,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _Header(closed: closed)),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: WhiteSheet(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SheetTitle(
+                      "Today's meals",
+                      trailing: list.isNotEmpty && !closed ? TextButton(onPressed: () => onTab(2), child: const Text('Close the gap')) : null,
                     ),
-                  if (closed)
-                    const Appear(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 12),
-                        child: Row(
-                          children: [
-                            Icon(Icons.check_circle, color: C.sGood, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'Gap closed for today',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: C.sGood),
-                            ),
-                          ],
+                    if (list.isEmpty) const Appear(child: EmptyState(title: 'Nothing logged yet', onSheet: true)),
+                    for (final (i, m) in list.indexed)
+                      Appear(
+                        key: ValueKey(m.id),
+                        index: i,
+                        child: _MealRow(meal: m),
+                      ),
+                    if (closed)
+                      const Appear(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle, color: C.sGood, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                'Gap closed for today',
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: C.sGood),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  if (state.profile?.diet == Diet.vegan && list.isNotEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 12),
-                      child: Text('B12: fortified foods or a supplement.', style: TextStyle(fontSize: 12, color: C.sInk2)),
-                    ),
-                  const Footnote(onSheet: true),
-                  const SizedBox(height: navClearance - 24),
-                ],
+                    if (state.profile?.diet == Diet.vegan && list.isNotEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 12),
+                        child: Text('B12: fortified foods or a supplement.', style: TextStyle(fontSize: 12, color: C.sInk2)),
+                      ),
+                    const Footnote(onSheet: true),
+                    const SizedBox(height: navClearance - 24),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -102,7 +106,7 @@ class _Header extends StatelessWidget {
     final date = '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
 
     return Container(
-      decoration: const BoxDecoration(gradient: C.header),
+      decoration: const BoxDecoration(color: C.indigo),
       padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 8, 24, 36),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
