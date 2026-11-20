@@ -12,6 +12,7 @@ import '../theme.dart';
 import '../widgets/assistant_pill.dart';
 import '../widgets/bits.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 import 'home_shell.dart';
 
 const _examples = ['₦1,000 rice and beans, medium pack', 'Eba and egusi with one meat', 'Bread and 4 akara', 'Soaked garri and groundnut'];
@@ -52,24 +53,35 @@ class TodayScreen extends StatelessWidget {
                   trailing: list.isNotEmpty && !closed ? TextButton(onPressed: () => onTab(2), child: const Text('Close the gap')) : null,
                 ),
                 if (list.isEmpty)
-                  const Panel(
-                    child: EmptyState(title: 'No meals logged today', body: 'Log your last meal. Bread and tea counts too.'),
+                  const Appear(
+                    child: Panel(child: EmptyState(title: 'Nothing logged yet')),
                   )
                 else
                   Panel(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Column(children: [for (final m in list) _MealRow(meal: m)]),
+                    child: Column(
+                      children: [
+                        for (final (i, m) in list.indexed)
+                          Appear(
+                            key: ValueKey(m.id),
+                            index: i,
+                            child: _MealRow(meal: m),
+                          ),
+                      ],
+                    ),
                   ),
                 if (closed) ...[
                   const SizedBox(height: 16),
-                  Panel(
-                    color: C.leaf100,
-                    child: Text("You've reached today's estimate.", style: textTheme.titleMedium?.copyWith(color: C.leaf700)),
+                  Appear(
+                    child: Panel(
+                      color: C.goodBg,
+                      child: Text('Gap closed for today', style: textTheme.titleMedium?.copyWith(color: C.good)),
+                    ),
                   ),
                 ],
                 if (state.profile?.diet == Diet.vegan && list.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text('Vegan tip: get B12 from fortified foods or supplements.', style: textTheme.bodyMedium),
+                  Text('B12: fortified foods or a supplement.', style: textTheme.bodySmall),
                 ],
                 const Footnote(),
               ],
@@ -100,7 +112,7 @@ class _Header extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 12, 20, 28),
       decoration: const BoxDecoration(
-        color: C.leaf700,
+        color: C.indigo,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(R.xl)),
       ),
       child: Column(
@@ -117,10 +129,10 @@ class _Header extends StatelessWidget {
                 child: Text(
                   date,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: C.onGreen2, fontSize: 13),
+                  style: const TextStyle(color: C.onIndigo2, fontSize: 13),
                 ),
               ),
-              StatusPill(state: s, onGreen: true),
+              const SizedBox(width: 48),
             ],
           ),
           const SizedBox(height: 20),
@@ -143,23 +155,20 @@ class _Header extends StatelessWidget {
                     Semantics(
                       label: 'About ${e.mid.round()} grams of protein eaten today',
                       excludeSemantics: true,
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${e.mid.round()}',
-                              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w500, color: Colors.white, height: 1),
-                            ),
-                            const TextSpan(
-                              text: ' g',
-                              style: TextStyle(fontSize: 22, color: C.onGreen2),
-                            ),
-                          ],
-                        ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          CountUp(
+                            value: e.mid,
+                            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w500, color: Colors.white, height: 1),
+                          ),
+                          const Text(' g', style: TextStyle(fontSize: 22, color: C.onIndigo2)),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(hasMeals ? 'eaten, about ${fmtRange(e)}' : 'protein eaten today', style: const TextStyle(color: C.onGreen2, fontSize: 14)),
+                    Text(hasMeals ? 'eaten · ${fmtRange(e)}' : 'eaten today', style: const TextStyle(color: C.onIndigo2, fontSize: 14)),
                   ],
                 ),
               ),
@@ -191,7 +200,7 @@ class _MiniPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(99)),
+    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(99)),
     child: Text.rich(
       TextSpan(
         children: [
@@ -223,23 +232,26 @@ class _Action extends StatelessWidget {
     button: true,
     label: label,
     excludeSemantics: true,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(R.md),
-      child: Column(
-        children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: BoxDecoration(color: primary ? Colors.white : Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(R.md)),
-            child: Icon(icon, color: primary ? C.leaf700 : Colors.white),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label.toUpperCase(),
-            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: C.onGreen2),
-          ),
-        ],
+    child: Pressable(
+      scale: 0.92,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(R.md),
+        child: Column(
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(color: primary ? Colors.white : Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(R.md)),
+              child: Icon(icon, color: primary ? C.indigo : Colors.white),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label.toUpperCase(),
+              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: C.onIndigo2),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -283,10 +295,7 @@ class _MealRow extends StatelessWidget {
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('+${fmtRange(p)}', style: Theme.of(context).textTheme.titleMedium),
-                Text('protein', style: Theme.of(context).textTheme.bodySmall),
-              ],
+              children: [Text('+${fmtRange(p)}', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: C.blueInk))],
             ),
           ],
         ),
@@ -315,7 +324,7 @@ class _MealRow extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: C.clay700),
+              style: TextButton.styleFrom(foregroundColor: C.warm),
               onPressed: () async {
                 Navigator.pop(sheet);
                 final state = AppScope.read(context);

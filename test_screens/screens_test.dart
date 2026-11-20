@@ -53,7 +53,10 @@ Future<void> _shot(WidgetTester t, String name) async {
   await expectLater(find.byType(MaterialApp).first, matchesGoldenFile('../docs/screens/$name.png'));
 }
 
-Widget _wrap(AppState s, Widget home) => AppScope(state: s, child: MaterialApp(debugShowCheckedModeBanner: false, theme: buildTheme(), home: home));
+Widget _wrap(AppState s, Widget home) => AppScope(
+  state: s,
+  child: MaterialApp(debugShowCheckedModeBanner: false, theme: buildTheme(), home: home),
+);
 
 void main() {
   setUpAll(_loadFonts);
@@ -87,7 +90,14 @@ void main() {
     final s = _state();
     await s.load();
     final reading = validate(readMeal('rice and stew 700 naira and shawarma'));
-    await t.pumpWidget(_wrap(s, ConfirmScreen(draft: Draft.fromReading(reading, source: LogSource.describe, text: 'rice and stew 700 naira and shawarma'))));
+    await t.pumpWidget(
+      _wrap(
+        s,
+        ConfirmScreen(
+          draft: Draft.fromReading(reading, source: LogSource.describe, text: 'rice and stew 700 naira and shawarma'),
+        ),
+      ),
+    );
     await _shot(t, '05-confirm');
   });
 

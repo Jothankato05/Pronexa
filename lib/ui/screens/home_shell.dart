@@ -18,11 +18,24 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends State<HomeShell> with SingleTickerProviderStateMixin {
   int _index = 0;
   int _lastCelebrate = 0;
+  late final AnimationController _fade = AnimationController(vsync: this, duration: Motion.medium, value: 1);
+  late final Animation<double> _t = CurvedAnimation(parent: _fade, curve: Motion.curve);
 
-  void _go(int i) => setState(() => _index = i);
+  void _go(int i) {
+    if (i == _index) return;
+    setState(() => _index = i);
+    if (MediaQuery.of(context).disableAnimations) return;
+    _fade.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -39,9 +52,7 @@ class _HomeShellState extends State<HomeShell> {
   Future<void> _celebrate() => showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      backgroundColor: C.surface,
-      surfaceTintColor: Colors.transparent,
-      icon: const Icon(Icons.check_circle, color: C.leaf600, size: 56),
+      icon: const Icon(Icons.check_circle, color: C.good, size: 56),
       title: const Text('Gap closed'),
       content: const Text("You've reached today's protein estimate.", textAlign: TextAlign.center),
       actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
@@ -55,7 +66,14 @@ class _HomeShellState extends State<HomeShell> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: IndexedStack(index: _index, children: pages),
+            child: AnimatedBuilder(
+              animation: _t,
+              builder: (context, child) => Opacity(
+                opacity: 0.25 + 0.75 * _t.value,
+                child: Transform.translate(offset: Offset(0, 10 * (1 - _t.value)), child: child),
+              ),
+              child: IndexedStack(index: _index, children: pages),
+            ),
           ),
           Positioned(
             left: 0,

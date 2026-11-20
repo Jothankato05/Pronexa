@@ -28,12 +28,12 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         children: [
           Panel(
-            color: C.leaf700,
+            color: C.indigo,
             child: Row(
               children: [
                 const CircleAvatar(
                   radius: 28,
-                  backgroundColor: C.leaf600,
+                  backgroundColor: C.indigo2,
                   child: Icon(Icons.person_outline, color: Colors.white),
                 ),
                 const SizedBox(width: 16),
@@ -45,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
                         'About ${target.mid.round()} g of protein a day',
                         style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
                       ),
-                      Text('Range ${fmtRange(target)} · ${dietLabels[p.diet]!.$1}', style: const TextStyle(color: C.onGreen2, fontSize: 13)),
+                      Text('${fmtRange(target)} · ${dietLabels[p.diet]!.$1}', style: const TextStyle(color: C.onIndigo2, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -85,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text(p.weightKg == null ? 'Weight not set ($defaultWeightKg kg used)' : 'Weight', style: text.titleMedium)),
+                    Expanded(child: Text('Weight', style: text.titleMedium)),
                     QtyStepper(
                       value: (p.weightKg ?? defaultWeightKg).toDouble(),
                       min: 30,
@@ -108,11 +108,6 @@ class SettingsScreen extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  '${activityInfo[p.activity]!.low}–${activityInfo[p.activity]!.high} g per kg. Needs differ with age, pregnancy and illness.',
-                  style: text.bodySmall,
-                ),
               ],
             ),
           ),
@@ -124,7 +119,6 @@ class SettingsScreen extends StatelessWidget {
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Low-data mode'),
-                  subtitle: const Text('Photos are never sent to the AI.'),
                   value: s.lowData,
                   onChanged: (v) => state.updateSettings(s.copyWith(lowData: v)),
                 ),
@@ -133,7 +127,6 @@ class SettingsScreen extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.copy_outlined),
                   title: const Text('Copy my data'),
-                  subtitle: const Text('Your profile and meals as text.'),
                   onTap: () async {
                     final messenger = ScaffoldMessenger.of(context);
                     await Clipboard.setData(ClipboardData(text: state.exportJson()));
@@ -143,16 +136,12 @@ class SettingsScreen extends StatelessWidget {
                 const Divider(),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.delete_outline, color: C.clay700),
-                  title: const Text('Delete all my data', style: TextStyle(color: C.clay700)),
+                  leading: const Icon(Icons.delete_outline, color: C.warm),
+                  title: const Text('Delete all my data', style: TextStyle(color: C.warm)),
                   onTap: () => _confirmDelete(context),
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text('Everything is stored on this phone. No name, email or phone number is collected.', style: text.bodySmall),
           ),
           const SectionTitle('Demo'),
           Panel(
@@ -163,7 +152,6 @@ class SettingsScreen extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.restaurant_outlined),
                   title: const Text('Load a demo day'),
-                  subtitle: const Text('Adds a sample breakfast and lunch for today.'),
                   onTap: () async {
                     final nav = Navigator.of(context);
                     await state.loadDemoDay();
@@ -173,8 +161,7 @@ class SettingsScreen extends StatelessWidget {
                 const Divider(),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Act as if the meal reader is down'),
-                  subtitle: const Text('To show the fallback.'),
+                  title: const Text('Pretend the reader is down'),
                   value: s.simulateAiDown,
                   onChanged: (v) => state.updateSettings(s.copyWith(simulateAiDown: v)),
                 ),
@@ -182,11 +169,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SectionTitle('About the numbers'),
-          Text(
-            'Protein values: ${foods.length} foods (database v$dbVersion), from the West African Food Composition Table 2019 and USDA data, '
-            'with typical campus portions. They still need review by a nutrition professional. Prices are from $pricesAsOf.',
-            style: text.bodyMedium,
-          ),
+          Text('${foods.length} foods from WAFCT 2019 and USDA. Prices from $pricesAsOf. Pending review by a nutritionist.', style: text.bodyMedium),
           const Footnote(),
         ],
       ),
@@ -197,14 +180,12 @@ class SettingsScreen extends StatelessWidget {
     final yes = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: C.surface,
-        surfaceTintColor: Colors.transparent,
         title: const Text('Delete all data?'),
-        content: const Text('Your profile, meals and settings will be removed from this phone. This cannot be undone.'),
+        content: const Text('This cannot be undone.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: C.clay700),
+            style: FilledButton.styleFrom(backgroundColor: C.warm),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Delete'),
           ),

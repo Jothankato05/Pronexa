@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme.dart';
+import 'motion.dart';
 
 /// Food and container illustrations (flat SVG assets).
 class FoodIcon extends StatelessWidget {
@@ -16,9 +17,9 @@ class FoodIcon extends StatelessWidget {
   );
 }
 
-/// Icon on a soft tile, as used in lists.
+/// Illustration on a light tile, so its dark outlines stay visible on navy.
 class IconTile extends StatelessWidget {
-  const IconTile(this.icon, {super.key, this.size = 48, this.color = C.surface2});
+  const IconTile(this.icon, {super.key, this.size = 48, this.color = C.tile});
 
   final String icon;
   final double size;
@@ -40,14 +41,7 @@ class Footnote extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 24),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.info_outline, size: 15, color: C.ink3),
-        const SizedBox(width: 6),
-        Flexible(child: Text('Estimates only. Not medical advice.', style: Theme.of(context).textTheme.bodySmall)),
-      ],
-    ),
+    child: Text('Estimates only. Not medical advice.', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
   );
 }
 
@@ -93,9 +87,8 @@ class Tag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
-      Tone.good => (C.leaf100, C.leaf700),
-      Tone.gap => (C.clay100, C.clay700),
-      Tone.value => (C.ochre100, C.ochre800),
+      Tone.good => (C.goodBg, C.good),
+      Tone.gap || Tone.value => (C.warmBg, C.warm),
       Tone.plain => (C.surface2, C.ink2),
     };
     return Container(
@@ -109,7 +102,7 @@ class Tag extends StatelessWidget {
   }
 }
 
-/// White rounded panel with a hairline border.
+/// Rounded panel. Navy with a hairline border by default.
 class Panel extends StatelessWidget {
   const Panel({super.key, required this.child, this.padding = const EdgeInsets.all(20), this.color = C.surface});
 
@@ -132,7 +125,7 @@ class Panel extends StatelessWidget {
   );
 }
 
-/// Selectable pill (diet, allergies, budget...). 48 px tall for thumbs.
+/// Selectable pill (diet, allergies, budget...). 46 px tall for thumbs.
 class SelectPill extends StatelessWidget {
   const SelectPill({super.key, required this.label, required this.selected, required this.onTap, this.icon});
 
@@ -142,37 +135,62 @@ class SelectPill extends StatelessWidget {
   final IconData? icon;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    selected: selected,
-    child: Material(
-      color: selected ? C.leaf600 : C.surface,
-      shape: StadiumBorder(side: BorderSide(color: selected ? C.leaf600 : C.line)),
-      child: InkWell(
-        customBorder: const StadiumBorder(),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 46),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (selected) ...[const Icon(Icons.check, size: 16, color: Colors.white), const SizedBox(width: 6)],
-                if (icon != null && !selected) ...[Icon(icon, size: 16, color: C.ink2), const SizedBox(width: 6)],
-                Flexible(
-                  child: Text(
-                    label,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: selected ? Colors.white : C.ink),
+  Widget build(BuildContext context) {
+    final d = Motion.of(context, Motion.fast);
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Pressable(
+        child: AnimatedContainer(
+          duration: d,
+          curve: Motion.curve,
+          decoration: ShapeDecoration(
+            color: selected ? C.indigo2 : C.surface,
+            shape: StadiumBorder(side: BorderSide(color: selected ? C.blue : C.line)),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: onTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 46),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedSize(
+                        duration: d,
+                        curve: Motion.curve,
+                        child: selected
+                            ? const Padding(
+                                padding: EdgeInsets.only(right: 6),
+                                child: Icon(Icons.check, size: 16, color: Colors.white),
+                              )
+                            : icon != null
+                            ? Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: Icon(icon, size: 16, color: C.ink2),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: selected ? Colors.white : C.ink),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Full-width choice row with a check.
@@ -186,42 +204,59 @@ class ChoiceRow extends StatelessWidget {
   final Widget? leading;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Semantics(
-      inMutuallyExclusiveGroup: true,
-      checked: selected,
-      child: Material(
-        color: selected ? C.leaf50 : C.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(R.lg),
-          side: BorderSide(color: selected ? C.leaf600 : C.line, width: selected ? 1.5 : 1),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(R.lg),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            child: Row(
-              children: [
-                if (leading != null) ...[leading!, const SizedBox(width: 14)],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) {
+    final d = Motion.of(context, Motion.fast);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Semantics(
+        inMutuallyExclusiveGroup: true,
+        checked: selected,
+        child: Pressable(
+          scale: 0.98,
+          child: AnimatedContainer(
+            duration: d,
+            curve: Motion.curve,
+            decoration: ShapeDecoration(
+              color: selected ? C.indigo2 : C.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(R.lg),
+                side: BorderSide(color: selected ? C.blue : C.line, width: selected ? 1.5 : 1),
+              ),
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(R.lg),
+                onTap: onTap,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  child: Row(
                     children: [
-                      Text(title, style: Theme.of(context).textTheme.titleMedium),
-                      if (subtitle != null) Text(subtitle!, style: Theme.of(context).textTheme.bodyMedium),
+                      if (leading != null) ...[leading!, const SizedBox(width: 14)],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, style: Theme.of(context).textTheme.titleMedium),
+                            if (subtitle != null) Text(subtitle!, style: Theme.of(context).textTheme.bodyMedium),
+                          ],
+                        ),
+                      ),
+                      AnimatedSwitcher(
+                        duration: d,
+                        transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+                        child: Icon(selected ? Icons.check_circle : Icons.circle_outlined, key: ValueKey(selected), color: selected ? Colors.white : C.ink3),
+                      ),
                     ],
                   ),
                 ),
-                Icon(selected ? Icons.check_circle : Icons.circle_outlined, color: selected ? C.leaf600 : C.line),
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class QtyStepper extends StatelessWidget {
@@ -239,9 +274,16 @@ class QtyStepper extends StatelessWidget {
     Widget btn(IconData icon, String label, double next, bool enabled) => IconButton.filledTonal(
       tooltip: label,
       onPressed: enabled ? () => onChanged(double.parse(next.toStringAsFixed(2))) : null,
-      style: IconButton.styleFrom(backgroundColor: C.surface, foregroundColor: C.leaf700, minimumSize: const Size(44, 44)),
+      style: IconButton.styleFrom(
+        backgroundColor: C.surface,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: C.surface,
+        disabledForegroundColor: C.line,
+        minimumSize: const Size(44, 44),
+      ),
       icon: Icon(icon, size: 20),
     );
+    final text = format?.call(value) ?? value.toStringAsFixed(value == value.roundToDouble() ? 0 : 2);
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(color: C.surface2, borderRadius: BorderRadius.circular(99)),
@@ -251,10 +293,18 @@ class QtyStepper extends StatelessWidget {
           btn(Icons.remove, 'Less', value - step, value - step >= min - 0.001),
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 44),
-            child: Text(
-              format?.call(value) ?? value.toStringAsFixed(value == value.roundToDouble() ? 0 : 2),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            child: AnimatedSwitcher(
+              duration: Motion.of(context, Motion.fast),
+              transitionBuilder: (c, a) => FadeTransition(
+                opacity: a,
+                child: ScaleTransition(scale: Tween(begin: 0.8, end: 1.0).animate(a), child: c),
+              ),
+              child: Text(
+                text,
+                key: ValueKey(text),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
             ),
           ),
           btn(Icons.add, 'More', value + step, value + step <= max + 0.001),
@@ -265,28 +315,27 @@ class QtyStepper extends StatelessWidget {
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.title, required this.body, this.icon = 'empty-plate'});
+  const EmptyState({super.key, required this.title, this.body, this.icon = 'empty-plate'});
 
   final String title;
-  final String body;
+  final String? body;
   final String icon;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 24),
+    padding: const EdgeInsets.symmetric(vertical: 20),
     child: Column(
       children: [
-        FoodIcon(icon, size: 80),
-        const SizedBox(height: 12),
+        IconTile(icon, size: 72),
+        const SizedBox(height: 14),
         Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
-        const SizedBox(height: 4),
-        Text(body, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+        if (body != null) ...[const SizedBox(height: 4), Text(body!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center)],
       ],
     ),
   );
 }
 
-/// Pronexa mark: a leaf and a seed. Flat colours.
+/// Pronexa mark: a leaf and a seed, in white.
 class PronexaMark extends StatelessWidget {
   const PronexaMark({super.key, this.width = 120});
 
@@ -295,12 +344,45 @@ class PronexaMark extends StatelessWidget {
   static const _svg =
       '<svg viewBox="0 0 170 124" xmlns="http://www.w3.org/2000/svg">'
       '<path d="M2 122C2 60 40 12 118 2c4 62-34 112-116 120Z" fill="#FFFFFF"/>'
-      '<rect x="122" y="74" width="47" height="49" rx="4" fill="#D9A441"/></svg>';
+      '<rect x="122" y="74" width="47" height="49" rx="6" fill="#FFFFFF"/></svg>';
 
   @override
   Widget build(BuildContext context) => Semantics(
     label: 'Pronexa',
     image: true,
     child: SvgPicture.string(_svg, width: width),
+  );
+}
+
+/// Tappable rounded box that animates between idle and selected.
+class SelectBox extends StatelessWidget {
+  const SelectBox({super.key, required this.selected, required this.onTap, required this.child, this.padding = const EdgeInsets.all(12)});
+
+  final bool selected;
+  final VoidCallback onTap;
+  final Widget child;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) => Pressable(
+    child: AnimatedContainer(
+      duration: Motion.of(context, Motion.fast),
+      curve: Motion.curve,
+      decoration: ShapeDecoration(
+        color: selected ? C.indigo2 : C.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(R.lg),
+          side: BorderSide(color: selected ? C.blue : C.line, width: selected ? 1.5 : 1),
+        ),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(R.lg),
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    ),
   );
 }

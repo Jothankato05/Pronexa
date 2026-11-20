@@ -68,7 +68,8 @@ void main() {
     await _tapText(tester, 'Continue');
     await _tapText(tester, 'On my feet a lot');
     await _tapText(tester, 'Continue');
-    expect(find.text('60 g'), findsOneWidget);
+    expect(find.text('60'), findsOneWidget);
+    expect(find.text('54–66 g'), findsOneWidget);
     await _tapText(tester, 'Start');
     expect(find.text("Today's meals"), findsOneWidget);
     expect(state.profile?.activity, Activity.moderate);
@@ -119,9 +120,9 @@ void main() {
     await _tapText(tester, 'Take a photo');
     expect(find.byType(Image), findsOneWidget, reason: 'the photo is shown');
     // No AI server in tests, so the student picks the foods.
-    expect(find.textContaining('needs the AI server'), findsOneWidget);
+    expect(find.textContaining('Photo reading is off'), findsOneWidget);
     await _tapText(tester, 'Pick the foods myself');
-    expect(find.text('What is in the photo?'), findsOneWidget);
+    expect(find.text("What's in it?"), findsOneWidget);
     await _tapText(tester, 'Akara');
     await _tapText(tester, 'Next: 1 food');
     await _tapText(tester, 'Add to today');

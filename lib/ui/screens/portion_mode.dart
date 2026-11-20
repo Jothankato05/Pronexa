@@ -9,6 +9,7 @@ import '../draft.dart';
 import '../nav.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 
 const _extraIds = [
   'beef',
@@ -86,20 +87,33 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
         if (!didPop) setState(() => _step--);
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('Portion · step ${_step + 1} of 4')),
+        appBar: AppBar(title: Text('Portion · ${_step + 1} of 4')),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
           children: [
-            LinearProgressIndicator(value: (_step + 1) / 4, backgroundColor: C.surface2, borderRadius: BorderRadius.circular(4), minHeight: 5),
+            TweenAnimationBuilder<double>(
+              tween: Tween(end: (_step + 1) / 4),
+              duration: Motion.of(context, Motion.slow),
+              curve: Motion.curve,
+              builder: (context, v, _) => LinearProgressIndicator(value: v, borderRadius: BorderRadius.circular(4), minHeight: 5),
+            ),
             const SizedBox(height: 20),
-            Text(_titles[_step], style: text.titleLarge),
-            const SizedBox(height: 14),
-            ...switch (_step) {
-              0 => [_containers()],
-              1 => _fillStep(),
-              2 => _extrasStep(),
-              _ => [_eatenStep()],
-            },
+            FadeSwap(
+              id: _step,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(_titles[_step], style: text.titleLarge),
+                  const SizedBox(height: 14),
+                  ...switch (_step) {
+                    0 => [_containers()],
+                    1 => _fillStep(),
+                    2 => _extrasStep(),
+                    _ => [_eatenStep()],
+                  },
+                ],
+              ),
+            ),
           ],
         ),
         bottomNavigationBar: _step == 0
@@ -141,8 +155,6 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
   );
 
   List<Widget> _fillStep() => [
-    Text('Pick one or more. Two foods in one pack are split evenly.', style: Theme.of(context).textTheme.bodyMedium),
-    const SizedBox(height: 12),
     GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
@@ -162,12 +174,14 @@ class _PortionModeScreenState extends State<PortionModeScreen> {
     ),
     if (_container == PortionId.wrap && _fill.isNotEmpty) ...[
       const SizedBox(height: 16),
-      Panel(
-        child: Row(
-          children: [
-            const Expanded(child: Text('How many wraps?')),
-            QtyStepper(value: _wraps, min: 0.5, max: 6, step: 0.5, onChanged: (v) => setState(() => _wraps = v)),
-          ],
+      Appear(
+        child: Panel(
+          child: Row(
+            children: [
+              const Expanded(child: Text('How many wraps?')),
+              QtyStepper(value: _wraps, min: 0.5, max: 6, step: 0.5, onChanged: (v) => setState(() => _wraps = v)),
+            ],
+          ),
         ),
       ),
     ],
@@ -225,38 +239,29 @@ class _Tile extends StatelessWidget {
     selected: selected,
     label: title,
     excludeSemantics: true,
-    child: Material(
-      color: selected ? C.leaf50 : C.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(R.lg),
-        side: BorderSide(color: selected ? C.leaf600 : C.line, width: selected ? 1.5 : 1),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(R.lg),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconTile(icon, size: 52, color: selected ? C.surface : C.surface2),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              if (subtitle != null)
-                Text(
-                  subtitle!,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: const TextStyle(fontSize: 11, color: C.ink3),
-                ),
-            ],
+    child: SelectBox(
+      selected: selected,
+      onTap: onTap,
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconTile(icon, size: 52),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
-        ),
+          if (subtitle != null)
+            Text(
+              subtitle!,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              style: const TextStyle(fontSize: 11, color: C.ink3),
+            ),
+        ],
       ),
     ),
   );
@@ -276,27 +281,20 @@ class _EatenTile extends StatelessWidget {
     selected: selected,
     label: label,
     excludeSemantics: true,
-    child: Material(
-      color: selected ? C.leaf50 : C.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(R.lg),
-        side: BorderSide(color: selected ? C.leaf600 : C.line, width: selected ? 1.5 : 1),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(R.lg),
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: CircularProgressIndicator(value: fraction, strokeWidth: 22, backgroundColor: C.surface2, color: C.leaf600),
-            ),
-            const SizedBox(height: 10),
-            Text(label, style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
+    child: SelectBox(
+      selected: selected,
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(value: fraction, strokeWidth: 22, backgroundColor: selected ? C.indigo : C.surface2, color: C.blue),
+          ),
+          const SizedBox(height: 10),
+          Text(label, style: Theme.of(context).textTheme.titleMedium),
+        ],
       ),
     ),
   );

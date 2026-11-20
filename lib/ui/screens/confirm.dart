@@ -11,6 +11,7 @@ import '../nav.dart';
 import '../scope.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 
 /// Step 3: the student checks and corrects what was understood. Nothing is
 /// counted until "Add to today" is tapped.
@@ -106,34 +107,52 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
           if (d.text != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Text('You wrote: "${d.text}"', style: text.bodyMedium),
+              child: Text('"${d.text}"', style: text.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
             ),
           if (d.confidence != null) _ConfidenceBar(d.confidence!),
-          if (q != null) ...[
-            const SizedBox(height: 12),
-            Panel(
-              color: C.ochre100,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(q.text, style: text.titleMedium),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [for (final o in q.options) SelectPill(label: o.label, selected: o.selected, onTap: () => _answer(o.action))],
-                  ),
-                ],
-              ),
+          AnimatedSize(
+            duration: Motion.of(context, Motion.medium),
+            curve: Motion.curve,
+            alignment: Alignment.topCenter,
+            child: FadeSwap(
+              id: q?.id ?? 'none',
+              child: q == null
+                  ? const SizedBox(width: double.infinity)
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Panel(
+                        color: C.indigo,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(q.text, style: text.titleMedium),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [for (final o in q.options) SelectPill(label: o.label, selected: o.selected, onTap: () => _answer(o.action))],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
             ),
-          ],
+          ),
           const SectionTitle('Foods', top: 20),
           if (d.items.isEmpty)
             const Panel(
               child: EmptyState(title: 'No foods yet', body: 'Add what you ate.'),
             ),
-          for (final it in d.items)
-            _ItemCard(it: it, onChange: (next) => _update(it, next), onRemove: () => setState(() => d.items = d.items.where((x) => x.key != it.key).toList())),
+          for (final (i, it) in d.items.indexed)
+            Appear(
+              key: ValueKey(it.key),
+              index: i,
+              child: _ItemCard(
+                it: it,
+                onChange: (next) => _update(it, next),
+                onRemove: () => setState(() => d.items = d.items.where((x) => x.key != it.key).toList()),
+              ),
+            ),
           const SizedBox(height: 4),
           OutlinedButton.icon(
             onPressed: () async {
@@ -158,25 +177,30 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
               color: C.surface2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [if (d.price != null) const _Note('Price is used only as a clue for the portion.'), for (final n in d.notes) _Note(n)],
+                children: [if (d.price != null) const _Note('Price is only a clue to the size.'), for (final n in d.notes) _Note(n)],
               ),
             ),
           ],
           if (d.items.isNotEmpty) ...[
             const SizedBox(height: 16),
             Panel(
-              color: C.leaf700,
+              color: C.indigo,
               child: Row(
                 children: [
                   const Expanded(
                     child: Text(
                       'This meal',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(color: C.onIndigo2, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ),
-                  Text(
-                    'about ${fmtRange(total)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+                  AnimatedSwitcher(
+                    duration: Motion.of(context, Motion.fast),
+                    transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
+                    child: Text(
+                      fmtRange(total),
+                      key: ValueKey(fmtRange(total)),
+                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
                   ),
                 ],
               ),
@@ -207,7 +231,7 @@ class _Note extends StatelessWidget {
       children: [
         const Padding(
           padding: EdgeInsets.only(top: 2),
-          child: Icon(Icons.info_outline, size: 16, color: C.ochre800),
+          child: Icon(Icons.info_outline, size: 16, color: C.ink3),
         ),
         const SizedBox(width: 8),
         Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
@@ -222,33 +246,32 @@ class _ConfidenceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (title, body, bg, fg) = switch (c) {
-      Confidence.high => ('Looks clear', 'Check it, then add it.', C.leaf100, C.leaf700),
-      Confidence.medium => ('Mostly clear', 'Check the highlighted parts.', C.ochre100, C.ochre800),
-      Confidence.low => ('Not sure', 'Check each food and portion.', C.ochre100, C.ochre800),
+    final (title, bg, fg) = switch (c) {
+      Confidence.high => ('Looks clear', C.goodBg, C.good),
+      Confidence.medium => ('Check the marked parts', C.warmBg, C.warm),
+      Confidence.low => ('Not sure. Check each food', C.warmBg, C.warm),
     };
     return Semantics(
       liveRegion: true,
-      child: Panel(
-        color: bg,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        child: Row(
-          children: [
-            Icon(c == Confidence.high ? Icons.check_circle_outline : Icons.help_outline, color: fg),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(color: fg, fontWeight: FontWeight.w500),
-                  ),
-                  Text(body, style: TextStyle(color: fg, fontSize: 13)),
-                ],
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: AnimatedContainer(
+          duration: Motion.of(context, Motion.medium),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(99)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(c == Confidence.high ? Icons.check_circle_outline : Icons.help_outline, color: fg, size: 18),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  title,
+                  style: TextStyle(color: fg, fontWeight: FontWeight.w500, fontSize: 14),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -312,7 +335,7 @@ class _ItemCard extends StatelessWidget {
                   Expanded(child: Text(it.isGuess ? 'Check the size' : (f.local ?? ''), style: Theme.of(context).textTheme.bodySmall)),
                   Text(
                     fmtRange(p),
-                    style: const TextStyle(color: C.leaf700, fontWeight: FontWeight.w500, fontSize: 16),
+                    style: const TextStyle(color: C.blueInk, fontWeight: FontWeight.w500, fontSize: 16),
                   ),
                 ],
               ),
@@ -417,8 +440,8 @@ class _EditChip extends StatelessWidget {
     label: '$label. Change',
     excludeSemantics: true,
     child: Material(
-      color: guess ? C.ochre100 : C.surface2,
-      shape: StadiumBorder(side: BorderSide(color: guess ? C.ochre400 : Colors.transparent)),
+      color: guess ? C.warmBg : C.surface2,
+      shape: StadiumBorder(side: BorderSide(color: guess ? C.warm : Colors.transparent)),
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: onTap,
@@ -433,11 +456,11 @@ class _EditChip extends StatelessWidget {
                   child: Text(
                     label,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: big ? 16 : 14, fontWeight: FontWeight.w500, color: guess ? C.ochre800 : C.ink),
+                    style: TextStyle(fontSize: big ? 16 : 14, fontWeight: FontWeight.w500, color: guess ? C.warm : C.ink),
                   ),
                 ),
                 const SizedBox(width: 6),
-                Icon(Icons.edit_outlined, size: 14, color: guess ? C.ochre800 : C.ink3),
+                Icon(Icons.edit_outlined, size: 14, color: guess ? C.warm : C.ink3),
               ],
             ),
           ),

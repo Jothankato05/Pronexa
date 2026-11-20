@@ -8,12 +8,12 @@ An Android app (built with Flutter) for Nigerian university students. Log meals 
 
 ## Install
 
-Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browser or file manager, then open the file. Either file replaces earlier Pronexa test builds.
+Android 7.0 or newer. On the phone, allow "Install unknown apps" for your browser or file manager, then open the file. Each file updates the same file from an earlier build.
 
 | File | Size | Use |
 |------|------|-----|
-| `release/Pronexa-0.2.0-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
-| `release/Pronexa-0.2.0.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
+| `release/Pronexa-0.3.0-small.apk` | 17 MB | Most Android phones, including budget Tecno, Infinix and itel phones. Try this first to save data |
+| `release/Pronexa-0.3.0.apk` | 55 MB | Works on every phone. Use it if the small one says "App not installed" |
 
 Checksums are in `release/SHA256SUMS.txt`. Screens are in `docs/screens/`.
 
@@ -94,4 +94,4 @@ See `docs/GUARDRAILS.md`: strict analysis, tests, pinned dependencies, no secret
 
 ## Credits
 
-Layout based on the Asteria app design and the Assistant Pill by HorizonX, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL).
+Navy look and layout based on the Asteria app design and the Assistant Pill by HorizonX, used under the project owner's licence. Fonts: Poppins and Nunito (SIL OFL).

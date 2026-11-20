@@ -10,14 +10,9 @@ import '../scope.dart';
 import '../theme.dart';
 import '../widgets/assistant_pill.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 
-const _examples = [
-  '₦1,000 rice and beans, medium takeaway',
-  'I chop 2 wraps of eba with egusi and one meat',
-  'Bread and 4 akara, ₦600',
-  'Soaked garri with groundnut',
-  'Jollof rice big pack with chicken',
-];
+const _examples = ['₦1,000 rice and beans, medium takeaway', 'I chop 2 wraps of eba with egusi', 'Bread and 4 akara, ₦600', 'Garri and groundnut'];
 const _steps = ['Reading', 'Matching foods', 'Checking the portion'];
 
 class DescribeScreen extends StatefulWidget {
@@ -85,8 +80,6 @@ class _DescribeScreenState extends State<DescribeScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
-          Text('Write what you ate, in English or Pidgin. Add the price or pack size if you know it.', style: text.bodyMedium),
-          const SizedBox(height: 16),
           AssistantPill(
             key: _pill,
             examples: _examples,
@@ -98,25 +91,20 @@ class _DescribeScreenState extends State<DescribeScreen> {
           ),
           if (fail != null) ...[
             const SizedBox(height: 20),
-            Panel(
-              color: fail.reason == ReadFailure.nothingFound ? C.surface : C.ochre100,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(switch (fail.reason) {
-                    ReadFailure.nothingFound => fail.unknown.isEmpty ? 'No foods found' : '"${fail.unknown.first}" is not in the food list yet',
-                    _ => 'The meal reader is not available',
-                  }, style: text.titleMedium),
-                  const SizedBox(height: 4),
-                  Text(
-                    fail.reason == ReadFailure.nothingFound
-                        ? 'Try simple words like "rice and beans", or pick from the list.'
-                        : 'Pick and Portion work offline and count the same way.',
-                    style: text.bodyMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton(onPressed: () => openQuickPick(context), child: const Text('Pick from the list')),
-                ],
+            Appear(
+              child: Panel(
+                color: fail.reason == ReadFailure.nothingFound ? C.surface : C.warmBg,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(switch (fail.reason) {
+                      ReadFailure.nothingFound => fail.unknown.isEmpty ? 'No foods found' : '"${fail.unknown.first}" is not in the food list yet',
+                      _ => 'The meal reader is not available',
+                    }, style: text.titleMedium),
+                    const SizedBox(height: 12),
+                    FilledButton(onPressed: () => openQuickPick(context), child: const Text('Pick from the list')),
+                  ],
+                ),
               ),
             ),
           ],
@@ -126,20 +114,21 @@ class _DescribeScreenState extends State<DescribeScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final ex in _examples)
-                  SelectPill(
-                    label: ex,
-                    selected: false,
-                    onTap: () {
-                      _pill.currentState?.setText(ex);
-                      unawaited(_run(ex));
-                    },
+                for (final (i, ex) in _examples.indexed)
+                  Appear(
+                    index: i,
+                    child: SelectPill(
+                      label: ex,
+                      selected: false,
+                      onTap: () {
+                        _pill.currentState?.setText(ex);
+                        unawaited(_run(ex));
+                      },
+                    ),
                   ),
               ],
             ),
           ],
-          const SizedBox(height: 24),
-          Text('Only foods from the food list are used, and you check them before anything is counted.', style: text.bodySmall, textAlign: TextAlign.center),
         ],
       ),
     );
