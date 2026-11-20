@@ -10,7 +10,7 @@ Rules this codebase follows so that fast, AI-assisted ("vibe") coding stays safe
 | One code style | `dart format` with a 160-column page width | `dart format --set-exit-if-changed` in CI |
 | Typed code only | No `dynamic` calls (`avoid_dynamic_calls`); the server is strict TypeScript (`strict`, `noUncheckedIndexedAccess`) | Analyzer and `tsc` |
 | Small, focused files | Data, logic, AI, state and UI are separate folders; no file mixes storage with UI | Review |
-| No dead or fake code | No demo-only fake behaviour presented as real. There is no fake "synced" status: the app says "Saved on phone", because nothing is uploaded | Review |
+| No dead or fake code | No demo-only fake behaviour presented as real, and no decorative status badges (no fake "synced" or "saved" states) | Review |
 
 ## 2. Tests
 
@@ -61,9 +61,9 @@ Rules this codebase follows so that fast, AI-assisted ("vibe") coding stays safe
 | Rule | How it's applied |
 |------|------------------|
 | Tap targets of 44–48 px or more | Pills, steppers, tiles and nav buttons |
-| Screen-reader labels | `Semantics` on the nav, actions, tiles, ring and status |
+| Screen-reader labels | `Semantics` on the nav, actions, tiles and ring |
 | Text scaling | Rows use `Flexible` or `Expanded`; widget tests run with a wide test font to catch overflow |
-| Reduced motion | Ring animation and rotating examples stop when the system asks for less motion |
+| Reduced motion | Every transition, count-up and rotating example is skipped when the system asks for less motion |
 | Contrast | Every text and background pair meets WCAG AA (see `docs/DESIGN.md`) |
 | Light on old phones | Release build is AOT-compiled; ripple effect instead of shader-based sparkle; no gradients or blur; photos downscaled to 1280 px |
 

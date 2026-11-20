@@ -41,7 +41,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
     final showRecent = _q.isEmpty && recent.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.photo == null ? 'Pick foods' : 'What is in the photo?')),
+      appBar: AppBar(title: Text(widget.photo == null ? 'Pick foods' : 'What\'s in it?')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
         children: [
@@ -70,21 +70,25 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                 onTap: _toggle,
               ),
             ],
-          if (list.isEmpty) const EmptyState(title: 'Not in the list yet', body: 'Try another word, like "swallow" or "soup".'),
+          if (list.isEmpty) const EmptyState(title: 'Not in the list yet'),
         ],
       ),
-      bottomNavigationBar: _picked.isEmpty
-          ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: FilledButton(
-                  onPressed: () =>
-                      openConfirm(context, Draft.fromFoods(_picked, source: widget.photo == null ? LogSource.quick : LogSource.photo, photo: widget.photo)),
-                  child: Text('Next: ${_picked.length} food${_picked.length == 1 ? '' : 's'}'),
+      bottomNavigationBar: AnimatedSize(
+        duration: Motion.of(context, Motion.medium),
+        curve: Motion.curve,
+        child: _picked.isEmpty
+            ? const SizedBox(width: double.infinity)
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                  child: FilledButton(
+                    onPressed: () =>
+                        openConfirm(context, Draft.fromFoods(_picked, source: widget.photo == null ? LogSource.quick : LogSource.photo, photo: widget.photo)),
+                    child: Text('Next: ${_picked.length} food${_picked.length == 1 ? '' : 's'}'),
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }
@@ -121,36 +125,31 @@ class _FoodTile extends StatelessWidget {
     selected: selected,
     label: food.name,
     excludeSemantics: true,
-    child: Material(
-      color: selected ? C.leaf50 : C.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(R.lg),
-        side: BorderSide(color: selected ? C.leaf600 : C.line, width: selected ? 1.5 : 1),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(R.lg),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    child: SelectBox(
+      selected: selected,
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  IconTile(food.icon, size: 44, color: selected ? C.surface : C.surface2),
-                  const Spacer(),
-                  if (selected)
-                    const Icon(Icons.check_circle, color: C.leaf600, size: 22)
-                  else if (food.altProtein)
-                    const Icon(Icons.eco_outlined, color: C.leaf600, size: 18),
-                ],
-              ),
+              IconTile(food.icon, size: 44),
               const Spacer(),
-              Text(food.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
-              if (food.local != null) Text(food.local!, style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+              AnimatedSwitcher(
+                duration: Motion.of(context, Motion.fast),
+                transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+                child: selected
+                    ? const Icon(Icons.check_circle, key: ValueKey('on'), color: Colors.white, size: 22)
+                    : food.altProtein
+                    ? const Icon(Icons.eco_outlined, key: ValueKey('plant'), color: C.good, size: 18)
+                    : const SizedBox(key: ValueKey('off')),
+              ),
             ],
           ),
-        ),
+          const Spacer(),
+          Text(food.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+          if (food.local != null) Text(food.local!, style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ],
       ),
     ),
   );

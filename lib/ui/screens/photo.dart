@@ -13,6 +13,7 @@ import '../nav.dart';
 import '../scope.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 
 /// Photo mode. Uses the phone's own camera app through image_picker, so the
 /// app needs no camera permission. Photos stay in memory and are never saved.
@@ -68,9 +69,9 @@ class _PhotoScreenState extends State<PhotoScreen> {
     } on PlatformException catch (e) {
       setState(
         () => _message = switch (e.code) {
-          'camera_access_denied' => 'Pronexa is not allowed to use the camera. Allow it in your phone settings, or choose from the gallery.',
-          'no_available_camera' => 'No camera app found on this phone. Choose from the gallery instead.',
-          _ => 'The camera could not open. Try again, or choose from the gallery.',
+          'camera_access_denied' => 'Camera not allowed. Use the gallery instead.',
+          'no_available_camera' => 'No camera found. Use the gallery instead.',
+          _ => "The camera didn't open. Try again.",
         },
       );
     }
@@ -88,7 +89,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
     }
     if (!mounted) return;
     if (bytes.lengthInBytes > maxPhotoBytes) {
-      setState(() => _message = 'That photo is too large. Try again with the camera.');
+      setState(() => _message = 'Photo too large. Try the camera.');
       return;
     }
     setState(() => _photo = bytes);
@@ -109,11 +110,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
       case ReadOk(:final reading):
         await openConfirm(context, Draft.fromReading(reading, source: LogSource.photo, photo: photo));
       case ReadFail(:final reason):
-        setState(
-          () => _message = reason == ReadFailure.nothingFound
-              ? 'No foods found in the photo. Pick them yourself.'
-              : 'The photo could not be read right now. Pick the foods yourself.',
-        );
+        setState(() => _message = reason == ReadFailure.nothingFound ? 'No foods found. Pick them yourself.' : "Couldn't read it. Pick the foods yourself.");
     }
   }
 
@@ -128,74 +125,83 @@ class _PhotoScreenState extends State<PhotoScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         children: [
-          if (photo == null) ...[
-            Panel(
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-              child: Column(
-                children: [
-                  const Icon(Icons.photo_camera_outlined, size: 48, color: C.leaf600),
-                  const SizedBox(height: 12),
-                  Text('Photograph your plate or pack', style: text.titleMedium, textAlign: TextAlign.center),
+          FadeSwap(
+            id: photo == null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (photo == null) ...[
+                  Panel(
+                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: const BoxDecoration(color: C.indigo, shape: BoxShape.circle),
+                          child: const Icon(Icons.photo_camera_outlined, size: 32, color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        Text('Shoot from above, in good light', style: text.bodyMedium, textAlign: TextAlign.center),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton.icon(onPressed: () => _take(ImageSource.camera), icon: const Icon(Icons.photo_camera), label: const Text('Take a photo')),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () => _take(ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text('Choose from gallery'),
+                  ),
+                ] else ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(R.lg),
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Image.memory(photo, fit: BoxFit.cover, semanticLabel: 'Your meal photo'),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (canRead)
+                    FilledButton.icon(
+                      onPressed: _busy ? null : _read,
+                      icon: _busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.search),
+                      label: Text(_busy ? 'Reading the photo…' : 'Read the photo'),
+                    )
+                  else
+                    Text(
+                      state.settings.lowData
+                          ? 'Low-data mode: pick the foods you see.'
+                          : !state.online
+                          ? 'No internet: pick the foods you see.'
+                          : 'Photo reading is off: pick the foods you see.',
+                      style: text.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  const SizedBox(height: 10),
+                  (canRead ? OutlinedButton.new : FilledButton.new)(
+                    onPressed: _busy ? null : () => openQuickPick(context, photo: photo),
+                    child: const Text('Pick the foods myself'),
+                  ),
                   const SizedBox(height: 4),
-                  Text('Take it from above, in good light.', style: text.bodyMedium, textAlign: TextAlign.center),
+                  TextButton.icon(onPressed: _busy ? null : () => setState(() => _photo = null), icon: const Icon(Icons.refresh), label: const Text('Retake')),
                 ],
-              ),
+              ],
             ),
-            const SizedBox(height: 20),
-            FilledButton.icon(onPressed: () => _take(ImageSource.camera), icon: const Icon(Icons.photo_camera), label: const Text('Take a photo')),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () => _take(ImageSource.gallery),
-              icon: const Icon(Icons.photo_library_outlined),
-              label: const Text('Choose from gallery'),
-            ),
-          ] else ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(R.lg),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: Image.memory(photo, fit: BoxFit.cover, semanticLabel: 'Your meal photo'),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (canRead)
-              FilledButton.icon(
-                onPressed: _busy ? null : _read,
-                icon: _busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.search),
-                label: Text(_busy ? 'Reading the photo…' : 'Read the photo'),
-              )
-            else
-              Panel(
-                color: C.ochre100,
-                child: Text(
-                  state.settings.lowData
-                      ? 'Low-data mode is on, so the photo stays on your phone. Pick the foods you see.'
-                      : !state.online
-                      ? 'You are offline. Pick the foods you see in the photo.'
-                      : 'Reading photos needs the AI server. Pick the foods you see in the photo.',
-                  style: text.bodyMedium?.copyWith(color: C.ochre800),
-                ),
-              ),
-            const SizedBox(height: 10),
-            (canRead ? OutlinedButton.new : FilledButton.new)(
-              onPressed: _busy ? null : () => openQuickPick(context, photo: photo),
-              child: const Text('Pick the foods myself'),
-            ),
-            const SizedBox(height: 4),
-            TextButton.icon(onPressed: _busy ? null : () => setState(() => _photo = null), icon: const Icon(Icons.refresh), label: const Text('Retake')),
-          ],
+          ),
           if (_message != null) ...[
             const SizedBox(height: 16),
-            Semantics(
-              liveRegion: true,
-              child: Panel(
-                color: C.clay100,
-                child: Text(_message!, style: text.bodyMedium?.copyWith(color: C.clay700)),
+            Appear(
+              child: Semantics(
+                liveRegion: true,
+                child: Panel(
+                  color: C.warmBg,
+                  child: Text(_message!, style: text.bodyMedium?.copyWith(color: C.warm)),
+                ),
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          Text('Photos are not saved. They are sent only when you tap "Read the photo".', style: text.bodySmall, textAlign: TextAlign.center),
         ],
       ),
     );

@@ -12,6 +12,7 @@ import '../nav.dart';
 import '../scope.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 import 'home_shell.dart';
 
 const _budgets = [300, 500, 1000, 2000];
@@ -49,7 +50,7 @@ class SuggestionsScreen extends StatelessWidget {
           Text('Close the gap', style: text.headlineSmall),
           const SizedBox(height: 16),
           Panel(
-            color: C.leaf700,
+            color: C.indigo,
             padding: const EdgeInsets.all(24),
             child: closed
                 ? const Text(
@@ -61,15 +62,18 @@ class SuggestionsScreen extends StatelessWidget {
                     children: [
                       Text(
                         hasMeals ? 'LEFT TO EAT TODAY' : 'TODAY\'S TARGET',
-                        style: const TextStyle(color: C.onGreen2, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w500),
+                        style: const TextStyle(color: C.onIndigo2, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        fmtRange(gap),
-                        style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, height: 1.1),
+                      AnimatedSwitcher(
+                        duration: Motion.of(context, Motion.medium),
+                        transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
+                        child: Text(
+                          fmtRange(gap),
+                          key: ValueKey(fmtRange(gap)),
+                          style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, height: 1.1),
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      const Text('protein, estimated', style: TextStyle(color: C.onGreen2, fontSize: 14)),
                     ],
                   ),
           ),
@@ -92,19 +96,19 @@ class SuggestionsScreen extends StatelessWidget {
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Plant protein first'),
-              subtitle: Text(vegan ? 'Always on for vegan.' : 'Beans, soy and groundnuts first.'),
               value: plantFirst,
               onChanged: vegan ? null : (v) => state.updateSettings(s.copyWith(plantFirst: v)),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              'For ${dietLabels[p.diet]!.$1.toLowerCase()}${p.allergies.isEmpty ? '' : ', no ${p.allergies.map((a) => allergenLabels[a]!.toLowerCase()).join(', ')}'}. Change in your profile.',
-              style: text.bodySmall,
-            ),
-          ),
-          if (!closed && r.combos.isNotEmpty) ...[const SectionTitle('Ways to close it'), for (final c in r.combos) _ComboCard(combo: c, gap: gap)],
+          if (!closed && r.combos.isNotEmpty) ...[
+            const SectionTitle('Ways to close it'),
+            for (final (i, c) in r.combos.indexed)
+              Appear(
+                key: ValueKey('${c.title}-${s.budget}'),
+                index: i,
+                child: _ComboCard(combo: c, gap: gap),
+              ),
+          ],
           if (r.upgrades.isNotEmpty) ...[
             SectionTitle(hasMeals ? 'Add to your meals' : 'Add to common meals'),
             Panel(
@@ -133,11 +137,14 @@ class SuggestionsScreen extends StatelessWidget {
           if (r.hiddenCount > 0)
             Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: Text('${r.hiddenCount} foods hidden for your diet or allergies.', style: text.bodySmall),
+              child: Text(
+                '${r.hiddenCount} hidden for ${dietLabels[p.diet]!.$1.toLowerCase()}${p.allergies.isEmpty ? '' : ' and allergies'}',
+                style: text.bodySmall,
+              ),
             ),
           Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text('Prices are typical campus prices from $pricesAsOf and vary by vendor.', style: text.bodySmall),
+            padding: const EdgeInsets.only(top: 6),
+            child: Text('Prices from $pricesAsOf', style: text.bodySmall),
           ),
           const Footnote(),
         ],
@@ -187,7 +194,7 @@ class _ComboCard extends StatelessWidget {
                   ),
                   Text(
                     '+${fmtRange(it.protein)}',
-                    style: const TextStyle(color: C.leaf700, fontWeight: FontWeight.w500),
+                    style: const TextStyle(color: C.blueInk, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -227,7 +234,7 @@ class _UpgradeRow extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             change,
-            style: const TextStyle(fontWeight: FontWeight.w500, color: C.leaf700),
+            style: const TextStyle(fontWeight: FontWeight.w500, color: C.blueInk),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -242,7 +249,7 @@ class _UpgradeRow extends StatelessWidget {
           if (u.suggestion.caveat != null)
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text(u.suggestion.caveat!, style: const TextStyle(color: C.ochre800, fontSize: 13)),
+              child: Text(u.suggestion.caveat!, style: const TextStyle(color: C.warm, fontSize: 13)),
             ),
         ],
       ),
@@ -271,7 +278,7 @@ class _SuggestionRow extends StatelessWidget {
                   Expanded(child: Text(s.food.name, style: Theme.of(context).textTheme.titleMedium)),
                   Text(
                     '+${fmtRange(s.protein)}',
-                    style: const TextStyle(color: C.leaf700, fontWeight: FontWeight.w500),
+                    style: const TextStyle(color: C.blueInk, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -286,15 +293,10 @@ class _SuggestionRow extends StatelessWidget {
                   if (s.gapShare > 0) Tag('${(s.gapShare * 100).round()}% of gap', tone: Tone.good),
                 ],
               ),
-              if (s.food.note != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(s.food.note!, style: Theme.of(context).textTheme.bodyMedium),
-                ),
               if (s.caveat != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(s.caveat!, style: const TextStyle(color: C.ochre800, fontSize: 13)),
+                  child: Text(s.caveat!, style: const TextStyle(color: C.warm, fontSize: 13)),
                 ),
               Align(
                 alignment: Alignment.centerLeft,

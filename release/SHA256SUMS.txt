@@ -1,2 +1,2 @@
-be938195d0e6ca32e61afd408427c1eaac87f1c3af00be750470f12d6eac20ff  Pronexa-0.2.0-small.apk
-d96bfd602e0b255572a1de441dcabbdeac6c39fae55437554793d5832e0a51c4  Pronexa-0.2.0.apk
+3d5240dea35663f8187dbdffe0fcee5e569ec480aea228c61b1e5997bca8f62a  Pronexa-0.3.0.apk
+b25aeefa34ef26525670b4e7877b8f5cce86aa30cd1cf08779806505a244c967  Pronexa-0.3.0-small.apk
