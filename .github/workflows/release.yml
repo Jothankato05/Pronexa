@@ -88,13 +88,17 @@ jobs:
           if [ -n "$AI_URL" ]; then DEFINE="--dart-define=PRONEXA_AI_URL=$AI_URL"; fi
           flutter build apk --release -P force-version-code-ignoring-abi=true $DEFINE
           cp build/app/outputs/flutter-apk/app-release.apk "Pronexa-${TAG#v}.apk"
+          # A fixed name too, so https://github.com/<repo>/releases/latest/download/Pronexa.apk always works.
+          cp build/app/outputs/flutter-apk/app-release.apk Pronexa.apk
       - name: Remove keystore
         if: always()
         run: rm -f android/pronexa-upload.jks
       - uses: actions/upload-artifact@v4
         with:
           name: release-android
-          path: Pronexa-*.apk
+          path: |
+            Pronexa-*.apk
+            Pronexa.apk
 
   ios:
     name: iPhone .ipa (unsigned)
@@ -137,6 +141,8 @@ jobs:
   publish:
     name: Publish
     needs: [android, ios]
+    # Publish the Android app even if the iPhone build fails.
+    if: ${{ !cancelled() && needs.android.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -146,7 +152,7 @@ jobs:
         with:
           pattern: release-*
           merge-multiple: true
-      - run: sha256sum Pronexa-* > SHA256SUMS.txt
+      - run: sha256sum Pronexa* > SHA256SUMS.txt
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
@@ -160,5 +166,5 @@ jobs:
 
             Checksums are in SHA256SUMS.txt.
           files: |
-            Pronexa-*
+            Pronexa*
             SHA256SUMS.txt
