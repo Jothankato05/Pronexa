@@ -44,3 +44,6 @@ tool/food_model/.cache/
 
 # ONNX Runtime Web, fetched and checked by tool/web/build.sh
 web/ort/
+
+# Python bytecode
+__pycache__/
