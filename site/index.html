@@ -62,6 +62,8 @@
     .step img { width: 100%; border-radius: 18px; margin-bottom: 16px; border: 1px solid var(--line); }
     .step h3 { font-size: 18px; font-weight: 500; }
     .step p { color: var(--ink2); font-size: 15px; margin-top: 6px; }
+    .video { margin-top: 32px; border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: #0B1426; aspect-ratio: 16 / 9; }
+    .video video { display: block; width: 100%; height: 100%; }
     .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
     .features h3 { font-size: 18px; font-weight: 500; }
     .download { background: var(--navy); border-radius: 32px; padding: 48px; margin-top: 8px; }
@@ -88,7 +90,7 @@
   <div class="wrap">
     <nav>
       <a class="brand" href="/"><img src="/img/icon-192.png" alt="">Pronexa</a>
-      <div class="links"><a href="#why">Why</a><a href="#how">How it works</a><a href="#download">Download</a><a href="/pitch">Pitch deck</a></div>
+      <div class="links"><a href="#demo">Demo</a><a href="#why">Why</a><a href="#how">How it works</a><a href="#download">Download</a><a href="/pitch">Pitch deck</a></div>
     </nav>
 
     <header class="hero">
@@ -112,6 +114,19 @@
       </div>
     </header>
   </div>
+
+  <section id="demo">
+    <div class="wrap">
+      <h2>See it in action.</h2>
+      <p class="sub">The Android app on a real phone, next to the web app in a browser. One minute, no sound.</p>
+      <div class="video">
+        <video controls playsinline muted preload="none" poster="/img/demo-poster.webp" aria-label="Pronexa demo: the Android app and the web app side by side">
+          <source src="__DEMO_URL__" type="video/mp4">
+        </video>
+      </div>
+      <p class="src">Can't play it here? <a href="__DEMO_DRIVE_URL__">Watch on Google Drive</a>.</p>
+    </div>
+  </section>
 
   <section id="why">
     <div class="wrap">
@@ -196,7 +211,7 @@
     <div class="wrap">
       <p><strong style="color:#fff">Pronexa</strong> · Built at Hack the Fork Nigeria 2026 by Miracle Matthew, Iwuafor Eberechukwu, Ordinna Chiamaka Benita and Zinachidi Uzor Akor.</p>
       <p style="margin-top:8px">Pronexa is an independent student team project. It is not a Primers Group product; primersgroup.ng only hosts this site.</p>
-      <p style="margin-top:8px">Our pitch: <a href="/pitch">pitch deck (PDF)</a> · <a href="__PITCH_PPTX_URL__">PowerPoint</a></p>
+      <p style="margin-top:8px">Our pitch: <a href="/pitch">pitch deck (PDF)</a> · <a href="__PITCH_PPTX_URL__">PowerPoint</a> · <a href="#demo">demo video</a></p>
       <p style="margin-top:8px">Protein values: FAO West African Food Composition Table 2019 and USDA FoodData Central. Estimates only, not medical advice. <a href="https://github.com/Jothankato05/Pronexa">Source code</a></p>
     </div>
   </footer>
