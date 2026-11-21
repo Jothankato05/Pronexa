@@ -21,13 +21,13 @@ The service worker:
 
 ## Live site
 
-**https://pronexa.primersgroup.ng** (Vercel project `pronexa` in the Primers team; the domain is on Vercel DNS):
+**https://pronexa.primersgroup.ng**. Hosting only: the Vercel project `pronexa` and its file storage sit in the Primers team's Vercel account, and the subdomain is on primersgroup.ng's Vercel DNS. Pronexa is an independent team project, not a Primers Group product, and the site says so in its footer. To move it, transfer the Vercel project and Blob store to the team's own Vercel account and point a new domain at it.
 - `/`: the website (`site/`), with download buttons
 - `/app/`: the PWA, built with `tool/web/build.sh /app/`
 - downloads live in the team's public Vercel Blob store `pronexa-downloads` (Vercel's free plan limits deployment files to 100 MB): the signed Android APK, the unsigned iPhone .ipa (installed with Sideloadly or AltStore) and the pitch deck
 - `/pitch` redirects to the pitch deck PDF
 
-Redeploy after changes: `tool/web/build.sh /app/`, then `VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <Primers team id> --apk-url <APK URL> --ipa-url <IPA URL> --pitch-pdf <PDF URL> --pitch-pptx <PPTX URL>`.
+Redeploy after changes: `tool/web/build.sh /app/`, then `VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <Vercel team id> --apk-url <APK URL> --ipa-url <IPA URL> --pitch-pdf <PDF URL> --pitch-pptx <PPTX URL>`.
 
 ## Publishing
 
