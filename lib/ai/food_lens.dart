@@ -154,24 +154,30 @@ class DishHead {
     return [for (final v in e) v / sum];
   }
 
-  /// The head's dishes scoring at least [minScore] first, best first, then the
-  /// recogniser's own foods (it sees several foods on one plate; the head
-  /// names the main dish). At most [max]. Same rule as merged() in
-  /// train_head.py, which measured it.
+  /// The head's dishes scoring at least [minScore] and the recogniser's own
+  /// foods, ranked together by each one's confidence, at most [max]. The head
+  /// only knows 18 dishes and always picks one of them, so a photo of egg,
+  /// chicken or spaghetti still gets a dish; ranking by confidence keeps a
+  /// food the recogniser is sure of first. Same rule as merged() in
+  /// train_head.py, which measured it (docs/PHOTO.md).
   List<LensGuess> merge(Float32List f, List<LensGuess> lens, {int max = 4}) {
     final p = probabilities(f);
-    final order = List.generate(p.length, (i) => i)..sort((a, b) => p[b].compareTo(p[a]));
-    final out = <String, LensGuess>{};
-    for (final k in order) {
-      if (p[k] < minScore) break;
+    final best = <String, LensGuess>{};
+    void offer(LensGuess g) {
+      if (!foodById.containsKey(g.foodId)) return;
+      final had = best[g.foodId];
+      if (had == null || g.score > had.score) best[g.foodId] = g;
+    }
+
+    for (var k = 0; k < p.length; k++) {
+      if (p[k] < minScore) continue;
       for (final id in foods[k]) {
-        if (foodById.containsKey(id)) out.putIfAbsent(id, () => LensGuess(id, p[k]));
+        offer(LensGuess(id, p[k]));
       }
     }
-    for (final g in lens) {
-      out.putIfAbsent(g.foodId, () => g);
-    }
-    return out.values.take(max).toList();
+    lens.forEach(offer);
+    final list = best.values.toList()..sort((a, b) => b.score.compareTo(a.score));
+    return list.take(max).toList();
   }
 }
 
@@ -232,8 +238,8 @@ class OnDeviceLens implements FoodLens {
     _headLoaded = true;
     try {
       _head = DishHead.fromJson(jsonDecode(await rootBundle.loadString(dishHeadAsset)) as Map<String, Object?>);
-    } on Exception {
-      _head = null; // Not bundled: the recogniser's own guesses are used.
+    } catch (_) {
+      _head = null; // Missing or unreadable: the recogniser's own guesses are used.
     }
     return _head;
   }

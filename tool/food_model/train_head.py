@@ -130,19 +130,21 @@ def head_probs(x, w, b, scale=20.0):
 
 
 def merged(lens: list[tuple[str, float]], probs: np.ndarray, names: list[str], min_head: float, top=4):
-    """Python copy of mergeHead in lib/ai/food_lens.dart: the head's dishes at or
-    above [min_head] come first, best first; then the recogniser's other foods."""
-    out: list[str] = []
+    """Python copy of DishHead.merge in lib/ai/food_lens.dart: the head's dishes
+    at or above [min_head] and the recogniser's foods, ranked together by each
+    one's own confidence. (Putting the head's dish always first scores higher on
+    this set, 82.9%, but buries foods outside its 18 dishes: on 200 Food-101
+    photos of chips, fried rice, omelette, chicken wings and spaghetti the right
+    food came first 3.5% of the time instead of 21.5%. This rule: 18.0%.)"""
+    best: dict[str, float] = {}
     for i in np.argsort(-probs):
         if probs[i] < min_head:
             break
         for food in DISHES[names[i]]:
-            if food not in out:
-                out.append(food)
-    for food, _ in lens:
-        if food not in out:
-            out.append(food)
-    return out[:top]
+            best[food] = max(best.get(food, 0.0), float(probs[i]))
+    for food, s in lens:
+        best[food] = max(best.get(food, 0.0), s)
+    return [f for f, _ in sorted(best.items(), key=lambda kv: -kv[1])][:top]
 
 
 def report(title, hits1, hitsk, mask):
@@ -195,7 +197,7 @@ def main() -> None:
         print(tag)
         print("  " + report("all 18 dishes", a1, ak, every))
         print("  " + report("12 dishes it already knew", a1, ak, ~new))
-        print("  " + report("6 dishes it never learned", a1, ak, new))
+        print("  " + report("dishes it never learned", a1, ak, new))
     print("\nPer dish (first guess: before -> after)")
     for c in range(k):
         m = y == c

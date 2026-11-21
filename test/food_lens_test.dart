@@ -234,6 +234,15 @@ void main() {
       expect(out.map((g) => g.foodId), ['suya', 'eba', 'beef', 'fish']);
     });
 
+    test('a food the recogniser is surer of stays first', () {
+      // The head always names one of its dishes; a confident egg should not be buried under it.
+      final unsure = DishHead(scale: 1, minScore: 0.35, foods: head().foods, bias: Float64List(2), weights: head().weights);
+      const lens = [LensGuess('egg', 0.8), LensGuess('bread', 0.3)];
+      final out = unsure.merge(fp(0), lens);
+      expect(out.first.foodId, 'egg');
+      expect(out.map((g) => g.foodId), contains('suya'));
+    });
+
     test('an unsure head leaves the recogniser alone', () {
       const lens = [LensGuess('eba', 0.9)];
       // A blank fingerprint gives 50/50, below this head's 0.9 bar.

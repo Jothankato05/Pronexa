@@ -1,7 +1,7 @@
 name: pronexa
 description: "Pronexa: check your protein and close the gap for less. Offline-first, for Nigerian university students."
 publish_to: 'none'
-version: 0.8.0+10
+version: 0.8.1+11
 
 environment:
   sdk: ^3.13.7
