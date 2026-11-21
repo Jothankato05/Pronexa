@@ -24,9 +24,10 @@ The service worker:
 **https://pronexa.primersgroup.ng** (Vercel project `pronexa` in the Primers team; the domain is on Vercel DNS):
 - `/`: the website (`site/`), with download buttons
 - `/app/`: the PWA, built with `tool/web/build.sh /app/`
-- the Android download is the signed APK in the team's public Vercel Blob store `pronexa-downloads` (Vercel's free plan limits deployment files to 100 MB, and the APK is 214 MB)
+- downloads live in the team's public Vercel Blob store `pronexa-downloads` (Vercel's free plan limits deployment files to 100 MB): the signed Android APK, the unsigned iPhone .ipa (installed with Sideloadly or AltStore) and the pitch deck
+- `/pitch` redirects to the pitch deck PDF
 
-Redeploy after changes: `tool/web/build.sh /app/`, then `VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <Primers team id> --apk-url <APK URL>`.
+Redeploy after changes: `tool/web/build.sh /app/`, then `VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <Primers team id> --apk-url <APK URL> --ipa-url <IPA URL> --pitch-pdf <PDF URL> --pitch-pptx <PPTX URL>`.
 
 ## Publishing
 

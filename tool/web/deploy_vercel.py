@@ -1,6 +1,6 @@
 """Deploys the Pronexa website to Vercel with the REST API (no Vercel CLI needed).
 
-  VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <team id> [--apk build/Pronexa.apk] [--apk-url URL]
+  VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <team id> [--apk build/Pronexa.apk] [--apk-url URL] [--ipa-url URL]
 
 Layout of the deployment:
   /            the website (site/)
@@ -42,7 +42,7 @@ def call(method, path, token, body=None, headers=None, team=None):
         return e.code, json.loads(e.read().decode() or "{}")
 
 
-def collect(site: pathlib.Path, app: pathlib.Path, apk: pathlib.Path | None, apk_url: str):
+def collect(site: pathlib.Path, app: pathlib.Path, apk: pathlib.Path | None, apk_url: str, ipa_url: str, pitch_pdf: str, pitch_pptx: str):
     files = {}
     for p in site.rglob("*"):
         if p.is_file():
@@ -51,13 +51,14 @@ def collect(site: pathlib.Path, app: pathlib.Path, apk: pathlib.Path | None, apk
         if p.is_file() and not p.name.endswith((".map", ".symbols")) and p.name != "flutter_service_worker.js":
             files["app/" + p.relative_to(app).as_posix()] = p
     link = "/download/Pronexa.apk" if apk else apk_url
-    page = (site / "index.html").read_text().replace("__APK_URL__", link)
+    page = (site / "index.html").read_text().replace("__APK_URL__", link).replace("__IPA_URL__", ipa_url).replace("__PITCH_PPTX_URL__", pitch_pptx)
     tmp = pathlib.Path(tempfile.mkdtemp()) / "index.html"
     tmp.write_text(page)
     files["index.html"] = tmp
     if apk:
         files["download/Pronexa.apk"] = apk
     config = {
+        "redirects": [{"source": "/pitch", "destination": pitch_pdf, "permanent": False}],
         "headers": [
             {"source": "/app/sw.js", "headers": [{"key": "Cache-Control", "value": "no-cache"}]},
             {"source": "/app/(index.html|precache.json|lens.js|flutter_bootstrap.js|main.dart.js)", "headers": [{"key": "Cache-Control", "value": "no-cache"}]},
@@ -78,10 +79,13 @@ def main():
     ap.add_argument("--app", default=str(ROOT / "build/web"))
     ap.add_argument("--apk")
     ap.add_argument("--apk-url", default="https://github.com/Jothankato05/Pronexa/releases/latest/download/Pronexa.apk")
+    ap.add_argument("--ipa-url", default="https://github.com/Jothankato05/Pronexa/releases/latest")
+    ap.add_argument("--pitch-pdf", default="https://github.com/Jothankato05/Pronexa")
+    ap.add_argument("--pitch-pptx", default="https://github.com/Jothankato05/Pronexa")
     args = ap.parse_args()
     token = os.environ.get("VERCEL_TOKEN") or sys.exit("Set VERCEL_TOKEN")
 
-    files = collect(pathlib.Path(args.site), pathlib.Path(args.app), pathlib.Path(args.apk) if args.apk else None, args.apk_url)
+    files = collect(pathlib.Path(args.site), pathlib.Path(args.app), pathlib.Path(args.apk) if args.apk else None, args.apk_url, args.ipa_url, args.pitch_pdf, args.pitch_pptx)
     listing = []
     for name, path in sorted(files.items()):
         data = path.read_bytes()
