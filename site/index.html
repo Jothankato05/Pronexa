@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pronexa: check your protein, close the gap for less</title>
+  <meta name="description" content="Pronexa shows Nigerian students how much protein they're missing and the cheapest way to close the gap, plant protein first. Works offline on Android, iPhone and the web.">
+  <meta name="theme-color" content="#0A0E17">
+  <meta property="og:title" content="Pronexa">
+  <meta property="og:description" content="Check your protein. Close the gap for less. Offline, Nigerian foods, naira prices.">
+  <meta property="og:image" content="/img/og.png">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/img/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0A0E17; --navy: #20296B; --indigo: #293477; --blue: #50A2FF; --good: #5FD38A; --warm: #F5B971; --ink2: #B6B7B9; --ink3: #9D9FA2; --line: rgba(255,255,255,.10); --fill: rgba(255,255,255,.05); }
+    * { box-sizing: border-box; margin: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: #fff; font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 20px; text-decoration: none; }
+    .brand img { width: 36px; height: 36px; border-radius: 10px; }
+    nav .links a { color: var(--ink2); text-decoration: none; margin-left: 24px; font-size: 15px; }
+    nav .links a:hover { color: #fff; }
+    .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; padding: 48px 0 72px; }
+    .eyebrow { color: var(--blue); font-size: 13px; letter-spacing: 3px; font-weight: 500; text-transform: uppercase; }
+    h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1.05; letter-spacing: -2px; font-weight: 600; margin: 16px 0 20px; }
+    h1 span { color: var(--good); }
+    .lead { color: var(--ink2); font-size: 19px; max-width: 520px; }
+    .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 26px; border-radius: 999px; font-weight: 500; font-size: 16px; text-decoration: none; transition: transform .15s, background .15s; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: #fff; color: var(--bg); }
+    .btn.ghost { background: var(--fill); border: 1px solid var(--line); }
+    .btn svg { width: 20px; height: 20px; }
+    .fine { color: var(--ink3); font-size: 13px; margin-top: 14px; }
+    .phones { position: relative; height: 560px; }
+    .phone { position: absolute; width: 240px; border-radius: 36px; border: 3px solid #2a3147; background: #05070c; padding: 8px; box-shadow: 0 0 0 8px #121827; }
+    .phone img { display: block; width: 100%; border-radius: 28px; }
+    .phone.a { left: 10%; top: 0; z-index: 2; }
+    .phone.b { left: 48%; top: 60px; opacity: .9; }
+    section { padding: 72px 0; border-top: 1px solid var(--line); }
+    h2 { font-size: clamp(30px, 4vw, 42px); letter-spacing: -1px; font-weight: 600; line-height: 1.15; }
+    .sub { color: var(--ink2); font-size: 17px; margin-top: 12px; max-width: 640px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+    .card { background: var(--fill); border: 1px solid var(--line); border-radius: 24px; padding: 28px; }
+    .big { font-size: 48px; font-weight: 600; letter-spacing: -2px; line-height: 1; }
+    .card p { color: var(--ink2); margin-top: 10px; }
+    .src { color: var(--ink3); font-size: 12px; margin-top: 20px; }
+    .bars { margin-top: 36px; display: grid; gap: 12px; max-width: 760px; }
+    .bar { display: grid; grid-template-columns: 130px 1fr; align-items: center; gap: 14px; font-size: 15px; color: var(--ink2); }
+    .bar i { display: block; height: 34px; border-radius: 10px; background: var(--good); position: relative; }
+    .bar i b { position: absolute; left: calc(100% + 10px); top: 4px; color: var(--good); font-style: normal; font-weight: 600; white-space: nowrap; }
+    .bar.animal i { background: var(--warm); }
+    .bar.animal i b { color: var(--warm); }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 36px; }
+    .step img { width: 100%; border-radius: 18px; margin-bottom: 16px; border: 1px solid var(--line); }
+    .step h3 { font-size: 18px; font-weight: 500; }
+    .step p { color: var(--ink2); font-size: 15px; margin-top: 6px; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+    .features h3 { font-size: 18px; font-weight: 500; }
+    .download { background: var(--navy); border-radius: 32px; padding: 48px; margin-top: 8px; }
+    .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+    .dl { background: rgba(255,255,255,.08); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 10px; }
+    .dl h3 { font-size: 20px; font-weight: 500; }
+    .dl p { color: #d4d7f0; font-size: 15px; flex: 1; }
+    .dl .btn { align-self: flex-start; }
+    footer { padding: 40px 0 60px; color: var(--ink3); font-size: 14px; border-top: 1px solid var(--line); margin-top: 72px; }
+    footer a { color: var(--ink2); }
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; padding-top: 24px; }
+      .phones { height: 460px; }
+      .phone { width: 200px; }
+      .phone.a { left: 2%; } .phone.b { left: 42%; }
+      .stats, .features, .dl-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      nav .links { display: none; }
+      .download { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="/"><img src="/img/icon-192.png" alt="">Pronexa</a>
+      <div class="links"><a href="#why">Why</a><a href="#how">How it works</a><a href="#download">Download</a></div>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">For Nigerian students</div>
+        <h1>Check your protein.<br><span>Close the gap for less.</span></h1>
+        <p class="lead">Pronexa shows how much protein you've had today, how much you're missing, and the cheapest way to close the gap, plant protein first. It works offline.</p>
+        <div class="ctas">
+          <a class="btn primary" href="__APK_URL__" download>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.38.38 0 00-.66-.38l-1.86 3.22a11.4 11.4 0 00-9.84 0L5.22 5.92a.38.38 0 10-.66.38L6.4 9.48A10.8 10.8 0 001 18h22a10.8 10.8 0 00-5.4-8.52zM7 15.25a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zm10 0a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z"/></svg>
+            Download for Android
+          </a>
+          <a class="btn ghost" href="/app/">Open the web app</a>
+        </div>
+        <p class="fine">Free. Android 7.0 or newer, about 214 MB (includes the offline food recogniser). Web app works on any phone, including iPhone.</p>
+      </div>
+      <div class="phones" aria-hidden="true">
+        <div class="phone a"><img src="/img/03-today.webp" alt=""></div>
+        <div class="phone b"><img src="/img/06-solve.webp" alt=""></div>
+      </div>
+    </header>
+  </div>
+
+  <section id="why">
+    <div class="wrap">
+      <h2>Students are short on protein, and short on money.</h2>
+      <p class="sub">Most don't know that beans, soya, groundnuts and akara are cheap protein. So when food prices rise, they cut meat and go without.</p>
+      <div class="stats">
+        <div class="card"><div class="big" style="color:var(--warm)">45 g</div><p>average daily protein per Nigerian, below the FAO minimum of about 54 g</p></div>
+        <div class="card"><div class="big">~45%</div><p>of Nigerians don't eat protein every day</p></div>
+        <div class="card"><div class="big">+20%</div><p>food prices in one year (July 2026)</p></div>
+      </div>
+      <p class="src">Sources: Nigerian Protein Deficiency Report 2020; FAO; National Bureau of Statistics CPI, July 2026.</p>
+
+      <h2 style="margin-top:64px">Plant protein gives up to 8× more per naira.</h2>
+      <p class="sub">Grams of protein for every ₦100, from Pronexa's food list (WAFCT 2019 and USDA protein values, campus prices Oct 2026).</p>
+      <div class="bars">
+        <div class="bar"><span>Soybeans</span><i style="width:80%"><b>7.5 g</b></i></div>
+        <div class="bar"><span>Soya chunks</span><i style="width:69%"><b>6.5 g</b></i></div>
+        <div class="bar"><span>Groundnuts</span><i style="width:60%"><b>5.6 g</b></i></div>
+        <div class="bar"><span>Akara</span><i style="width:38%"><b>3.6 g</b></i></div>
+        <div class="bar"><span>Beans</span><i style="width:29%"><b>2.7 g</b></i></div>
+        <div class="bar animal"><span>Eggs</span><i style="width:22%"><b>2.1 g</b></i></div>
+        <div class="bar animal"><span>Chicken</span><i style="width:10%"><b>0.9 g</b></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <h2>Log a meal in seconds.</h2>
+      <p class="sub">Tap it, type it the way you'd say it, or take a photo. Pronexa recognises Nigerian food right on your phone, even offline.</p>
+      <div class="steps">
+        <div class="step"><img src="/img/07-describe.webp" alt="Typing a meal: rice and beans" loading="lazy"><h3>Describe it</h3><p>"Rice and beans with 2 fish" is read instantly, offline.</p></div>
+        <div class="step"><img src="/img/08-photo.webp" alt="Photo mode" loading="lazy"><h3>Snap it</h3><p>On-phone food recognition. Your photo never leaves your phone.</p></div>
+        <div class="step"><img src="/img/03-today.webp" alt="Today's protein and gap" loading="lazy"><h3>See your gap</h3><p>Today's protein and what's missing, as an honest range.</p></div>
+        <div class="step"><img src="/img/06-solve.webp" alt="Cheapest ways to close the gap" loading="lazy"><h3>Close it for less</h3><p>The cheapest fix within your budget, plant protein first.</p></div>
+      </div>
+      <div class="features">
+        <div class="card"><h3>Built for Nigeria</h3><p>78 Nigerian foods, takeaway portions and real naira prices, each with a source.</p></div>
+        <div class="card"><h3>Works offline</h3><p>No data needed to log, recognise photos or get suggestions.</p></div>
+        <div class="card"><h3>Learns your food</h3><p>Confirm a photo once and Pronexa suggests that food next time.</p></div>
+        <div class="card"><h3>Plan within a budget</h3><p>Build a day of campus meals that meets your protein target for less.</p></div>
+        <div class="card"><h3>The ₦500 challenge</h3><p>Close your gap with ₦500 of extra protein, day after day.</p></div>
+        <div class="card"><h3>Your data stays yours</h3><p>Everything lives on your phone. Estimates only, not medical advice.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="download" style="border-top:0">
+    <div class="wrap">
+      <div class="download">
+        <h2>Get Pronexa</h2>
+        <p class="sub" style="color:#d4d7f0">Free for students.</p>
+        <div class="dl-grid">
+          <div class="dl">
+            <h3>Android</h3>
+            <p>Download the app (about 214 MB, Android 7.0+). Open the file, allow "Install unknown apps" if your phone asks, then install.</p>
+            <a class="btn primary" href="__APK_URL__" download>Download APK</a>
+          </div>
+          <div class="dl">
+            <h3>Web app</h3>
+            <p>Works in any browser. Tap "Add to Home screen" to install it like an app; it then works offline. Photo recognition is an optional one-time download.</p>
+            <a class="btn primary" href="/app/">Open the web app</a>
+          </div>
+          <div class="dl">
+            <h3>iPhone</h3>
+            <p>Open the web app in Safari, tap Share, then "Add to Home Screen". A native iPhone app is coming.</p>
+            <a class="btn primary" href="/app/">Open in Safari</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p><strong style="color:#fff">Pronexa</strong> · Built at Hack the Fork Nigeria 2026 by Miracle Matthew, Iwuafor Eberechukwu, Ordinna Chiamaka Benita and Zinachidi Uzor Akor.</p>
+      <p style="margin-top:8px">Protein values: FAO West African Food Composition Table 2019 and USDA FoodData Central. Estimates only, not medical advice. <a href="https://github.com/Jothankato05/Pronexa">Source code</a></p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -19,6 +19,15 @@ The service worker:
 - serves the photo recogniser's files from the browser's storage once downloaded;
 - adds cross-origin isolation headers, so ONNX Runtime can use several threads.
 
+## Live site
+
+**https://pronexa.primersgroup.ng** (Vercel project `pronexa` in the Primers team; the domain is on Vercel DNS):
+- `/`: the website (`site/`), with download buttons
+- `/app/`: the PWA, built with `tool/web/build.sh /app/`
+- the Android download is the signed APK in the team's public Vercel Blob store `pronexa-downloads` (Vercel's free plan limits deployment files to 100 MB, and the APK is 214 MB)
+
+Redeploy after changes: `tool/web/build.sh /app/`, then `VERCEL_TOKEN=... python3 tool/web/deploy_vercel.py --team <Primers team id> --apk-url <APK URL>`.
+
 ## Publishing
 
 The **Web app** workflow (`.github/workflows/web.yml`) builds the recogniser, runs the tests, builds the PWA and publishes it to GitHub Pages on every push to `main` that touches the app. One-time setup: in the repository's **Settings > Pages**, set **Source** to **GitHub Actions**. The app is then at `https://<owner>.github.io/<repo>/`.
