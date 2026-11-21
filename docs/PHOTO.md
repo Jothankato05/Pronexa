@@ -25,6 +25,28 @@ Strong: egusi, akara, jollof, ogbono, okra soup, nkwobi. Weaker as first guess: 
 
 **It does not know foods outside its 41**, for example chips, shawarma, suya, puff-puff or meat pie. For those it may suggest something similar-looking (chips can come up as plantain), and the student picks the right food themselves. The phone then learns them (below).
 
+## The dish head: a sharper first guess, and more dishes
+
+A small classifier trained on the recogniser's photo fingerprints by Miracle Matthew (`tool/food_model/train_head.py`, shipped as `assets/models/pronexa-food-head.json`, 172 KB). It knows 18 dishes, including five the recogniser never learned: chin chin, puff-puff, suya, pepper soup and yam porridge (ofada rice also improves; it maps to rice, which the recogniser knew). Trained on all 1,542 labelled photos in `cicerothoma/nigeria_food` (MIT). It runs in Dart on the phone, offline (`DishHead` in `lib/ai/food_lens.dart`).
+
+The head always picks one of its 18 dishes, even for a photo of egg or spaghetti. So its dishes and the recogniser's foods are ranked together by each one's own confidence: a food the recogniser is sure of stays first.
+
+Measured with 5-fold cross-validation on the 18 dishes (every photo scored by a head trained without it):
+
+| 1,542 photos, 18 dishes | Recogniser alone | With the dish head |
+|---|---|---|
+| Right food is the first suggestion | 42.8% | **73.0%** |
+| Right food among the suggestions | 63.7% | **91.8%** |
+| First suggestion, 5 dishes it never learned | 0% | **75.5%** |
+
+Biggest gains (first suggestion): banga 9% → 45%, pounded yam 12% → 54%, efo riro 38% → 72%, suya 0% → 86%, chin chin 0% → 84%. No dish got worse except akara (91% → 90%).
+
+**Foods outside the 18 dishes.** On 200 Food-101 validation photos (40 each of chips, fried rice, omelette, chicken wings and spaghetti, used only for this check), the right food came first 18.0% of the time with the head and 21.5% without it, and was among the suggestions 39.5% vs 41.0%. Always putting the head's dish first scored higher on the 18 dishes (82.9%) but dropped this to 3.5% (an omelette became moi-moi, spaghetti became nkwobi), so it was not used.
+
+These photos come from public sets whose folds share a style. Expect lower numbers on real campus photos; the pilot should collect confirmed photos to measure that.
+
+To retrain: `python tool/food_model/train_head.py --data nigeria_food.parquet --model assets/models/pronexa-food-v1.onnx` (needs `numpy pillow pyarrow onnxruntime`). It prints the report above and writes the head.
+
 ## Learning new foods on the phone
 
 Pronexa adapts to each student's food without retraining or the internet (`lib/ai/photo_memory.dart`):

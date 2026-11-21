@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -107,6 +108,81 @@ List<LensGuess> guessesFromScores(List<double> scores, {double threshold = 0.2, 
   return list.take(max).toList();
 }
 
+/// A small classifier trained on the recogniser's photo fingerprints
+/// (tool/food_model/train_head.py), for 18 Nigerian dishes. It sharpens the
+/// first guess and knows dishes the recogniser never learned (suya, puff-puff,
+/// chin chin, pepper soup, yam porridge, ofada rice). One softmax layer:
+/// probabilities = softmax(scale × weights · fingerprint + bias).
+class DishHead {
+  DishHead({required this.scale, required this.minScore, required this.foods, required this.bias, required this.weights})
+    : assert(weights.length == bias.length * lensFeatures);
+
+  factory DishHead.fromJson(Map<String, Object?> j) {
+    final dishes = (j['dishes']! as List).cast<Map<String, Object?>>();
+    final rows = (j['weights']! as List).cast<List<Object?>>();
+    return DishHead(
+      scale: (j['scale']! as num).toDouble(),
+      minScore: (j['minScore']! as num).toDouble(),
+      foods: [for (final d in dishes) (d['foods']! as List).cast<String>()],
+      bias: Float64List.fromList([for (final v in j['bias']! as List) (v as num).toDouble()]),
+      weights: Float32List.fromList([
+        for (final r in rows)
+          for (final v in r) (v as num).toDouble(),
+      ]),
+    );
+  }
+
+  final double scale;
+
+  /// Dishes below this probability are left to the recogniser.
+  final double minScore;
+  final List<List<String>> foods;
+  final Float64List bias;
+  final Float32List weights;
+
+  List<double> probabilities(Float32List f) {
+    final z = List<double>.generate(bias.length, (k) {
+      var s = 0.0;
+      for (var i = 0, o = k * lensFeatures; i < lensFeatures; i++) {
+        s += weights[o + i] * f[i];
+      }
+      return scale * s + bias[k];
+    });
+    final top = z.reduce(math.max);
+    final e = [for (final v in z) math.exp(v - top)];
+    final sum = e.fold(0.0, (a, b) => a + b);
+    return [for (final v in e) v / sum];
+  }
+
+  /// The head's dishes scoring at least [minScore] and the recogniser's own
+  /// foods, ranked together by each one's confidence, at most [max]. The head
+  /// only knows 18 dishes and always picks one of them, so a photo of egg,
+  /// chicken or spaghetti still gets a dish; ranking by confidence keeps a
+  /// food the recogniser is sure of first. Same rule as merged() in
+  /// train_head.py, which measured it (docs/PHOTO.md).
+  List<LensGuess> merge(Float32List f, List<LensGuess> lens, {int max = 4}) {
+    final p = probabilities(f);
+    final best = <String, LensGuess>{};
+    void offer(LensGuess g) {
+      if (!foodById.containsKey(g.foodId)) return;
+      final had = best[g.foodId];
+      if (had == null || g.score > had.score) best[g.foodId] = g;
+    }
+
+    for (var k = 0; k < p.length; k++) {
+      if (p[k] < minScore) continue;
+      for (final id in foods[k]) {
+        offer(LensGuess(id, p[k]));
+      }
+    }
+    lens.forEach(offer);
+    final list = best.values.toList()..sort((a, b) => b.score.compareTo(a.score));
+    return list.take(max).toList();
+  }
+}
+
+const dishHeadAsset = 'assets/models/pronexa-food-head.json';
+
 /// Bundled with the app (built by tool/food_model/convert.py), so Photo mode
 /// recognises foods offline from the first launch.
 const lensAsset = 'assets/models/pronexa-food-v1.onnx';
@@ -122,15 +198,7 @@ class OnDeviceLens implements FoodLens {
   bool? _available;
 
   @override
-  Future<bool> isAvailable() async {
-    if (_available != null) return _available!;
-    try {
-      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-      return _available = manifest.listAssets().contains(lensAsset);
-    } on Exception {
-      return _available = false;
-    }
-  }
+  Future<bool> isAvailable() async => _available ??= await lensBundled();
 
   @override
   Future<void> prepare() async {
@@ -147,8 +215,54 @@ class OnDeviceLens implements FoodLens {
     final out = await _channel.invokeMapMethod<String, Object?>('recognise', {'image': input});
     final scores = out?['scores'];
     final features = out?['features'];
-    if (scores is! Float32List || scores.length != lensLabels.length) return LensResult.empty;
-    return LensResult(guessesFromScores([for (final v in scores) v.toDouble()]), features is Float32List && features.length == lensFeatures ? features : null);
+    return lensResultFrom(scores is Float32List ? scores : null, features is Float32List ? features : null);
+  }
+}
+
+/// A recogniser whose model is downloaded on request rather than bundled
+/// (the web app). Nothing is fetched until the student asks for it.
+abstract class DownloadableLens implements FoodLens {
+  /// Whether the model and engine are already stored on this device.
+  Future<bool> isDownloaded();
+
+  /// Approximate one-time download size, for the prompt.
+  int get downloadBytes;
+
+  /// Downloads and stores everything, reporting progress from 0 to 1.
+  Future<void> download(void Function(double progress) onProgress);
+}
+
+/// Turns the model's raw outputs into suggestions, adding the dish head
+/// when it is bundled. Shared by every platform's recogniser.
+Future<LensResult> lensResultFrom(Float32List? scores, Float32List? features) async {
+  if (scores == null || scores.length != lensLabels.length) return LensResult.empty;
+  final f = features != null && features.length == lensFeatures ? features : null;
+  final guesses = guessesFromScores([for (final v in scores) v.toDouble()]);
+  final head = f == null ? null : await _dishHead();
+  return LensResult(head == null ? guesses : head.merge(f!, guesses), f);
+}
+
+DishHead? _head;
+bool _headLoaded = false;
+
+Future<DishHead?> _dishHead() async {
+  if (_headLoaded) return _head;
+  _headLoaded = true;
+  try {
+    _head = DishHead.fromJson(jsonDecode(await rootBundle.loadString(dishHeadAsset)) as Map<String, Object?>);
+  } catch (_) {
+    _head = null; // Missing or unreadable: the recogniser's own guesses are used.
+  }
+  return _head;
+}
+
+/// Whether this build includes the recogniser model.
+Future<bool> lensBundled() async {
+  try {
+    final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    return manifest.listAssets().contains(lensAsset);
+  } catch (_) {
+    return false;
   }
 }
 

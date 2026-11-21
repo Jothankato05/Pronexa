@@ -41,3 +41,6 @@ assets/models/*.onnx
 assets/models/*.labels.json
 tool/food_model/.cache/
 *.pth
+
+# ONNX Runtime Web, fetched and checked by tool/web/build.sh
+web/ort/

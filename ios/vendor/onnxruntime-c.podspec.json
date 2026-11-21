@@ -1,0 +1,36 @@
+{
+  "name": "onnxruntime-c",
+  "version": "1.28.0",
+  "authors": {
+    "ONNX Runtime": "onnxruntime@microsoft.com"
+  },
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "homepage": "https://github.com/microsoft/onnxruntime",
+  "summary": "ONNX Runtime C/C++ Pod",
+  "description": "Same as the official onnxruntime-c 1.28.0 pod, but taken from Microsoft's NuGet package (Microsoft.ML.OnnxRuntime 1.28.0, checked by SHA-256) because download.onnxruntime.ai stopped serving a valid certificate in November 2026.",
+  "source": {
+    "http": "https://api.nuget.org/v3-flatcontainer/microsoft.ml.onnxruntime/1.28.0/microsoft.ml.onnxruntime.1.28.0.nupkg",
+    "type": "zip",
+    "sha256": "769d1d3ea8ab6cd69f737c9dd4d4462aa4ad0ccfa106eaf506efc40d7bead5db"
+  },
+  "prepare_command": "unzip -q runtimes/ios/native/onnxruntime.xcframework.zip -d . && mkdir -p Headers && cp build/native/include/* Headers/ && cp onnxruntime.xcframework/ios-arm64/onnxruntime.framework/Headers/*.h Headers/",
+  "platforms": {
+    "ios": "15.1"
+  },
+  "vendored_frameworks": "onnxruntime.xcframework",
+  "static_framework": true,
+  "weak_frameworks": [
+    "CoreML"
+  ],
+  "source_files": "Headers/*.{h,inc}",
+  "preserve_paths": [
+    "LICENSE"
+  ],
+  "libraries": "c++",
+  "pod_target_xcconfig": {
+    "OTHER_CPLUSPLUSFLAGS": "-fvisibility=hidden -fvisibility-inlines-hidden"
+  }
+}

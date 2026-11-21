@@ -44,6 +44,7 @@ Rules this codebase follows so that fast, AI-assisted ("vibe") coding stays safe
 | Photos aren't kept | Photo mode reads the image into memory, deletes the temporary file at once, and never saves it. A photo is sent only when the student taps "Read the photo", only to the configured AI server, and never in low-data mode. Location metadata is stripped (`requestFullMetadata: false`) |
 | Photos are recognised on the phone | The food recogniser runs offline inside the app; the photo is never uploaded for it. Third-party model weights are pinned to a commit, checked against a SHA-256, and loaded as weights only (no code from the file runs) |
 | Learning stays on the phone | Photo memory keeps 8-bit fingerprints (not photos) of confirmed meals, at most 200, only on the phone; clearable in Profile and by Delete all. Stored data is validated on load (`MemoryExample.fromJson`) |
+| Web app asks before big downloads | The PWA never fetches the 96 MB photo recogniser on its own: the student taps Download after seeing the size. ONNX Runtime Web is pinned and checked against its SHA-512 at build time (`tool/web/build.sh`); every file is served from the same origin, with no CDN |
 | Minimal permissions | Internet and network state only. No camera permission: Photo mode uses the phone's own camera app |
 | No user content in logs | The server logs only method, path, status and duration |
 | User control | Copy my data, and Delete all my data (with confirmation) in Profile |

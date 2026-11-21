@@ -30,6 +30,13 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
 
+  # ONNX Runtime for the food recogniser (packages/pronexa_lens). Microsoft's
+  # download.onnxruntime.ai stopped serving a valid certificate, so the same
+  # 1.28.0 build comes from NuGet (hash-checked) and the small Objective-C
+  # wrapper is kept in ios/vendor. See ios/vendor/README.md.
+  pod 'onnxruntime-c', :podspec => 'vendor/onnxruntime-c.podspec.json'
+  pod 'onnxruntime-objc', :path => 'vendor/onnxruntime-objc'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths

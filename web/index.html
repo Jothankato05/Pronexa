@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Replaced by flutter build web --base-href (tool/web/build.sh). -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Check your protein and close the gap for less. Offline, Nigerian foods, naira prices, plant protein first.">
+  <meta name="theme-color" content="#0A0E17">
+
+  <!-- Installed on iPhone -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Pronexa">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+  <title>Pronexa</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0A0E17; }
+    #splash { position: fixed; inset: 0; display: grid; place-items: center; transition: opacity .3s; }
+    #splash img { width: 96px; height: 96px; border-radius: 24px; }
+  </style>
+</head>
+<body>
+  <div id="splash"><img src="icons/Icon-192.png" alt="Pronexa"></div>
+  <script src="lens.js" defer></script>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var s = document.getElementById('splash');
+      if (s) { s.style.opacity = '0'; setTimeout(function () { s.remove(); }, 400); }
+      // Keep what this browser loaded (its graphics engine, fonts) for offline use.
+      if ('serviceWorker' in navigator) {
+        setTimeout(function () {
+          navigator.serviceWorker.ready.then(function (reg) {
+            var urls = performance.getEntriesByType('resource').map(function (e) { return e.name; });
+            if (reg.active) reg.active.postMessage({ cacheUrls: urls });
+          });
+        }, 3000);
+      }
+    });
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js'); });
+    }
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
