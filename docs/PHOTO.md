@@ -25,6 +25,25 @@ Strong: egusi, akara, jollof, ogbono, okra soup, nkwobi. Weaker as first guess: 
 
 **It does not know foods outside its 41**, for example chips, shawarma, suya, puff-puff or meat pie. For those it may suggest something similar-looking (chips can come up as plantain), and the student picks the right food themselves. The phone then learns them (below).
 
+## The dish head: a sharper first guess, and 6 more dishes
+
+A small classifier trained on the recogniser's photo fingerprints (`tool/food_model/train_head.py`, shipped as `assets/models/pronexa-food-head.json`, 172 KB). It names the main dish; the recogniser still adds the other foods on the plate. Trained on all 1,542 labelled photos of 18 dishes in `cicerothoma/nigeria_food` (MIT), including six the recogniser never learned: chin chin, puff-puff, suya, pepper soup, yam porridge and ofada rice. It runs in Dart on the phone, offline (`DishHead` in `lib/ai/food_lens.dart`).
+
+Measured with 5-fold cross-validation: every photo is scored by a head trained without it.
+
+| 1,542 photos, 18 dishes | Recogniser alone | Recogniser + dish head |
+|---|---|---|
+| Right food is the first suggestion | 660 (42.8%) | **1,278 (82.9%)** |
+| Right food among the suggestions | 983 (63.7%) | **1,423 (92.3%)** |
+| First suggestion, 12 dishes it already knew | 58.8% | **80.7%** |
+| First suggestion, 6 new dishes | 0% | **88.6%** |
+
+Biggest gains: banga 9% → 77%, pounded yam 12% → 68%, efo riro 38% → 90%, puff-puff 0% → 96%, suya 0% → 92%. Akara dropped slightly (91% → 87%).
+
+These photos come from one public set, so the folds share its style. Expect lower numbers on real campus photos; the pilot should collect confirmed photos to measure that. The 96-photo check above is part of this set, so it is not an independent test of the head.
+
+To retrain: `python tool/food_model/train_head.py --data nigeria_food.parquet --model assets/models/pronexa-food-v1.onnx` (needs `numpy pillow pyarrow onnxruntime`). It prints the report above and writes the head.
+
 ## Learning new foods on the phone
 
 Pronexa adapts to each student's food without retraining or the internet (`lib/ai/photo_memory.dart`):
