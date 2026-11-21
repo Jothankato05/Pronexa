@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -107,6 +108,75 @@ List<LensGuess> guessesFromScores(List<double> scores, {double threshold = 0.2, 
   return list.take(max).toList();
 }
 
+/// A small classifier trained on the recogniser's photo fingerprints
+/// (tool/food_model/train_head.py), for 18 Nigerian dishes. It sharpens the
+/// first guess and knows dishes the recogniser never learned (suya, puff-puff,
+/// chin chin, pepper soup, yam porridge, ofada rice). One softmax layer:
+/// probabilities = softmax(scale × weights · fingerprint + bias).
+class DishHead {
+  DishHead({required this.scale, required this.minScore, required this.foods, required this.bias, required this.weights})
+    : assert(weights.length == bias.length * lensFeatures);
+
+  factory DishHead.fromJson(Map<String, Object?> j) {
+    final dishes = (j['dishes']! as List).cast<Map<String, Object?>>();
+    final rows = (j['weights']! as List).cast<List<Object?>>();
+    return DishHead(
+      scale: (j['scale']! as num).toDouble(),
+      minScore: (j['minScore']! as num).toDouble(),
+      foods: [for (final d in dishes) (d['foods']! as List).cast<String>()],
+      bias: Float64List.fromList([for (final v in j['bias']! as List) (v as num).toDouble()]),
+      weights: Float32List.fromList([
+        for (final r in rows)
+          for (final v in r) (v as num).toDouble(),
+      ]),
+    );
+  }
+
+  final double scale;
+
+  /// Dishes below this probability are left to the recogniser.
+  final double minScore;
+  final List<List<String>> foods;
+  final Float64List bias;
+  final Float32List weights;
+
+  List<double> probabilities(Float32List f) {
+    final z = List<double>.generate(bias.length, (k) {
+      var s = 0.0;
+      for (var i = 0, o = k * lensFeatures; i < lensFeatures; i++) {
+        s += weights[o + i] * f[i];
+      }
+      return scale * s + bias[k];
+    });
+    final top = z.reduce(math.max);
+    final e = [for (final v in z) math.exp(v - top)];
+    final sum = e.fold(0.0, (a, b) => a + b);
+    return [for (final v in e) v / sum];
+  }
+
+  /// The head's dishes scoring at least [minScore] first, best first, then the
+  /// recogniser's own foods (it sees several foods on one plate; the head
+  /// names the main dish). At most [max]. Same rule as merged() in
+  /// train_head.py, which measured it.
+  List<LensGuess> merge(Float32List f, List<LensGuess> lens, {int max = 4}) {
+    final p = probabilities(f);
+    final order = List.generate(p.length, (i) => i)..sort((a, b) => p[b].compareTo(p[a]));
+    final out = <String, LensGuess>{};
+    for (final k in order) {
+      if (p[k] < minScore) break;
+      for (final id in foods[k]) {
+        if (foodById.containsKey(id)) out.putIfAbsent(id, () => LensGuess(id, p[k]));
+      }
+    }
+    for (final g in lens) {
+      out.putIfAbsent(g.foodId, () => g);
+    }
+    return out.values.take(max).toList();
+  }
+}
+
+const dishHeadAsset = 'assets/models/pronexa-food-head.json';
+
 /// Bundled with the app (built by tool/food_model/convert.py), so Photo mode
 /// recognises foods offline from the first launch.
 const lensAsset = 'assets/models/pronexa-food-v1.onnx';
@@ -148,7 +218,24 @@ class OnDeviceLens implements FoodLens {
     final scores = out?['scores'];
     final features = out?['features'];
     if (scores is! Float32List || scores.length != lensLabels.length) return LensResult.empty;
-    return LensResult(guessesFromScores([for (final v in scores) v.toDouble()]), features is Float32List && features.length == lensFeatures ? features : null);
+    final f = features is Float32List && features.length == lensFeatures ? features : null;
+    final guesses = guessesFromScores([for (final v in scores) v.toDouble()]);
+    final head = f == null ? null : await _dishHead();
+    return LensResult(head == null ? guesses : head.merge(f!, guesses), f);
+  }
+
+  DishHead? _head;
+  bool _headLoaded = false;
+
+  Future<DishHead?> _dishHead() async {
+    if (_headLoaded) return _head;
+    _headLoaded = true;
+    try {
+      _head = DishHead.fromJson(jsonDecode(await rootBundle.loadString(dishHeadAsset)) as Map<String, Object?>);
+    } on Exception {
+      _head = null; // Not bundled: the recogniser's own guesses are used.
+    }
+    return _head;
   }
 }
 

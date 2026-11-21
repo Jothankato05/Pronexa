@@ -203,6 +203,57 @@ void main() {
     expect(labels, lensLabels.map((l) => l.$1).toList());
   });
 
+  group('dish head (trained on photo fingerprints)', () {
+    // Two dishes; fingerprint axis 0 means suya, axis 1 means egusi.
+    Float32List fp(int axis) => Float32List(lensFeatures)..[axis] = 1;
+    DishHead head() {
+      final w = Float32List(2 * lensFeatures)
+        ..[0] = 1
+        ..[lensFeatures + 1] = 1;
+      return DishHead(
+        scale: 10,
+        minScore: 0.35,
+        foods: const [
+          ['suya'],
+          ['egusi'],
+        ],
+        bias: Float64List(2),
+        weights: w,
+      );
+    }
+
+    test('probabilities sum to one and follow the fingerprint', () {
+      final p = head().probabilities(fp(0));
+      expect(p.reduce((a, b) => a + b), closeTo(1, 1e-9));
+      expect(p[0], greaterThan(0.99));
+    });
+
+    test('a confident dish comes first, then the recogniser foods, at most four', () {
+      const lens = [LensGuess('eba', 0.9), LensGuess('suya', 0.3), LensGuess('beef', 0.25), LensGuess('fish', 0.22), LensGuess('egg', 0.21)];
+      final out = head().merge(fp(0), lens);
+      expect(out.map((g) => g.foodId), ['suya', 'eba', 'beef', 'fish']);
+    });
+
+    test('an unsure head leaves the recogniser alone', () {
+      const lens = [LensGuess('eba', 0.9)];
+      // A blank fingerprint gives 50/50, below this head's 0.9 bar.
+      final unsure = DishHead(scale: 1, minScore: 0.9, foods: head().foods, bias: Float64List(2), weights: head().weights);
+      expect(unsure.merge(Float32List(lensFeatures), lens).map((g) => g.foodId), ['eba']);
+    });
+
+    test('the shipped head matches the fingerprint size and names only database foods', () {
+      final f = File(dishHeadAsset);
+      expect(f.existsSync(), isTrue, reason: 'run tool/food_model/train_head.py');
+      final h = DishHead.fromJson(jsonDecode(f.readAsStringSync()) as Map<String, Object?>);
+      expect(h.weights.length, h.bias.length * lensFeatures);
+      for (final ids in h.foods) {
+        for (final id in ids) {
+          expect(foodById, contains(id));
+        }
+      }
+    });
+  });
+
   group('photo memory (learning new foods on the phone)', () {
     test('a confirmed photo is recalled for a similar photo, not for a different one', () {
       final m = PhotoMemory();
