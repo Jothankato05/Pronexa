@@ -31,6 +31,8 @@ jobs:
         run: flutter test
       - name: Build APK
         run: flutter build apk --release
+      - name: Build the web app (compile check)
+        run: flutter build web --release --no-web-resources-cdn
       - uses: actions/upload-artifact@v4
         with:
           name: pronexa-apk

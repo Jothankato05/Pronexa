@@ -12,6 +12,8 @@ Download `Pronexa-<version>.apk` from the [Releases page](../../releases). One A
 
 iPhone (iOS 15.1 or newer): download `Pronexa-<version>-iphone-unsigned.ipa` from the same page and install it with your Apple ID using Sideloadly or AltStore. See `docs/IOS.md`.
 
+Web (any phone or laptop browser): open the web app and add it to your home screen. It works offline after the first visit; photo recognition is an optional one-time download. See `docs/WEB.md`.
+
 Versions before 0.6.0 were signed with a test key: uninstall them once before installing 0.6.0 or later. Screens are in `docs/screens/`.
 
 ## What it does
@@ -84,6 +86,7 @@ APKs are not kept in the repository. Push a version tag (`git tag v0.6.0 && git 
 - `docs/PILOT.md`: running a pilot, collecting real descriptions, the nutrition review sheet (`docs/food_review.csv`)
 - `docs/PHOTO.md`: the on-phone food recogniser and photo memory (how they work, accuracy, licence)
 - `docs/IOS.md`: the iPhone app (how it's built and how to install it)
+- `docs/WEB.md`: the web app / PWA (offline, photo recognition in the browser, publishing)
 - `docs/AI_SERVER.md`: the optional AI server
 - `docs/DEMO.md`: a 3-minute demo script
 - `docs/DESIGN.md`, `docs/GUARDRAILS.md`

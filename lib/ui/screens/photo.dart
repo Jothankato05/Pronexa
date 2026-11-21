@@ -40,6 +40,11 @@ class _PhotoScreenState extends State<PhotoScreen> {
   // On-phone recogniser.
   bool _lens = false;
   bool _looking = false;
+
+  // Web only: the model is downloaded once, on request.
+  bool _needsDownload = false;
+  double? _progress;
+  String? _downloadError;
   List<LensGuess>? _guesses;
   Float32List? _features;
 
@@ -55,15 +60,46 @@ class _PhotoScreenState extends State<PhotoScreen> {
   Future<void> _checkLens() async {
     final lens = AppScope.read(context).lens;
     final available = await lens.isAvailable();
-    if (available) unawaited(lens.prepare());
+    final needs = available && lens is DownloadableLens && !await lens.isDownloaded();
+    if (available && !needs) unawaited(lens.prepare());
     if (!mounted) return;
-    setState(() => _lens = available);
-    if (available && _photo != null) unawaited(_recognise());
+    setState(() {
+      _lens = available;
+      _needsDownload = needs;
+    });
+    if (available && !needs && _photo != null) unawaited(_recognise());
+  }
+
+  Future<void> _download() async {
+    final lens = AppScope.read(context).lens;
+    if (lens is! DownloadableLens) return;
+    setState(() {
+      _progress = 0;
+      _downloadError = null;
+    });
+    try {
+      await lens.download((p) {
+        if (mounted) setState(() => _progress = p);
+      });
+      if (!mounted) return;
+      setState(() {
+        _needsDownload = false;
+        _progress = null;
+      });
+      unawaited(lens.prepare());
+      if (_photo != null) unawaited(_recognise());
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _progress = null;
+        _downloadError = 'Download stopped. Check your connection and try again.';
+      });
+    }
   }
 
   Future<void> _recognise() async {
     final photo = _photo;
-    if (photo == null || !_lens) return;
+    if (photo == null || !_lens || _needsDownload) return;
     setState(() {
       _looking = true;
       _guesses = null;
@@ -172,6 +208,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
   Widget _lensPanel() {
     final text = Theme.of(context).textTheme;
     if (!_lens) return Text('Pick the foods you see.', style: text.bodyMedium, textAlign: TextAlign.center);
+    if (_needsDownload) return _downloadCard();
     if (_looking) {
       return const Column(
         children: [
@@ -199,6 +236,37 @@ class _PhotoScreenState extends State<PhotoScreen> {
             g.any((x) => x.learned) ? 'Ticked items are from meals you confirmed before. Check before adding.' : 'Check before adding: guesses can be wrong.',
             style: text.bodySmall,
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Web only: offers the one-time model download, with its size, before
+  /// using any data.
+  Widget _downloadCard() {
+    final text = Theme.of(context).textTheme;
+    final lens = AppScope.read(context).lens;
+    final mb = lens is DownloadableLens ? (lens.downloadBytes / 1e6).round() : 0;
+    final p = _progress;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: C.fill,
+        borderRadius: BorderRadius.circular(R.lg),
+        border: Border.all(color: C.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Recognise foods in photos', style: text.titleMedium),
+          const SizedBox(height: 6),
+          Text(
+            p == null ? 'One-time download, about $mb MB. Best on Wi-Fi. Then it works offline.' : 'Downloading… ${(p * 100).round()}%',
+            style: text.bodySmall,
+          ),
+          const SizedBox(height: 14),
+          if (p != null) LinearProgressIndicator(value: p, minHeight: 4) else OutlinedButton(onPressed: _download, child: Text('Download ($mb MB)')),
+          if (_downloadError != null) ...[const SizedBox(height: 8), Text(_downloadError!, style: text.bodySmall?.copyWith(color: C.warm))],
         ],
       ),
     );
@@ -246,6 +314,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
                   FilledButton(onPressed: () => _take(ImageSource.camera), child: const Text('Take a photo')),
                   const SizedBox(height: 8),
                   TextButton(onPressed: () => _take(ImageSource.gallery), child: const Text('Choose from gallery')),
+                  if (_lens && _needsDownload) ...[const SizedBox(height: 24), _downloadCard()],
                 ] else ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(R.xl),

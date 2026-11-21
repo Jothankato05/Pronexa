@@ -198,15 +198,7 @@ class OnDeviceLens implements FoodLens {
   bool? _available;
 
   @override
-  Future<bool> isAvailable() async {
-    if (_available != null) return _available!;
-    try {
-      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-      return _available = manifest.listAssets().contains(lensAsset);
-    } on Exception {
-      return _available = false;
-    }
-  }
+  Future<bool> isAvailable() async => _available ??= await lensBundled();
 
   @override
   Future<void> prepare() async {
@@ -223,25 +215,54 @@ class OnDeviceLens implements FoodLens {
     final out = await _channel.invokeMapMethod<String, Object?>('recognise', {'image': input});
     final scores = out?['scores'];
     final features = out?['features'];
-    if (scores is! Float32List || scores.length != lensLabels.length) return LensResult.empty;
-    final f = features is Float32List && features.length == lensFeatures ? features : null;
-    final guesses = guessesFromScores([for (final v in scores) v.toDouble()]);
-    final head = f == null ? null : await _dishHead();
-    return LensResult(head == null ? guesses : head.merge(f!, guesses), f);
+    return lensResultFrom(scores is Float32List ? scores : null, features is Float32List ? features : null);
   }
+}
 
-  DishHead? _head;
-  bool _headLoaded = false;
+/// A recogniser whose model is downloaded on request rather than bundled
+/// (the web app). Nothing is fetched until the student asks for it.
+abstract class DownloadableLens implements FoodLens {
+  /// Whether the model and engine are already stored on this device.
+  Future<bool> isDownloaded();
 
-  Future<DishHead?> _dishHead() async {
-    if (_headLoaded) return _head;
-    _headLoaded = true;
-    try {
-      _head = DishHead.fromJson(jsonDecode(await rootBundle.loadString(dishHeadAsset)) as Map<String, Object?>);
-    } catch (_) {
-      _head = null; // Missing or unreadable: the recogniser's own guesses are used.
-    }
-    return _head;
+  /// Approximate one-time download size, for the prompt.
+  int get downloadBytes;
+
+  /// Downloads and stores everything, reporting progress from 0 to 1.
+  Future<void> download(void Function(double progress) onProgress);
+}
+
+/// Turns the model's raw outputs into suggestions, adding the dish head
+/// when it is bundled. Shared by every platform's recogniser.
+Future<LensResult> lensResultFrom(Float32List? scores, Float32List? features) async {
+  if (scores == null || scores.length != lensLabels.length) return LensResult.empty;
+  final f = features != null && features.length == lensFeatures ? features : null;
+  final guesses = guessesFromScores([for (final v in scores) v.toDouble()]);
+  final head = f == null ? null : await _dishHead();
+  return LensResult(head == null ? guesses : head.merge(f!, guesses), f);
+}
+
+DishHead? _head;
+bool _headLoaded = false;
+
+Future<DishHead?> _dishHead() async {
+  if (_headLoaded) return _head;
+  _headLoaded = true;
+  try {
+    _head = DishHead.fromJson(jsonDecode(await rootBundle.loadString(dishHeadAsset)) as Map<String, Object?>);
+  } catch (_) {
+    _head = null; // Missing or unreadable: the recogniser's own guesses are used.
+  }
+  return _head;
+}
+
+/// Whether this build includes the recogniser model.
+Future<bool> lensBundled() async {
+  try {
+    final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    return manifest.listAssets().contains(lensAsset);
+  } catch (_) {
+    return false;
   }
 }
 

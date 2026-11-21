@@ -1,5 +1,5 @@
 // Dev tool: renders the flat navy Pronexa launcher icons and launch mark into the
-// Android and iOS resources. Needs Node 22 and Playwright (Chromium) on the machine:
+// Android, iOS and web resources. Needs Node 22 and Playwright (Chromium) on the machine:
 //   node tool/make_icons.mjs
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -39,5 +39,13 @@ for (const k of [1, 2, 3]) {
   const px = 77 * k;
   await render(px, `<div style="width:${px}px;height:${px}px;display:grid;place-items:center"><div style="width:${px}px">${MARK}</div></div>`, `${IOS}LaunchImage.imageset/LaunchImage${k === 1 ? '' : `@${k}x`}.png`);
 }
+// Web (PWA): rounded icons, full-bleed maskable icons with the mark in the safe zone, favicon.
+const WEB = new URL('../web/', import.meta.url).pathname;
+for (const px of [192, 512]) {
+  await render(px, tile(px, '22%', 0.56), `${WEB}icons/Icon-${px}.png`);
+  await render(px, tile(px, '0', 0.42), `${WEB}icons/Icon-maskable-${px}.png`);
+}
+await render(180, tile(180, '0', 0.56), `${WEB}icons/apple-touch-icon.png`);
+await render(64, tile(64, '22%', 0.6), `${WEB}favicon.png`);
 await browser.close();
 console.log('icons written');

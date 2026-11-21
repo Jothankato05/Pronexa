@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../ai/food_lens.dart';
+import '../ai/lens_platform.dart';
 import '../ai/photo_memory.dart';
 import '../ai/meal_reader.dart';
 import '../data/models.dart';
@@ -19,7 +20,7 @@ const keepDays = 120;
 class AppState extends ChangeNotifier {
   AppState({required this.storage, MealReader? reader, FoodLens? lens, DateTime Function()? clock})
     : reader = reader ?? MealReader(),
-      lens = lens ?? OnDeviceLens(),
+      lens = lens ?? createLens(),
       _clock = clock ?? DateTime.now;
 
   final Storage storage;

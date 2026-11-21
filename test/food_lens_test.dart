@@ -55,6 +55,28 @@ class FakeLens implements FoodLens {
   }
 }
 
+/// The web recogniser: nothing is stored until the student downloads it.
+class FakeDownloadLens extends FakeLens implements DownloadableLens {
+  bool stored = false;
+  int prepared = 0;
+
+  @override
+  int get downloadBytes => 96000000;
+
+  @override
+  Future<bool> isDownloaded() async => stored;
+
+  @override
+  Future<void> download(void Function(double progress) onProgress) async {
+    onProgress(0.5);
+    stored = true;
+    onProgress(1);
+  }
+
+  @override
+  Future<void> prepare() async => prepared++;
+}
+
 /// A unit-length fingerprint pointing mostly along [axis], tilted by [tilt].
 Float32List fingerprint(int axis, {double tilt = 0, int tiltAxis = 0}) {
   final v = Float32List(lensFeatures);
@@ -172,6 +194,26 @@ void main() {
     await t.pumpAndSettle();
     expect(state.meals.single.items.single.foodId, 'moi_moi');
     expect(state.meals.single.source, LogSource.photo);
+  });
+
+  testWidgets('web: asks before the one-time download, then recognises the photo', (t) async {
+    final lens = FakeDownloadLens();
+    await _pump(t, lens);
+    expect(find.text('Recognise foods in photos'), findsOneWidget);
+    expect(find.textContaining('96 MB'), findsWidgets);
+    expect(lens.prepared, 0, reason: 'nothing is fetched until asked');
+
+    await t.tap(find.text('Take a photo'));
+    await t.pumpAndSettle();
+    expect(lens.recognised, 0);
+    expect(find.text('Download (96 MB)'), findsOneWidget);
+
+    await t.tap(find.text('Download (96 MB)'));
+    await t.pumpAndSettle();
+    expect(lens.stored, isTrue);
+    expect(lens.recognised, 1);
+    expect(find.text('Looks like'.toUpperCase()), findsOneWidget);
+    expect(find.text('Recognise foods in photos'), findsNothing);
   });
 
   testWidgets('a build without the recogniser falls back to picking', (t) async {
