@@ -7,6 +7,7 @@ import '../../logic/calc.dart';
 import '../draft.dart';
 import '../nav.dart';
 import '../scope.dart';
+import '../../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/bits.dart';
 import '../widgets/common.dart';
@@ -76,6 +77,10 @@ class TodayScreen extends StatelessWidget {
                         padding: EdgeInsets.only(top: 12),
                         child: Text('B12: fortified foods or a supplement.', style: TextStyle(fontSize: 12, color: C.sInk2)),
                       ),
+                    if (state.meals.any((m) => m.date != state.todayKey)) ...[
+                      const SheetTitle('This week', top: 32),
+                      _WeekBars(days: state.week(), target: state.target.mid),
+                    ],
                     const Footnote(onSheet: true),
                     const SizedBox(height: navClearance - 24),
                   ],
@@ -273,4 +278,76 @@ class _MealRow extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Last seven days as bars, today on the right. Green when the target was reached.
+class _WeekBars extends StatelessWidget {
+  const _WeekBars({required this.days, required this.target});
+
+  final List<DaySummary> days;
+  final double target;
+
+  static const _letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  @override
+  Widget build(BuildContext context) {
+    final reached = days.where((d) => d.logged && d.eaten.mid >= target).length;
+    return Semantics(
+      label: 'Target reached on $reached of the last 7 days',
+      excludeSemantics: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 96,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (final d in days)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(end: target > 0 ? (d.eaten.mid / target).clamp(0.0, 1.0) : 0),
+                        duration: Motion.of(context, const Duration(milliseconds: 700)),
+                        curve: Motion.curve,
+                        builder: (context, v, _) => Container(
+                          height: 8 + 88 * v,
+                          decoration: BoxDecoration(
+                            color: !d.logged
+                                ? C.sTile
+                                : d.eaten.mid >= target
+                                ? C.sGood
+                                : C.sBlue,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (final d in days)
+                Expanded(
+                  child: Text(
+                    _letters[d.day.weekday - 1],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: C.sInk2),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Target reached on $reached of 7 days',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: C.sInk2),
+          ),
+        ],
+      ),
+    );
+  }
 }

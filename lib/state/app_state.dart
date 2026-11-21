@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../ai/food_lens.dart';
+import '../ai/photo_memory.dart';
 import '../ai/meal_reader.dart';
 import '../data/models.dart';
 import '../logic/calc.dart';
@@ -15,10 +17,19 @@ const keepDays = 120;
 
 /// App state. One ChangeNotifier, no extra framework.
 class AppState extends ChangeNotifier {
-  AppState({required this.storage, MealReader? reader, DateTime Function()? clock}) : reader = reader ?? MealReader(), _clock = clock ?? DateTime.now;
+  AppState({required this.storage, MealReader? reader, FoodLens? lens, DateTime Function()? clock})
+    : reader = reader ?? MealReader(),
+      lens = lens ?? OnDeviceLens(),
+      _clock = clock ?? DateTime.now;
 
   final Storage storage;
   final MealReader reader;
+
+  /// On-phone food recogniser for Photo mode.
+  final FoodLens lens;
+
+  /// What the phone has learned from the student's confirmed photos.
+  PhotoMemory memory = PhotoMemory();
   final DateTime Function() _clock;
   final _random = Random.secure();
 
@@ -46,6 +57,7 @@ class AppState extends ChangeNotifier {
       final raw = _decode(await storage.read('meals'));
       final cutoff = dateKey(now.subtract(const Duration(days: keepDays)));
       meals = raw is List ? raw.map(Meal.fromJson).whereType<Meal>().where((m) => m.date.compareTo(cutoff) >= 0).toList() : [];
+      memory = PhotoMemory.fromJson(_decode(await storage.read('photoMemory')));
     } on Exception {
       // Corrupt or unreadable storage: start clean rather than crash.
       meals = [];
@@ -86,7 +98,14 @@ class AppState extends ChangeNotifier {
   String _newId() => 'm_${now.millisecondsSinceEpoch.toRadixString(36)}_${_random.nextInt(1 << 32).toRadixString(36)}';
 
   /// Saves a confirmed meal. Returns it, so the UI can show the total.
-  Future<Meal> saveMeal({required List<MealItem> items, required LogSource source, String? text, int? price, String? editingId}) async {
+  Future<Meal> saveMeal({
+    required List<MealItem> items,
+    required LogSource source,
+    String? text,
+    int? price,
+    String? editingId,
+    Float32List? photoFeatures,
+  }) async {
     final before = gap.mid;
     final existing = editingId == null ? null : meals.where((m) => m.id == editingId).firstOrNull;
     final meal = existing != null
@@ -97,6 +116,10 @@ class AppState extends ChangeNotifier {
       celebrateTick++;
       settings = settings.copyWith(lastCelebrated: todayKey);
       await storage.write('settings', jsonEncode(settings.toJson()));
+    }
+    // Learn from a confirmed photo: the foods the student actually ate.
+    if (photoFeatures != null && existing == null && memory.learn(items.map((i) => i.foodId).toList(), photoFeatures, todayKey)) {
+      await storage.write('photoMemory', jsonEncode(memory.toJson()));
     }
     notifyListeners();
     await _saveMeals();
@@ -157,15 +180,57 @@ class AppState extends ChangeNotifier {
     await storage.write('settings', jsonEncode(settings.toJson()));
   }
 
+  Future<void> clearPhotoMemory() async {
+    memory = PhotoMemory();
+    await storage.write('photoMemory', '[]');
+    notifyListeners();
+  }
+
   Future<void> resetAll() async {
     await storage.clear();
+    memory = PhotoMemory();
     profile = null;
     meals = [];
     settings = const Settings();
     notifyListeners();
   }
 
+  /// The last seven days, oldest first: protein eaten and whether anything was logged.
+  List<DaySummary> week() => [
+    for (var i = 6; i >= 0; i--)
+      () {
+        final day = now.subtract(Duration(days: i));
+        final key = dateKey(day);
+        final list = meals.where((m) => m.date == key);
+        return DaySummary(day: day, eaten: itemsProtein(list.expand((m) => m.items)), logged: list.isNotEmpty);
+      }(),
+  ];
+
+  /// Opt-in pilot export: only what the student typed and the foods they
+  /// confirmed, in the format of test/data/describe_set.json. No profile,
+  /// dates or other meals.
+  ({String json, int count}) exportDescriptions() {
+    final cases = [
+      for (final m in meals.where((m) => m.source == LogSource.describe && (m.text ?? '').trim().isNotEmpty))
+        {
+          'text': m.text!.trim(),
+          'foods': [for (final i in m.items) i.foodId],
+          'portions': {for (final i in m.items) i.foodId: i.portionId.key},
+          'qty': {for (final i in m.items) i.foodId: i.qty},
+        },
+    ];
+    return (json: const JsonEncoder.withIndent('  ').convert(cases), count: cases.length);
+  }
+
   String exportJson() => const JsonEncoder.withIndent(
     '  ',
   ).convert({'exportedAt': now.toIso8601String(), 'profile': profile?.toJson(), 'settings': settings.toJson(), 'meals': meals.map((m) => m.toJson()).toList()});
+}
+
+class DaySummary {
+  const DaySummary({required this.day, required this.eaten, required this.logged});
+
+  final DateTime day;
+  final Range eaten;
+  final bool logged;
 }

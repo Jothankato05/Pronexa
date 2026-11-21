@@ -1,0 +1,164 @@
+name: Release
+
+# Builds the signed APK and an unsigned iPhone .ipa and publishes them on a
+# GitHub Release.
+# Run it by pushing a tag (git tag v0.6.0 && git push origin v0.6.0) or from
+# the Actions tab ("Run workflow"). Needs four repository secrets, see
+# docs/RELEASING.md. Optional repository variable PRONEXA_AI_URL builds the
+# app with the AI reader server's address.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag, for example v0.6.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  model:
+    name: Food recogniser
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Convert the model
+        run: |
+          pip install -r tool/food_model/requirements.txt
+          python tool/food_model/convert.py --out assets/models --cache /tmp/food_model
+      - uses: actions/upload-artifact@v4
+        with:
+          name: food-model
+          path: assets/models/pronexa-food-v1.*
+          retention-days: 3
+
+  android:
+    name: Signed APK
+    needs: model
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check signing secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.PRONEXA_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.PRONEXA_STORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$STORE_PASSWORD" ]; then
+            echo "::error::Add the PRONEXA_* signing secrets first (docs/RELEASING.md)."
+            exit 1
+          fi
+      - name: Restore keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.PRONEXA_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_B64" | base64 --decode > android/pronexa-upload.jks
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+      - uses: actions/download-artifact@v4
+        with:
+          name: food-model
+          path: assets/models
+      - run: flutter pub get
+      - name: Tests
+        run: flutter test
+      - name: Build signed APK
+        env:
+          PRONEXA_KEYSTORE: pronexa-upload.jks
+          PRONEXA_STORE_PASSWORD: ${{ secrets.PRONEXA_STORE_PASSWORD }}
+          PRONEXA_KEY_ALIAS: ${{ secrets.PRONEXA_KEY_ALIAS }}
+          PRONEXA_KEY_PASSWORD: ${{ secrets.PRONEXA_KEY_PASSWORD }}
+          AI_URL: ${{ vars.PRONEXA_AI_URL }}
+        run: |
+          DEFINE=""
+          if [ -n "$AI_URL" ]; then DEFINE="--dart-define=PRONEXA_AI_URL=$AI_URL"; fi
+          flutter build apk --release -P force-version-code-ignoring-abi=true $DEFINE
+          cp build/app/outputs/flutter-apk/app-release.apk "Pronexa-${TAG#v}.apk"
+      - name: Remove keystore
+        if: always()
+        run: rm -f android/pronexa-upload.jks
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-android
+          path: Pronexa-*.apk
+
+  ios:
+    name: iPhone .ipa (unsigned)
+    needs: model
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the newest Xcode (plugins need the iOS 26 SDK)
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+      - uses: actions/download-artifact@v4
+        with:
+          name: food-model
+          path: assets/models
+      - run: flutter pub get
+      - name: Build for iPhone
+        env:
+          AI_URL: ${{ vars.PRONEXA_AI_URL }}
+        run: |
+          DEFINE=""
+          if [ -n "$AI_URL" ]; then DEFINE="--dart-define=PRONEXA_AI_URL=$AI_URL"; fi
+          flutter build ios --release --no-codesign $DEFINE
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr "Pronexa-${TAG#v}-iphone-unsigned.ipa" Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-ios
+          path: Pronexa-*.ipa
+
+  publish:
+    name: Publish
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+      - run: sha256sum Pronexa-* > SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: Pronexa ${{ env.TAG }}
+          body: |
+            Both builds include the on-phone food recogniser, so Photo mode works offline from the first launch.
+
+            **Android** (the .apk): Android 7.0 or newer. Allow "Install unknown apps" for your browser or file manager, then open the file.
+
+            **iPhone** (the .ipa): iOS 15.1 or newer. It is unsigned: install it with your own Apple ID using Sideloadly or AltStore (see docs/IOS.md in the repository).
+
+            Checksums are in SHA256SUMS.txt.
+          files: |
+            Pronexa-*
+            SHA256SUMS.txt

@@ -18,6 +18,7 @@ class Draft {
     this.unknown = const [],
     this.editingId,
     this.photo,
+    this.photoFeatures,
   });
 
   factory Draft.fromReading(Reading r, {required LogSource source, String? text, Uint8List? photo}) => Draft(
@@ -32,9 +33,10 @@ class Draft {
     photo: photo,
   );
 
-  factory Draft.fromFoods(Iterable<String> foodIds, {required LogSource source, Uint8List? photo}) => Draft(
+  factory Draft.fromFoods(Iterable<String> foodIds, {required LogSource source, Uint8List? photo, Float32List? photoFeatures}) => Draft(
     source: source,
     photo: photo,
+    photoFeatures: photoFeatures,
     items: [
       for (final id in foodIds)
         DraftItem(
@@ -65,4 +67,8 @@ class Draft {
 
   /// Kept in memory only, never saved.
   final Uint8List? photo;
+
+  /// The photo's fingerprint from the on-phone recogniser. When the meal is
+  /// added, the phone remembers it with the confirmed foods (PhotoMemory).
+  final Float32List? photoFeatures;
 }

@@ -13,9 +13,15 @@ import '../widgets/common.dart';
 /// Tap the foods in the meal. Works offline. If a photo is passed in (Photo mode
 /// without AI), it is shown at the top as a reference.
 class QuickPickScreen extends StatefulWidget {
-  const QuickPickScreen({super.key, this.photo});
+  const QuickPickScreen({super.key, this.photo, this.suggested = const [], this.photoFeatures});
 
   final Uint8List? photo;
+
+  /// Foods the on-phone recogniser saw in the photo. Shown first, not selected.
+  final List<String> suggested;
+
+  /// The photo's fingerprint, carried to Confirm so the phone can learn.
+  final Float32List? photoFeatures;
 
   @override
   State<QuickPickScreen> createState() => _QuickPickScreenState();
@@ -57,6 +63,10 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
             decoration: const InputDecoration(hintText: 'Search: beans, eba, akara', prefixIcon: Icon(Icons.search), counterText: ''),
             onChanged: (v) => setState(() => _q = v),
           ),
+          if (widget.suggested.isNotEmpty && _q.isEmpty) ...[
+            const Padding(padding: EdgeInsets.only(top: 28), child: Label('Looks like')),
+            _Grid(ids: widget.suggested, picked: _picked, onTap: _toggle),
+          ],
           if (showRecent) ...[
             const Padding(padding: EdgeInsets.only(top: 28), child: Label('Recent')),
             _Grid(ids: recent.take(6).toList(), picked: _picked, onTap: _toggle),
@@ -82,8 +92,15 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
                   child: FilledButton(
-                    onPressed: () =>
-                        openConfirm(context, Draft.fromFoods(_picked, source: widget.photo == null ? LogSource.quick : LogSource.photo, photo: widget.photo)),
+                    onPressed: () => openConfirm(
+                      context,
+                      Draft.fromFoods(
+                        _picked,
+                        source: widget.photo == null ? LogSource.quick : LogSource.photo,
+                        photo: widget.photo,
+                        photoFeatures: widget.photoFeatures,
+                      ),
+                    ),
                     child: Text('Next: ${_picked.length} food${_picked.length == 1 ? '' : 's'}'),
                   ),
                 ),

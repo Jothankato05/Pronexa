@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'state/app_state.dart';
@@ -14,6 +15,17 @@ import 'ui/theme.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // The bundled food recogniser's licence, shown with the app's other licences.
+  LicenseRegistry.addLicense(
+    () => Stream.value(
+      const LicenseEntryWithLineBreaks(
+        ['Nigerian Food Lens (photo recogniser)'],
+        'Nigerian Food Lens by yusasif, https://huggingface.co/yusasif/Nigerian-food-recognision\n'
+        'Licensed under the Apache License, Version 2.0, https://www.apache.org/licenses/LICENSE-2.0\n'
+        'Converted to ONNX for on-phone use by Pronexa (tool/food_model/convert.py); weights unchanged.',
+      ),
+    ),
+  );
   runApp(PronexaApp(state: AppState(storage: PrefsStorage())));
 }
 

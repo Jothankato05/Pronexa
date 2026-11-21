@@ -29,3 +29,15 @@ server/.env
 
 # Tool/session state written by editor plugins (not project content)
 .anchor/
+
+# APKs live on GitHub Releases, never in the repository
+release/
+*.apk
+*.aab
+
+
+# The food recogniser is built into assets/models by tool/food_model/convert.py
+assets/models/*.onnx
+assets/models/*.labels.json
+tool/food_model/.cache/
+*.pth
